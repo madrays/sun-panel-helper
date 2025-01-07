@@ -6,9 +6,9 @@
 
 <div align=center>
 
-<img src="./doc/images/logo.png" width="100" height="100" />
+<img src="https://picture.agsv.top/123/2025/01/07/677c9648da6dc/logo.png" width="300" height="275" />
 
-# Sun-Panel
+# Sun-Panel-Helper
 
 [![Github](https://img.shields.io/badge/Github-123456?logo=github&labelColor=242424)](https://github.com/madrays/sun-panel-helper)
 [![Gitee](https://img.shields.io/badge/Gitee-123456?logo=gitee&labelColor=c71d23)](https://gitee.com/madrays/sun-panel-helper)
@@ -22,7 +22,7 @@
 [[ Document ]](https://sun-panel-doc.enianteam.com) |
 [[ Demo ]](http://sunpaneldemo.enianteam.com) 
 
-为hslr-s/sun-panel开发的一个一键快捷美化的小项目~
+为[[ hslr-s/sun-panel ]](https://github.com/hslr-s/sun-panel)开发的一键快捷美化的小项目~
 
 </div>
 
@@ -33,13 +33,13 @@
 
 > 为hslr-s/sun-panel开发的一个一键快捷美化的小项目~进度0%。
  
-## 😎 Features
+## 😎 特点
 
-- 🍉 界面简洁，功能强大，资源占用少
+- 🍉 丰富模板
 - 🍊 上手简单，可视化操作，可0代码使用
-- 🍠 一键切换内、外网模式链接
+- 🍠 不断更新
 - 🍵 支持docker部署（支持Arm系统）
-- 🎪 支持多账号隔离使用
+- 🎪 支持数据保存
 
 ## TODO
 - [x] 建库
