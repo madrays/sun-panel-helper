@@ -1,5 +1,5 @@
 # sun-panel-helper
-为hslr-s/sun-panel开发的一个一键快捷美化的小项目~
+为[[ hslr-s/sun-panel ]](https://github.com/hslr-s/sun-panel)开发的一个一键快捷美化的小项目~
 
 [[ 简体中文 ]](https://sun-panel-doc.enianteam.com/zh_cn/introduce/project.html) |
 [[ English ]](https://sun-panel-doc.enianteam.com/introduce/project.html)
@@ -29,10 +29,10 @@
 
 ![](./doc/images/main-dark.png)
 
-> [!IMPORTANT]
+
 
 > 为hslr-s/sun-panel开发的一个一键快捷美化的小项目~进度0%。
-
+ 
 ## 😎 Features
 
 - 🍉 界面简洁，功能强大，资源占用少
