@@ -8,9 +8,9 @@
 [![Gitee](https://img.shields.io/badge/Gitee-123456?logo=gitee&labelColor=c71d23)](https://gitee.com/madrays/sun-panel-helper)
 [![docker](https://img.shields.io/badge/docker-123456?logo=docker&logoColor=fff&labelColor=1c7aed)](https://hub.docker.com/r/madrays/sun-panel-helper) 
 <br>
-[![GitHub User's stars](https://img.shields.io/github/stars/hslr-s%2Fsun-panel?style=flat&logo=github)](https://github.com/madrays/sun-panel-helper)
-[![github downloads](https://img.shields.io/github/downloads/hslr-s/sun-panel/total.svg?logo=github)](https://github.com/madrays/sun-panel-helper/releases)
-[![docker pulls](https://img.shields.io/docker/pulls/hslr/sun-panel.svg?logo=docker)](https://hub.docker.com/r/madrays/sun-panel-helper)
+[![GitHub User's stars](https://img.shields.io/github/stars/madrays%2Fsun-panel-helper?style=flat&logo=github)](https://github.com/madrays/sun-panel-helper)
+[![github downloads](https://img.shields.io/github/downloads/madrays/sun-panel-helper/total.svg?logo=github)](https://github.com/madrays/sun-panel-helper/releases)
+[![docker pulls](https://img.shields.io/docker/pulls/madrays/sun-panel-helper.svg?logo=docker)](https://hub.docker.com/r/madrays/sun-panel-helper)
 
 [[ 中文文档 ]](https://sun-panel-doc.enianteam.com/zh_cn) |
 [[ Document ]](https://sun-panel-doc.enianteam.com) |
