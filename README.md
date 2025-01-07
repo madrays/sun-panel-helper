@@ -12,14 +12,11 @@
 [![github downloads](https://img.shields.io/github/downloads/madrays/sun-panel-helper/total.svg?logo=github)](https://github.com/madrays/sun-panel-helper/releases)
 [![docker pulls](https://img.shields.io/docker/pulls/madrays/sun-panel-helper.svg?logo=docker)](https://hub.docker.com/r/madrays/sun-panel-helper)
 
-[[ 中文文档 ]](https://sun-panel-doc.enianteam.com/zh_cn) |
-[[ Document ]](https://sun-panel-doc.enianteam.com) |
 [[ Demo ]](http://sunpaneldemo.enianteam.com) 
 
+
 为[[ hslr-s/sun-panel ]](https://github.com/hslr-s/sun-panel)开发的一键快捷美化的小项目~
-
 </div>
-
 
 ![](./doc/images/main-dark.png)
 
