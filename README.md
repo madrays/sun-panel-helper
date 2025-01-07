@@ -1,11 +1,5 @@
 # sun-panel-helper
-为[[ hslr-s/sun-panel ]](https://github.com/hslr-s/sun-panel)开发的一个一键快捷美化的小项目~
-
-[[ 简体中文 ]](https://sun-panel-doc.enianteam.com/zh_cn/introduce/project.html) |
-[[ English ]](https://sun-panel-doc.enianteam.com/introduce/project.html)
-
 <div align=center>
-
 <img src="https://picture.agsv.top/123/2025/01/07/677c9648da6dc/logo.png" width="300" height="275" />
 
 # Sun-Panel-Helper
