@@ -1,7 +1,50 @@
 <template>
   <div class="param-editor">
-    <!-- 左列：颜色和尺寸设置 -->
+    <!-- 左列：预览设置和颜色设置 -->
     <div class="param-column">
+      <!-- 预览设置 -->
+      <div class="param-group" v-if="previewParams.length">
+        <h3 class="group-title">预览设置</h3>
+        <div class="param-items">
+          <div v-for="param in previewParams" :key="param.name" class="param-item">
+            <label :for="param.name" :title="param.description">卡片背景色（仅预览用）</label>
+            <!-- 根据参数类型使用不同的输入控件 -->
+            <div class="color-picker" v-if="param.type === 'color'">
+              <input 
+                type="color" 
+                :id="param.name"
+                :value="convertToHex6(localValue[param.name])"
+                @input="updateColorValue($event, param.name)"
+              >
+              <div class="color-controls">
+                <input 
+                  type="text"
+                  :value="localValue[param.name]"
+                  @input="updateColorText($event, param.name)"
+                  class="color-text"
+                >
+                <div class="opacity-control">
+                  <i class="opacity-icon" title="调整透明度">⚪</i>
+                  <input 
+                    type="range"
+                    :value="getColorOpacity(localValue[param.name])"
+                    @input="updateColorOpacity($event, param.name)"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    class="opacity-slider"
+                    :title="`调整透明度: ${Math.round(getColorOpacity(localValue[param.name]) * 100)}%`"
+                  >
+                  <span class="opacity-value" title="当前透明度">{{ Math.round(getColorOpacity(localValue[param.name]) * 100) }}%</span>
+                </div>
+              </div>
+            </div>
+            <div class="number-input" v-else>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 颜色设置 -->
       <div class="param-group">
         <h3 class="group-title">颜色设置</h3>
@@ -47,7 +90,12 @@
         <h3 class="group-title">尺寸设置</h3>
         <div class="param-items">
           <div v-for="param in sizeParams" :key="param.name" class="param-item">
-            <label :for="param.name" :title="param.description">{{ param.label }}</label>
+            <label :for="param.name" :title="param.description">{{
+              param.name === 'beforeCircleSize' ? '前置圆形装饰大小' :
+              param.name === 'afterCircleSize' ? '后置圆形装饰大小' :
+              param.name === 'afterCircleBorderWidth' ? '后置圆形边框宽度' :
+              param.label
+            }}</label>
             <div class="number-input">
               <div class="slider-wrapper">
                 <input 
@@ -60,18 +108,8 @@
                   @input="updateValue"
                   class="slider"
                 >
-                <div class="slider-value">{{ localValue[param.name] }}</div>
+                <div class="slider-value">{{ Math.round(localValue[param.name] * 100) }}%</div>
               </div>
-              <input 
-                type="number"
-                :id="param.name"
-                v-model.number="localValue[param.name]"
-                :min="param.min"
-                :max="param.max"
-                :step="param.step"
-                @change="updateValue"
-                class="number-text"
-              >
             </div>
           </div>
         </div>
@@ -85,7 +123,11 @@
         <h3 class="group-title">位置设置</h3>
         <div class="param-items">
           <div v-for="param in positionParams" :key="param.name" class="param-item">
-            <label :for="param.name" :title="param.description">{{ param.label }}</label>
+            <label :for="param.name" :title="param.description">{{ 
+              param.name.includes('beforeCircle') ? 
+                (param.name.includes('Top') ? '前置圆形装饰上下偏移' : '前置圆形装饰左右偏移') :
+                (param.name.includes('Top') ? '后置圆形装饰上下偏移' : '后置圆形装饰左右偏移')
+            }}</label>
             <div class="number-input">
               <div class="slider-wrapper">
                 <input 
@@ -167,24 +209,37 @@ export default {
     }
   },
   computed: {
+    previewParams() {
+      return this.paramDefs.filter(p => 
+        p.name === 'cardBackground'
+      );
+    },
     colorParams() {
-      return this.paramDefs.filter(p => p.type === 'color');
+      return this.paramDefs.filter(p => 
+        p.type === 'color' && 
+        !['cardBackground', 'cardOpacity'].includes(p.name)
+      );
     },
     sizeParams() {
       return this.paramDefs.filter(p => 
-        p.type === 'number' && p.name.includes('Size')
+        p.type === 'number' && 
+        (p.name.includes('Size') || p.name === 'afterCircleBorderWidth') &&
+        !['cardBackground', 'cardOpacity'].includes(p.name)
       );
     },
     positionParams() {
       return this.paramDefs.filter(p => 
-        p.type === 'number' && (p.name.includes('Top') || p.name.includes('Right'))
+        p.type === 'number' && 
+        (p.name.includes('Top') || p.name.includes('Right')) &&
+        !['cardBackground', 'cardOpacity'].includes(p.name)
       );
     },
     otherParams() {
       return this.paramDefs.filter(p => 
         !this.colorParams.includes(p) && 
         !this.sizeParams.includes(p) && 
-        !this.positionParams.includes(p)
+        !this.positionParams.includes(p) &&
+        !['cardBackground', 'cardOpacity', 'afterCircleBorderWidth'].includes(p.name)
       );
     }
   },
@@ -243,49 +298,49 @@ export default {
 <style>
 .param-editor {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 45% 55%;
   gap: 1.5rem;
   padding: 1rem;
+  max-height: calc(100vh - 160px);
 }
 
 .param-column {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 .param-group {
   background: #f8f9fa;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 0.5rem;
   border: 1px solid #eee;
 }
 
 .group-title {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #2c3e50;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.2rem;
   border-bottom: 1px solid #eee;
 }
 
 .param-items {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.25rem;
 }
 
 .param-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.1rem;
 }
 
 .param-item label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
-  cursor: help;
 }
 
 .color-picker {
@@ -295,8 +350,8 @@ export default {
 }
 
 .color-picker input[type="color"] {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   padding: 2px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -321,7 +376,7 @@ input:focus {
 
 .number-input {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -335,6 +390,7 @@ input:focus {
 .slider {
   flex: 1;
   height: 4px;
+  appearance: none;
   -webkit-appearance: none;
   background: #e9ecef;
   border-radius: 2px;
@@ -342,6 +398,7 @@ input:focus {
 }
 
 .slider::-webkit-slider-thumb {
+  appearance: none;
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
@@ -366,8 +423,8 @@ input:focus {
 }
 
 .number-text {
-  width: 60px;
-  padding: 0.4rem;
+  width: 50px;
+  padding: 0.3rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -386,7 +443,7 @@ input:focus {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
 }
 
 .opacity-icon {
@@ -399,6 +456,7 @@ input:focus {
 .opacity-slider {
   flex: 1;
   height: 4px;
+  appearance: none;
   -webkit-appearance: none;
   background: linear-gradient(to right, transparent, #666);
   border-radius: 2px;
@@ -406,6 +464,7 @@ input:focus {
 }
 
 .opacity-slider::-webkit-slider-thumb {
+  appearance: none;
   -webkit-appearance: none;
   width: 12px;
   height: 12px;

@@ -184,10 +184,12 @@ export default {
     },
     async fetchWidgets() {
       try {
-        const response = await fetch('http://localhost:3000/api/widgets')
-        this.widgets = await response.json()
+        const response = await fetch('http://localhost:5000/api/widgets/types/css');
+        const data = await response.json();
+        return data;
       } catch (error) {
-        console.error('Failed to fetch widgets:', error)
+        console.error('Failed to fetch widgets:', error);
+        throw error;
       }
     }
   },
@@ -332,15 +334,14 @@ export default {
 }
 
 .editor-content {
-  height: calc(100vh - var(--header-height) - 2rem);
-  overflow: hidden;
+  height: auto;
 }
 
 .editor-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
-  height: 100%;
+  height: auto;
 }
 
 .preview-panel, .params-panel {
@@ -358,14 +359,14 @@ export default {
 }
 
 .params-panel {
-  height: 100%;
+  height: auto;
 }
 
 .panel-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #333;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .nav-icon {

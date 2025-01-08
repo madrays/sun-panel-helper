@@ -3,6 +3,7 @@ venv/
 env/
 .env/
 .venv/
+backend/venv/
 
 # Dependencies
 node_modules/
