@@ -1,25 +1,10 @@
 version: '3'
 
 services:
-  backend:
-    build: ./backend
+  sun-panel-helper:
+    image: madrays/sun-panel-helper:v1.3
     ports:
-      - "5000:5000"
+      - "33002:80"
     volumes:
-      - ./backend:/app
-      - widget_data:/data
-    environment:
-      - FLASK_ENV=development
-      
-  frontend:
-    build: ./frontend
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    depends_on:
-      - backend
-
-volumes:
-  widget_data: 
+      - ./custom:/app/custom
+    restart: unless-stopped 
