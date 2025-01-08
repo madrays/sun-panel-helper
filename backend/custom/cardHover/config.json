@@ -1,0 +1,66 @@
+{
+  "id": "cardHover",
+  "name": "卡片悬停动画",
+  "type": "css",
+  "description": "为卡片添加优雅的悬停动画效果",
+  "tags": ["卡片", "动画", "悬停"],
+  "preview": null,
+  "params": [
+    {
+      "name": "cardBackground",
+      "label": "卡片背景色（仅预览用）",
+      "type": "color",
+      "default": "#ffffff",
+      "description": "卡片的背景颜色",
+      "group": "preview"
+    },
+    {
+      "name": "shakeDegree",
+      "label": "晃动幅度",
+      "type": "number",
+      "default": 10,
+      "min": 0,
+      "max": 15,
+      "step": 0.5,
+      "description": "卡片晃动的最大角度"
+    },
+    {
+      "name": "shakeSpeed",
+      "label": "晃动速度",
+      "type": "number",
+      "default": 0.5,
+      "min": 0.2,
+      "max": 1,
+      "step": 0.1,
+      "description": "晃动动画的速度（秒）"
+    },
+    {
+      "name": "scaleSize",
+      "label": "放大倍数",
+      "type": "number",
+      "default": 1.05,
+      "min": 1,
+      "max": 1.2,
+      "step": 0.01,
+      "description": "鼠标悬停时卡片放大的倍数"
+    },
+    {
+      "name": "scaleDelay",
+      "label": "动画间隔",
+      "type": "number",
+      "default": 0.2,
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "description": "放大到晃动之间的间隔时间（秒）"
+    },
+    {
+      "name": "enableScale",
+      "label": "启用放大效果",
+      "type": "boolean",
+      "default": true,
+      "description": "是否启用鼠标悬停时的放大效果"
+    }
+  ],
+  "template": "@keyframes cardShake {\n  0%, 100% { transform: rotate(0); }\n  25% { transform: rotate({{shakeDegree}}deg); }\n  50% { transform: rotate(-{{shakeDegree}}deg); }\n  75% { transform: rotate({{shakeDegree/4}}deg); }\n  85% { transform: rotate(-{{shakeDegree/4}}deg); }\n}\n\n.item-card:hover {\n  {{#if enableScale}}\n  transform: scale({{scaleSize}});\n  animation: cardShake {{shakeSpeed}}s {{scaleDelay}}s ease-in-out forwards;\n  {{else}}\n  animation: cardShake {{shakeSpeed}}s ease-in-out forwards;\n  {{/if}}\n}"
+} 

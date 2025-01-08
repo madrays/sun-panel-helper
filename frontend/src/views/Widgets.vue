@@ -40,18 +40,33 @@
             返回列表
           </button>
           <h2>{{ selectedWidget.name }}</h2>
+          <button class="deploy-btn">
+            <i class="fas fa-rocket"></i>
+            部署
+          </button>
         </div>
+        
         <div class="editor-content">
-          <widget-preview 
-            :widget="selectedWidget"
-            :template="widgetTemplate"
-            :params="widgetParams"
-          />
-          <param-editor
-            v-model="widgetParams"
-            :param-defs="selectedWidget.params"
-            @change="updatePreview"
-          />
+          <div class="editor-grid">
+            <div class="params-panel">
+              <h3 class="panel-title">参数设置</h3>
+              <param-editor
+                v-model="widgetParams"
+                :param-defs="selectedWidget.params"
+                :widget="selectedWidget"
+                @change="updatePreview"
+              />
+            </div>
+            
+            <div class="preview-panel">
+              <h3 class="panel-title">预览效果</h3>
+              <widget-preview 
+                :widget="selectedWidget"
+                :template="widgetTemplate"
+                :params="widgetParams"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -98,18 +113,31 @@ export default {
       this.selectedWidget = null
     },
     async selectWidget(widget) {
-      this.selectedWidget = widget
-      this.widgetTemplate = widget.template
-      this.widgetParams = {}
-      
-      // 初始化参数默认值
-      if (widget.params) {
-        widget.params.forEach(param => {
-          this.widgetParams[param.name] = param.default
-        })
+      try {
+        this.selectedWidget = widget;
+        
+        // 根据不同的组件ID加载不同的配置
+        const configPath = widget.id === 'xiantiao' 
+          ? '/api/widgets/xiantiao/config'
+          : `/api/widgets/${widget.id}/config`;
+          
+        const response = await fetch(configPath);
+        const config = await response.json();
+        
+        this.widgetTemplate = config.template;
+        this.widgetParams = {};
+        
+        // 初始化参数默认值
+        if (config.params) {
+          config.params.forEach(param => {
+            this.widgetParams[param.name] = param.default;
+          });
+        }
+        
+        this.updatePreview();
+      } catch (error) {
+        console.error('Error loading widget:', error);
       }
-      
-      this.updatePreview()
     },
     updatePreview() {
       console.log('Updated params:', this.widgetParams)

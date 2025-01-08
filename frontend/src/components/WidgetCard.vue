@@ -1,5 +1,5 @@
 <template>
-  <div class="widget-card" @click="$emit('click')">
+  <div class="widget-card" :data-widget-id="widget.id" @click="$emit('click')">
     <div class="preview-section">
       <div class="preview-area">
         <div class="item-card">
@@ -175,5 +175,49 @@ export default {
   border-radius: 12px;
   font-size: 0.8rem;
   color: #666;
+}
+
+/* 卡片悬停动画的预览效果 - 只对特定卡片生效 */
+.widget-card[data-widget-id="cardHover"] :deep(.item-card) {
+  transform-origin: center center;
+  animation: 
+    previewScale 4s infinite,
+    previewShake 4s 0.2s infinite ease-in-out;
+}
+
+@keyframes previewScale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  5%, 25% {
+    transform: scale(1.05);
+  }
+  30% {
+    transform: scale(1);
+  }
+}
+
+@keyframes previewShake {
+  0%, 100% {
+    transform: scale(1) rotate(0);
+  }
+  5% {
+    transform: scale(1.05) rotate(0);
+  }
+  10% {
+    transform: scale(1.05) rotate(10deg);
+  }
+  15% {
+    transform: scale(1.05) rotate(-10deg);
+  }
+  20% {
+    transform: scale(1.05) rotate(2.5deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(-2.5deg);
+  }
+  30% {
+    transform: scale(1) rotate(0);
+  }
 }
 </style> 

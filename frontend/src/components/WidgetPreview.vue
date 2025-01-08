@@ -1,7 +1,10 @@
 <template>
-  <div class="widget-preview">
+  <div class="widget-preview" :data-widget-id="widget?.id">
     <div class="preview-area">
-      <div class="item-card" :style="cardStyle">
+      <div class="item-card" 
+        :style="cardStyle" 
+        :data-enable-scale="params?.enableScale"
+      >
         <div class="item-card-content">
           <div class="github-icon">
             <svg viewBox="0 0 24 24" width="24" height="24">
@@ -32,12 +35,24 @@ export default {
   computed: {
     cardStyle() {
       if (!this.params) return {};
-      return {
+      
+      const baseStyle = {
         background: this.params.cardBackground || '#ffffff',
         opacity: this.params.cardOpacity || 0.8,
         backdropFilter: `blur(${this.params.blurAmount || 10}px)`,
         WebkitBackdropFilter: `blur(${this.params.blurAmount || 10}px)`
       };
+
+      if (this.widget?.id === 'cardHover') {
+        Object.assign(baseStyle, {
+          '--shake-degree': `${this.params.shakeDegree}deg`,
+          '--shake-speed': `${this.params.shakeSpeed}s`,
+          '--scale-size': this.params.scaleSize,
+          '--scale-delay': `${this.params.scaleDelay}s`
+        });
+      }
+
+      return baseStyle;
     },
     titleStyle() {
       if (!this.params) return {};
@@ -157,5 +172,47 @@ export default {
   top: var(--after-circle-top);
   right: var(--after-circle-right);
   pointer-events: none;
+}
+
+/* 只对卡片悬停动画的预览生效 */
+.widget-preview[data-widget-id="cardHover"] .item-card {
+  transform-origin: center center;
+  transition: transform 0.3s ease;
+}
+
+/* 基础悬停动画 */
+.widget-preview[data-widget-id="cardHover"] .item-card:hover {
+  animation: cardShake var(--shake-speed, 0.5s) ease-in-out forwards;
+}
+
+/* 启用放大时的动画 */
+.widget-preview[data-widget-id="cardHover"] .item-card:hover[data-enable-scale="true"] {
+  animation: 
+    cardScale var(--shake-speed, 0.5s) forwards,
+    cardShake var(--shake-speed, 0.5s) var(--scale-delay, 0.2s) ease-in-out forwards;
+}
+
+@keyframes cardScale {
+  to { 
+    transform: scale(var(--scale-size, 1.05)); 
+  }
+}
+
+@keyframes cardShake {
+  0%, 100% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(0); 
+  }
+  25% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(var(--shake-degree, 10deg)); 
+  }
+  50% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * -1)); 
+  }
+  75% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * 0.25)); 
+  }
+  85% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * -0.25)); 
+  }
 }
 </style> 

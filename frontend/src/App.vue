@@ -54,6 +54,7 @@
               <param-editor
                 v-model="widgetParams"
                 :param-defs="selectedWidget.params"
+                :widget="selectedWidget"
                 @change="updatePreview"
               />
             </div>
@@ -340,9 +341,10 @@ export default {
 
 .editor-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
-  height: auto;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  height: calc(100% - 3rem);
+  padding: 0.8rem;
 }
 
 .preview-panel, .params-panel {
@@ -360,14 +362,20 @@ export default {
 }
 
 .params-panel {
-  height: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  height: 750px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .panel-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: #2c3e50;
+  margin: 0;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid #eee;
 }
 
 .nav-icon {
