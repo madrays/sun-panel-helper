@@ -1,0 +1,129 @@
+﻿{
+  "id": "xiantiao",
+  "name": "卡片装饰线条",
+  "type": "css",
+  "description": "为卡片标题添加优雅的装饰线条效果，包含前置圆形装饰和后置圆形边框，并支持磨砂玻璃效果",
+  "tags": ["卡片", "装饰", "线条", "磨砂玻璃"],
+  "preview": null,
+  "params": [
+    {
+      "name": "beforeCircleColor",
+      "label": "前置圆形颜色",
+      "type": "color",
+      "default": "#efcece2f",
+      "description": "标题前的圆形装饰颜色（支持透明度）"
+    },
+    {
+      "name": "beforeCircleShadowColor",
+      "label": "前置圆形阴影颜色",
+      "type": "color",
+      "default": "#ceefe132",
+      "description": "标题前的圆形装饰阴影颜色（支持透明度）"
+    },
+    {
+      "name": "afterCircleColor",
+      "label": "后置圆形边框颜色",
+      "type": "color",
+      "default": "#ebece342",
+      "description": "标题后的圆形边框颜色（支持透明度）"
+    },
+    {
+      "name": "beforeCircleSize",
+      "label": "前置圆形大小",
+      "type": "number",
+      "default": 93,
+      "min": 50,
+      "max": 150,
+      "step": 1,
+      "description": "标题前的圆形装饰大小"
+    },
+    {
+      "name": "beforeCircleTop",
+      "label": "前置圆形上下位置",
+      "type": "number",
+      "default": -35,
+      "min": -100,
+      "max": 0,
+      "step": 1,
+      "description": "标题前的圆形装饰上下偏移"
+    },
+    {
+      "name": "beforeCircleRight",
+      "label": "前置圆形左右位置",
+      "type": "number",
+      "default": -27,
+      "min": -100,
+      "max": 0,
+      "step": 1,
+      "description": "标题前的圆形装饰左右偏移"
+    },
+    {
+      "name": "afterCircleSize",
+      "label": "后置圆形大小",
+      "type": "number",
+      "default": 40,
+      "min": 20,
+      "max": 80,
+      "step": 1,
+      "description": "标题后的圆形装饰大小"
+    },
+    {
+      "name": "afterCircleTop",
+      "label": "后置圆形上下位置",
+      "type": "number",
+      "default": -19,
+      "min": -50,
+      "max": 0,
+      "step": 1,
+      "description": "标题后的圆形装饰上下偏移"
+    },
+    {
+      "name": "afterCircleRight",
+      "label": "后置圆形左右位置",
+      "type": "number",
+      "default": 48,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "description": "标题后的圆形装饰左右偏移"
+    },
+    {
+      "name": "afterCircleBorderWidth",
+      "label": "后置圆形边框宽度",
+      "type": "number",
+      "default": 4,
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "description": "标题后的圆形边框宽度"
+    },
+    {
+      "name": "blurAmount",
+      "label": "磨砂玻璃效果",
+      "type": "number",
+      "default": 10,
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "description": "卡片内容区域的磨砂玻璃效果强度"
+    },
+    {
+      "name": "cardBackground",
+      "label": "卡片背景色",
+      "type": "color",
+      "default": "#ffffff",
+      "description": "卡片的背景颜色"
+    },
+    {
+      "name": "cardOpacity",
+      "label": "卡片透明度",
+      "type": "number",
+      "default": 0.8,
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "description": "卡片背景的透明度"
+    }
+  ],
+  "template": "/* 装饰效果样式 */\n.app-icon-info-text-box-title {\n  position: relative;\n}\n\n.app-icon-info-text-box-title:before {\n  content: \"\";\n  position: absolute;\n  width: {{beforeCircleSize}}px;\n  height: {{beforeCircleSize}}px;\n  border-radius: 60%;\n  background: {{beforeCircleColor}};\n  box-shadow: -8px 21px 0 {{beforeCircleShadowColor}};\n  z-index: -1;\n  right: {{beforeCircleRight}}px;\n  top: {{beforeCircleTop}}px;\n  pointer-events: none;\n}\n\n.app-icon-info-text-box-title:after {\n  content: \"\";\n  position: absolute;\n  width: {{afterCircleSize}}px;\n  height: {{afterCircleSize}}px;\n  border: {{afterCircleBorderWidth}}px solid {{afterCircleColor}};\n  border-radius: 70%;\n  z-index: -1;\n  top: {{afterCircleTop}}px;\n  right: {{afterCircleRight}}px;\n  pointer-events: none;\n}\n\n.item-card {\n  background: {{cardBackground}};\n  opacity: {{cardOpacity}};\n  -webkit-backdrop-filter: blur({{blurAmount}}px);\n  backdrop-filter: blur({{blurAmount}}px);\n}"
+}

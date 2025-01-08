@@ -1,0 +1,5 @@
+{
+  "code": "\n                    <div class=\"weather-widget\">\n                        <h3>天气预报</h3>\n                        <div>示例天气数据</div>\n                        <style>\n                            .weather-widget {\n                                text-align: center;\n                                padding: 1rem;\n                            }\n                        </style>\n                    </div>\n                ",
+  "id": "2",
+  "name": "天气小组件"
+}

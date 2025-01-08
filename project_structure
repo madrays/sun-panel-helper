@@ -1,0 +1,19 @@
+widget-platform/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── routes/
+│   │   ├── models/
+│   │   └── services/
+│   ├── config.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── views/
+│   │   └── App.vue
+│   ├── package.json
+│   └── Dockerfile
+├── docker-compose.yml
+└── README.md 
