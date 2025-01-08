@@ -1,19 +1,26 @@
-widget-platform/
+sun-panel-helper/
 ├── backend/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── routes/
-│   │   ├── models/
 │   │   └── services/
+│   ├── custom/
+│   │   └── xiantiao/
+│   │       └── config.json
 │   ├── config.py
 │   ├── requirements.txt
-│   └── Dockerfile
+│   └── run.py
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   ├── views/
-│   │   └── App.vue
+│   │   ├── App.vue
+│   │   └── config.js
 │   ├── package.json
-│   └── Dockerfile
+│   └── vue.config.js
+├── deploy/
+│   └── README.md
+├── Dockerfile
 ├── docker-compose.yml
+├── nginx.conf
+├── start.sh
 └── README.md 
