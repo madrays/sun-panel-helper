@@ -1,8 +1,16 @@
 # 构建前端
 FROM node:14 AS frontend-builder
 WORKDIR /app
+
+# 设置 npm 配置
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm install -g npm@6.14.18
+
+# 复制并安装依赖
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
+
+# 构建前端
 COPY frontend/ .
 RUN npm run build
 
