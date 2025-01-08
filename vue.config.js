@@ -1,22 +1,14 @@
 module.exports = {
+  publicPath: '/',
   devServer: {
     host: '0.0.0.0',
     port: 8080,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
-        ws: true,
+        target: 'http://127.0.0.1:5000',
+        ws: false,
         changeOrigin: true
       }
-    },
-    client: {
-      webSocketURL: {
-        hostname: 'localhost',
-        pathname: '/ws',
-        port: 8080,
-        protocol: 'ws',
-      },
-      reconnect: true
     }
   }
 } 

@@ -78,6 +78,7 @@
 import WidgetCard from './components/WidgetCard.vue'
 import ParamEditor from './components/ParamEditor.vue'
 import WidgetPreview from './components/WidgetPreview.vue'
+import { API_BASE_URL } from './config'
 
 export default {
   components: {
@@ -113,7 +114,7 @@ export default {
         console.log(`Selecting type: ${type}`);
         this.currentType = type;
         this.selectedWidget = null;
-        const response = await fetch(`http://localhost:5000/api/widgets/types/${type}`, {
+        const response = await fetch(`${API_BASE_URL}/api/widgets/types/${type}`, {
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -133,8 +134,8 @@ export default {
       try {
         this.selectedWidget = widget;
         const [templateRes, configRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/widgets/${widget.id}/template`),
-          fetch(`http://localhost:5000/api/widgets/${widget.id}/config`)
+          fetch(`${API_BASE_URL}/api/widgets/${widget.id}/template`),
+          fetch(`${API_BASE_URL}/api/widgets/${widget.id}/config`)
         ]);
         
         if (!templateRes.ok || !configRes.ok) {
@@ -158,7 +159,7 @@ export default {
     },
     async deployWidget() {
       try {
-        const response = await fetch(`http://localhost:5000/api/widgets/${this.selectedWidget.id}/deploy`, {
+        const response = await fetch(`${API_BASE_URL}/api/widgets/${this.selectedWidget.id}/deploy`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(this.widgetParams)
@@ -184,7 +185,7 @@ export default {
     },
     async fetchWidgets() {
       try {
-        const response = await fetch('http://localhost:5000/api/widgets/types/css');
+        const response = await fetch(`${API_BASE_URL}/api/widgets/types/css`);
         const data = await response.json();
         return data;
       } catch (error) {
