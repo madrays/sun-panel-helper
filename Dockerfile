@@ -11,6 +11,9 @@ COPY frontend/package*.json ./frontend/
 WORKDIR /app/frontend
 RUN npm install --legacy-peer-deps
 
+# 确保 element-ui 安装成功
+RUN npm install --save element-ui
+
 # 构建前端
 COPY frontend/ .
 RUN npm run build
