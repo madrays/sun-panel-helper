@@ -2,9 +2,9 @@ version: '3'
 
 services:
   sun-panel-helper:
-    image: madrays/sun-panel-helper:v1.5
+    image: madrays/sun-panel-helper:v1.7
     ports:
       - "33002:80"
     volumes:
-      - ./custom:/app/deploy
+      - /path/to/sunpanel/conf/custom:/app/deploy
     restart: unless-stopped

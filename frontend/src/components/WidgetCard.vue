@@ -1,5 +1,7 @@
 <template>
   <div class="widget-card" :data-widget-id="widget.id" @click="$emit('click')">
+    <div class="deploy-badge" v-if="isDeployed">已部署</div>
+    
     <div class="preview-section">
       <div class="preview-area">
         <div class="item-card">
@@ -29,12 +31,29 @@
 </template>
 
 <script>
+import { API_BASE_URL } from '../config'
+
 export default {
   name: 'WidgetCard',
   props: {
     widget: {
       type: Object,
       required: true
+    }
+  },
+  data() {
+    return {
+      isDeployed: false
+    }
+  },
+  async created() {
+    // 检查部署状态
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/widgets/${this.widget.id}/deployed`)
+      const data = await response.json()
+      this.isDeployed = data.deployed
+    } catch (error) {
+      console.error('Error checking deploy status:', error)
     }
   }
 }
@@ -48,6 +67,7 @@ export default {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transition: all 0.3s;
   cursor: pointer;
+  position: relative;
 }
 
 .widget-card:hover {
@@ -219,5 +239,19 @@ export default {
   30% {
     transform: scale(1) rotate(0);
   }
+}
+
+.deploy-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--primary-color, #409eff);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 </style> 

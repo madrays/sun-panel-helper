@@ -1,6 +1,8 @@
 import os
 import json
 from config import Config
+import re
+from datetime import datetime
 
 class WidgetService:
     def __init__(self):
@@ -123,24 +125,184 @@ class WidgetService:
         return config 
         
     def deploy_widget(self, widget_id, params):
-        """部署小组件到自定义目录"""
-        config = self.load_widget_config(widget_id)
-        if not config:
-            return None
+        """部署小组件"""
+        try:
+            deploy_file = os.path.join(Config.DEPLOY_PATH, 'index.css')
+            print(f"\n=== Deploy Debug Info ===")
+            print(f"Deploy path: {Config.DEPLOY_PATH}")
+            print(f"Deploy file: {deploy_file}")
+            
+            # 确保部署目录存在
+            os.makedirs(Config.DEPLOY_PATH, exist_ok=True)
+            
+            # 读取现有内容
+            existing_content = ''
+            header_comment = '''/* Sun-Panel-Helper CSS */
+/* 此文件由系统自动管理，请勿手动修改 */
+/* 警告：手动修改可能导致样式冲突或程序异常 */
+/* 上次更新：{} */
+
+'''.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+            if os.path.exists(deploy_file):
+                with open(deploy_file, 'r', encoding='utf-8') as f:
+                    existing_content = f.read()
+                    # 如果文件存在但没有头部注释，添加它
+                    if not existing_content.startswith('/* Sun-Panel-Helper CSS */'):
+                        existing_content = header_comment + existing_content
+            
+            # 部署文件路径 - 直接使用 index.css
+            deploy_file = os.path.join(Config.DEPLOY_PATH, 'index.css')
+            
+            print(f"Deploying widget {widget_id} with params: {params}")
+            
+            # 1. 加载组件配置
+            config = self.load_widget_config(widget_id)
+            if not config:
+                print(f"Widget config not found for {widget_id}")
+                return {'success': False, 'error': '组件配置不存在'}
+            
+            # 2. 获取模板
+            template = config.get('template')
+            if not template:
+                print(f"Template not found in config for {widget_id}")
+                return {'success': False, 'error': '模板不存在'}
+            
+            # 3. 处理模板中的条件语句
+            css_code = template
+            
+            # 处理条件语句
+            def replace_condition(match):
+                condition, if_block, else_block = match.groups()
+                value = params.get(condition)
+                # 确保布尔值正确处理
+                if isinstance(value, str):
+                    value = value.lower() == 'true'
+                elif isinstance(value, bool):
+                    value = bool(value)
+                else:
+                    value = False
+                    
+                print(f"Condition {condition}: {value} (type: {type(value)})")
+                return if_block.strip() if value else (else_block.strip() if else_block else '')
+            
+            # 首先处理条件语句
+            css_code = re.sub(
+                r'{{#if\s+(\w+)}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{/if}}',
+                replace_condition,
+                css_code
+            )
+            
+            # 然后处理数学表达式
+            def replace_math(match):
+                param, divisor = match.groups()
+                value = params.get(param)
+                if value is None:
+                    return '0'
+                try:
+                    return str(float(value) / float(divisor))
+                except (ValueError, TypeError):
+                    return '0'
+            
+            css_code = re.sub(r'{{(\w+)/(\d+)}}', replace_math, css_code)
+            
+            # 最后处理普通变量
+            for key, value in params.items():
+                if isinstance(value, bool):
+                    value = str(value).lower()
+                css_code = css_code.replace('{{' + key + '}}', str(value))
+            
+            print(f"Final CSS code:\n{css_code}")
+            
+            # 构建新的样式块
+            style_block = f"""
+/* Sun-Panel-Helper CSS Start: {widget_id} */
+{css_code}
+/* Sun-Panel-Helper CSS End: {widget_id} */
+"""
+            
+            # 写入文件
+            with open(deploy_file, 'w', encoding='utf-8') as f:
+                if existing_content.strip():
+                    # 确保头部注释存在且是最新的
+                    if '/* Sun-Panel-Helper CSS */' in existing_content:
+                        # 替换旧的头部注释
+                        pattern = r'/\* Sun-Panel-Helper CSS \*/.*?/\* 上次更新：.*?\*/\n*'
+                        existing_content = re.sub(pattern, '', existing_content, flags=re.DOTALL)
+                    f.write(header_comment + existing_content.strip() + '\n\n' + style_block)
+                else:
+                    f.write(header_comment + style_block)
+                
+            print(f"Successfully deployed to {deploy_file}")
+            
+            # 写入文件后再次检查
+            if os.path.exists(deploy_file):
+                with open(deploy_file, 'r', encoding='utf-8') as f:
+                    new_content = f.read()
+                    print(f"\nAfter deployment:")
+                    print(f"New file content length: {len(new_content)}")
+                    print(f"New file content preview: \n{new_content[:200]}...")
+            
+            return {'success': True, 'message': '部署成功'}
+            
+        except Exception as e:
+            print(f"Error deploying widget: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {'success': False, 'error': str(e)} 
         
-        # 生成最终的CSS代码
-        template = config['template']
-        for key, value in params.items():
-            template = template.replace('{{' + key + '}}', str(value))
+    def check_widget_deployed(self, widget_id):
+        """检查组件是否已部署"""
+        try:
+            # 修正部署文件路径
+            deploy_file = os.path.join(Config.DEPLOY_PATH, 'index.css')
+            if not os.path.exists(deploy_file):
+                return False
+            
+            with open(deploy_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            start_tag = f"/* Sun-Panel-Helper CSS Start: {widget_id} */"
+            return start_tag in content
+        except:
+            return False
         
-        # 创建部署目录
-        deploy_dir = os.path.join(self.custom_path, widget_id)
-        os.makedirs(deploy_dir, exist_ok=True)
-        
-        # 保存部署文件
-        with open(os.path.join(deploy_dir, 'style.css'), 'w', encoding='utf-8') as f:
-            f.write(template)
-        
-        return {'success': True, 'message': '部署成功'} 
-        
-        return {'success': True, 'message': '部署成功'} 
+    def undeploy_widget(self, widget_id):
+        """取消部署组件"""
+        try:
+            # 修正部署文件路径
+            deploy_file = os.path.join(Config.DEPLOY_PATH, 'index.css')
+            if not os.path.exists(deploy_file):
+                return {'success': True, 'message': '组件未部署'}
+            
+            with open(deploy_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            start_tag = f"/* Sun-Panel-Helper CSS Start: {widget_id} */"
+            end_tag = f"/* Sun-Panel-Helper CSS End: {widget_id} */"
+            
+            # 检查是否包含要删除的内容
+            if start_tag not in content:
+                return {'success': True, 'message': '组件未部署'}
+            
+            # 构建正则表达式模式，使用原始字符串避免转义问题
+            pattern = fr"\n*{re.escape(start_tag)}[\s\S]*?{re.escape(end_tag)}\n*"
+            
+            # 删除匹配的内容及其前后的空行
+            new_content = re.sub(pattern, '\n', content).strip()
+            
+            # 如果文件变空了，添加头部注释
+            if not new_content:
+                new_content = '/* Sun-Panel-Helper CSS */\n/* 此文件由系统自动管理，请勿手动修改 */\n'
+            
+            # 写入文件
+            with open(deploy_file, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            
+            print(f"Successfully undeployed widget {widget_id}")
+            return {'success': True, 'message': '取消部署成功'}
+        except Exception as e:
+            print(f"Error undeploying widget: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {'success': False, 'error': str(e)} 

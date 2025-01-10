@@ -25,14 +25,44 @@
 <script>
 export default {
   props: {
-    widget: {
-      type: Object,
-      default: null
-    },
+    widget: Object,
     template: String,
     params: Object
   },
   computed: {
+    processedTemplate() {
+      if (!this.template) return ''
+      let css = this.template
+      
+      // 处理条件语句
+      const processCondition = (match, condition, if_block, else_block) => {
+        const value = this.params[condition]
+        // 确保布尔值正确处理
+        const boolValue = typeof value === 'boolean' ? value : String(value).toLowerCase() === 'true'
+        console.log(`Preview condition ${condition}: ${boolValue} (${typeof value})`)
+        return boolValue ? if_block.trim() : (else_block ? else_block.trim() : '')
+      }
+      
+      css = css.replace(
+        /{{#if\s+(\w+)}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{\/if}}/g,
+        processCondition
+      )
+      
+      // 处理数学表达式
+      css = css.replace(/{{(\w+)\/(\d+)}}/g, (match, param, divisor) => {
+        const value = this.params[param]
+        if (value == null) return '0'
+        return String(Number(value) / Number(divisor))
+      })
+      
+      // 处理普通变量
+      Object.entries(this.params).forEach(([key, value]) => {
+        const regex = new RegExp(`{{${key}}}`, 'g')
+        css = css.replace(regex, value)
+      })
+      
+      return css
+    },
     cardStyle() {
       if (!this.params) return {};
       
@@ -177,7 +207,6 @@ export default {
 /* 只对卡片悬停动画的预览生效 */
 .widget-preview[data-widget-id="cardHover"] .item-card {
   transform-origin: center center;
-  transition: transform 0.3s ease;
 }
 
 /* 基础悬停动画 */
@@ -186,33 +215,26 @@ export default {
 }
 
 /* 启用放大时的动画 */
-.widget-preview[data-widget-id="cardHover"] .item-card:hover[data-enable-scale="true"] {
-  animation: 
-    cardScale var(--shake-speed, 0.5s) forwards,
-    cardShake var(--shake-speed, 0.5s) var(--scale-delay, 0.2s) ease-in-out forwards;
-}
-
-@keyframes cardScale {
-  to { 
-    transform: scale(var(--scale-size, 1.05)); 
-  }
+.widget-preview[data-widget-id="cardHover"] .item-card[data-enable-scale="true"]:hover {
+  transform: scale(var(--scale-size, 1.05));
+  animation: cardShake var(--shake-speed, 0.5s) var(--scale-delay, 0.2s) ease-in-out forwards;
 }
 
 @keyframes cardShake {
   0%, 100% { 
-    transform: scale(var(--scale-size, 1.05)) rotate(0); 
+    transform: rotate(0); 
   }
   25% { 
-    transform: scale(var(--scale-size, 1.05)) rotate(var(--shake-degree, 10deg)); 
+    transform: rotate(var(--shake-degree, 10deg)); 
   }
   50% { 
-    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * -1)); 
+    transform: rotate(calc(var(--shake-degree, 10deg) * -1)); 
   }
   75% { 
-    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * 0.25)); 
+    transform: rotate(calc(var(--shake-degree, 10deg) * 0.25)); 
   }
   85% { 
-    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * -0.25)); 
+    transform: rotate(calc(var(--shake-degree, 10deg) * -0.25)); 
   }
 }
 </style> 

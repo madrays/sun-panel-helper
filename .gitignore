@@ -19,8 +19,11 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Deploy directory (only for reference)
+# Deploy directory
+/backend/deploy/
 /deploy/
+*.css
+!frontend/src/**/*.css
 
 # Logs
 *.log

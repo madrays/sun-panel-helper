@@ -40,9 +40,13 @@
             返回
           </button>
           <h2>{{ selectedWidget.name }}</h2>
-          <button class="deploy-btn" @click="deployWidget">
-            <i class="fas fa-rocket"></i>
-            部署
+          <button 
+            class="deploy-btn" 
+            @click="isDeployed ? undeployWidget() : deployWidget()"
+            :class="{ 'deployed': isDeployed }"
+          >
+            <i class="fas" :class="isDeployed ? 'fa-times' : 'fa-rocket'"></i>
+            {{ isDeployed ? '取消部署' : '部署' }}
           </button>
         </div>
         
@@ -98,7 +102,8 @@ export default {
       currentWidgets: [],
       selectedWidget: null,
       widgetTemplate: '',
-      widgetParams: {}
+      widgetParams: {},
+      isDeployed: false
     }
   },
   computed: {
@@ -160,25 +165,29 @@ export default {
     },
     async deployWidget() {
       try {
+        // 确保布尔值正确传递
+        const params = { ...this.widgetParams }
+        if ('enableScale' in params) {
+          params.enableScale = Boolean(params.enableScale)
+        }
+        
         const response = await fetch(`${API_BASE_URL}/api/widgets/${this.selectedWidget.id}/deploy`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.widgetParams)
-        });
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(params)
+        })
         
-        if (!response.ok) {
-          throw new Error('部署失败');
-        }
-        
-        const result = await response.json();
+        const result = await response.json()
         if (result.success) {
-          this.$toast.success('部署成功！');
+          this.isDeployed = true
+          this.$message.success('部署成功')
         } else {
-          this.$toast.error(result.message || '部署失败');
+          throw new Error(result.error || '部署失败')
         }
       } catch (error) {
-        console.error('Deploy error:', error);
-        this.$toast.error('部署失败');
+        this.$message.error(error.message || '部署失败')
       }
     },
     updatePreview() {
@@ -192,6 +201,43 @@ export default {
       } catch (error) {
         console.error('Failed to fetch widgets:', error);
         throw error;
+      }
+    },
+    async checkDeployStatus() {
+      if (!this.selectedWidget) return
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/widgets/${this.selectedWidget.id}/deployed`)
+        const result = await response.json()
+        this.isDeployed = result.deployed
+      } catch (error) {
+        console.error('Check deploy status error:', error)
+      }
+    },
+    
+    async undeployWidget() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/widgets/${this.selectedWidget.id}/undeploy`, {
+          method: 'POST'
+        })
+        
+        const result = await response.json()
+        if (result.success) {
+          this.isDeployed = false
+          this.$message.success('取消部署成功')
+        } else {
+          throw new Error(result.error || '取消部署失败')
+        }
+      } catch (error) {
+        this.$message.error(error.message || '取消部署失败')
+      }
+    }
+  },
+  watch: {
+    selectedWidget: {
+      immediate: true,
+      handler() {
+        this.checkDeployStatus()
       }
     }
   },
@@ -333,6 +379,10 @@ export default {
 .deploy-btn {
   background: var(--primary-color);
   color: white;
+}
+
+.deploy-btn.deployed {
+  background: #f56c6c;
 }
 
 .editor-content {

@@ -46,20 +46,39 @@
 
 ## 🚀 部署说明
 
-1. 预览组件：
-   - 位置：backend/custom/
-   - 用途：提供组件模板和配置
-   - 打包：包含在 Docker 镜像中
 
-2. 部署目录：
-   - 容器内：/app/deploy/
-   - 宿主机：./custom/
-   - 用途：存放生成的样式和脚本
-   - 配置：通过 docker-compose volumes 挂载
+
+ Docker Compose 部署：
+   ```yaml
+   version: '3'
+   services:
+     sun-panel-helper:
+       image: madrays/sun-panel-helper:latest
+       ports:
+         - "33002:80"
+       volumes:
+         - ./custom:/app/deploy  # 挂载宿主机部署的sunpanel的 custom 目录，一般为类似*/conf/custom/ 目录
+       restart: unless-stopped
+   ```
+
+   启动命令：
+   ```bash
+   docker-compose up -d
+   ```
+
+   注意事项：
+   - 确保端口 33002 未被占用
+   - 首次启动可能需要拉取镜像，请耐心等待
+   - 数据目录必须挂载到本地部署的sunpanel的 custom 目录，一般为类似*/conf/custom/ 目录
 
 ## 📸 预览
 
 > 项目开发中，预览图片将在功能完善后更新...
+<img src="https://picture.agsv.top/123/2025/01/09/677f7af079188/AA.png" width="100%" height="100%" alt="Sun-Panel-Helper demon1" />
+<img src="https://picture.agsv.top/123/2025/01/09/677f7af005699/BB.png" width="100%" height="100%" alt="Sun-Panel-Helper demon2" />
+<img src="https://picture.agsv.top/123/2025/01/09/677f7aefb74c4/CC.png" width="100%" height="100%" alt="Sun-Panel-Helper demon3" /> 
+<img src="https://picture.agsv.top/123/2025/01/09/677f7af001bc7/DD.png" width="100%" height="100%" alt="Sun-Panel-Helper demon4" />
+
 
 ## 📈 项目统计
 

@@ -43,3 +43,14 @@ def get_widget_config(widget_id):
     if config:
         return jsonify(config)
     return jsonify({"error": "Widget not found"}), 404 
+
+@widget_bp.route('/widgets/<widget_id>/deployed', methods=['GET'])
+def check_widget_deployed(widget_id):
+    """检查组件是否已部署"""
+    is_deployed = widget_service.check_widget_deployed(widget_id)
+    return jsonify({'deployed': is_deployed})
+
+@widget_bp.route('/widgets/<widget_id>/undeploy', methods=['POST'])
+def undeploy_widget(widget_id):
+    """取消部署组件"""
+    return jsonify(widget_service.undeploy_widget(widget_id)) 
