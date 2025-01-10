@@ -16,6 +16,26 @@
   一款为 Sun-Panel 设计的可视化美化工具，让你的面板更加精美~
 </div>
 
+## 🌟 在线体验
+
+我们提供了完整的演示环境，让你在部署前可以充分体验：
+
+### 🎨 Sun-Panel-Helper Demo
+- 地址：[demo.cocoyoo.cn](http://demo.cocoyoo.cn)
+- 功能：
+  - 体验完整的样式编辑功能
+  - 预览各种美化效果
+  - 测试部署流程
+
+### 🎯 Sun-Panel 演示站
+- 地址：[home.cocoyoo.cn](http://home.cocoyoo.cn)
+- 特点：
+  - 展示实际应用效果
+  - 体验优化后的界面
+  - 感受流畅的交互体验
+
+> 💡 提示：你可以在 Helper Demo 中编辑样式，然后在演示站中查看效果，体验完整的美化流程！
+
 ## ✨ 项目特点
 
 - 🎨 可视化编辑
@@ -71,14 +91,21 @@
    - 首次启动可能需要拉取镜像，请耐心等待
    - 数据目录必须挂载到本地部署的sunpanel的 custom 目录，一般为类似*/conf/custom/ 目录
 
-## 📸 预览
+## 📸 效果展示
 
-> 项目开发中，预览图片将在功能完善后更新...
-<img src="https://picture.agsv.top/123/2025/01/09/677f7af079188/AA.png" width="100%" height="100%" alt="Sun-Panel-Helper demon1" />
-<img src="https://picture.agsv.top/123/2025/01/09/677f7af005699/BB.png" width="100%" height="100%" alt="Sun-Panel-Helper demon2" />
-<img src="https://picture.agsv.top/123/2025/01/09/677f7aefb74c4/CC.png" width="100%" height="100%" alt="Sun-Panel-Helper demon3" /> 
-<img src="https://picture.agsv.top/123/2025/01/09/677f7af001bc7/DD.png" width="100%" height="100%" alt="Sun-Panel-Helper demon4" />
-
+<div align="center">
+  <p><strong>🎨 可视化编辑界面</strong></p>
+  <img src="https://picture.agsv.top/123/2025/01/09/677f7af079188/AA.png" width="100%" alt="编辑界面" />
+  
+  <p><strong>✨ 实时预览效果</strong></p>
+  <img src="https://picture.agsv.top/123/2025/01/09/677f7af005699/BB.png" width="100%" alt="预览效果" />
+  
+  <p><strong>🎯 参数调整面板</strong></p>
+  <img src="https://picture.agsv.top/123/2025/01/09/677f7aefb74c4/CC.png" width="100%" alt="参数调整" />
+  
+  <p><strong>🚀 部署管理界面</strong></p>
+  <img src="https://picture.agsv.top/123/2025/01/09/677f7af001bc7/DD.png" width="100%" alt="部署管理" />
+</div>
 
 ## 📈 项目统计
 
