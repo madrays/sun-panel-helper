@@ -8,7 +8,6 @@
   [![docker](https://img.shields.io/badge/docker-123456?logo=docker&logoColor=fff&labelColor=1c7aed)](https://hub.docker.com/r/madrays/sun-panel-helper)
 
   [![GitHub stars](https://img.shields.io/github/stars/madrays/sun-panel-helper?style=flat&logo=github)](https://github.com/madrays/sun-panel-helper)
-  [![GitHub downloads](https://img.shields.io/github/downloads/madrays/sun-panel-helper/total.svg?logo=github)](https://github.com/madrays/sun-panel-helper/releases)
   [![Docker pulls](https://img.shields.io/docker/pulls/madrays/sun-panel-helper.svg?logo=docker)](https://hub.docker.com/r/madrays/sun-panel-helper)
 
   [Sun-Panel 项目](https://github.com/hslr-s/sun-panel)
@@ -36,7 +35,7 @@
 
 > 💡 提示：你可以在 Helper Demo 中编辑样式，然后在演示站中查看效果，体验完整的美化流程！
 
-## ✨ 项目特点
+## ✨ 功能特点
 
 - 🎨 可视化编辑
   - 所见即所得的编辑体验
@@ -48,48 +47,49 @@
   - 丰富的预设模板
   - 支持自定义配置
 
-- 🎯 功能完善
-  - CSS 样式美化
-  - 磨砂玻璃效果
-  - 动态边框装饰
+- 🎨 CSS 样式库
+  - 装饰线条：优雅的标题装饰
+  - 卡片动画：生动的悬停效果
+  - 渐变背景：流畅的动态渐变
+  - 鼠标指针：个性化的光标样式
+  - 更多样式开发中...
+
+
+- ⚡ JS 功能库 (开发中)
+  - 实用工具函数
+  - 动画效果插件
+  - 交互增强脚本
   - 更多功能开发中...
 
-## 📝 项目结构
-
-- `backend/custom/`: 预览组件目录，包含组件模板和配置
-- `deploy/`: 部署参考目录（实际部署时使用宿主机的 custom 目录）
-- `frontend/`: 前端代码
-- `Dockerfile`: 构建多阶段镜像
-- `docker-compose.yml`: 容器编排配置
-- `nginx.conf`: Nginx 反向代理配置
-- `start.sh`: 容器启动脚本
-
+- 🧩 组件库 (规划中)
+  - 完整的功能组件
+  - HTML/CSS/JS 组合
+  - 即插即用的解决方案
+  - 更多组件开发中...
 ## 🚀 部署说明
 
+Docker Compose 部署：
+```yaml
+version: '3'
+services:
+  sun-panel-helper:
+    image: madrays/sun-panel-helper:latest
+    ports:
+      - "33002:80"
+    volumes:
+      - ./custom:/app/deploy  # 挂载宿主机部署的sunpanel的 custom 目录，一般为类似*/conf/custom/ 目录
+    restart: unless-stopped
+```
 
+启动命令：
+```bash
+docker-compose up -d
+```
 
- Docker Compose 部署：
-   ```yaml
-   version: '3'
-   services:
-     sun-panel-helper:
-       image: madrays/sun-panel-helper:latest
-       ports:
-         - "33002:80"
-       volumes:
-         - ./custom:/app/deploy  # 挂载宿主机部署的sunpanel的 custom 目录，一般为类似*/conf/custom/ 目录
-       restart: unless-stopped
-   ```
-
-   启动命令：
-   ```bash
-   docker-compose up -d
-   ```
-
-   注意事项：
-   - 确保端口 33002 未被占用
-   - 首次启动可能需要拉取镜像，请耐心等待
-   - 数据目录必须挂载到本地部署的sunpanel的 custom 目录，一般为类似*/conf/custom/ 目录
+注意事项：
+- 确保端口 33002 未被占用
+- 首次启动可能需要拉取镜像，请耐心等待
+- 数据目录必须挂载到本地部署的sunpanel的 custom 目录，一般为类似*/conf/custom/ 目录
 
 ## 📸 效果展示
 
@@ -98,7 +98,7 @@
   <img src="https://picture.agsv.top/123/2025/01/09/677f7af079188/AA.png" width="100%" alt="编辑界面" />
   
   <p><strong>✨ 实时预览效果</strong></p>
-  <img src="https://picture.agsv.top/123/2025/01/09/677f7af005699/BB.png" width="100%" alt="预览效果" />
+  <img src="https://picture.agsv.top/123/2025/01/17/678a32afa7e7d/EEEE.png" width="100%" alt="预览效果" />
   
   <p><strong>🎯 参数调整面板</strong></p>
   <img src="https://picture.agsv.top/123/2025/01/09/677f7aefb74c4/CC.png" width="100%" alt="参数调整" />

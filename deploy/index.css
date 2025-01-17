@@ -1,0 +1,148 @@
+/* Sun-Panel-Helper CSS */
+/* 此文件由系统自动管理，请勿手动修改 */
+/* 警告：手动修改可能导致样式冲突或程序异常 */
+/* 上次更新：2025-01-11 06:20:01 */
+
+/* Sun-Panel-Helper CSS Start: mouseCursor */
+/* 定义新光标样式 */
+body {
+  cursor: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgLTAuMDAwMDAzODE1MTMyOTEzNTg3MTQ5IDM0MS4zODAwMzU0MDAzOTA2IDM0MS40MzAwMjMxOTMzNTk0Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImExYTlmYzI1Ny05MGQyLTQyNzktOWNlNC1hZDJmOTEwNDFkZDEiIHgxPSIyMi4xIiB5MT0iMzE5LjI4IiB4Mj0iMzE5LjI4IiB5Mj0iMjIuMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzAwYTBlOSI+PC9zdG9wPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzU0YzNmMSI+PC9zdG9wPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxnPjxwYXRoIGQ9Ik0yODAuNzUgODIuODhIMTM3LjYxYTUwLjUyIDUwLjUyIDAgMSAwIDAgMTAxaDYyLjU1YTI0LjA2IDI0LjA2IDAgMSAxIDAgNDguMTFoLTYyLjU1YTk4LjYzIDk4LjYzIDAgMSAxIDAtMTk3LjI3aDE5MS44N0E3NS4zMyA3NS4zMyAwIDAgMCAyNjYgMEg3NS40MUE3NS40MSA3NS40MSAwIDAgMCAwIDc1LjQxVjI1OC41aDIwMy43N2E1MC41MiA1MC41MiAwIDEgMCAwLTEwMWgtNjIuNTVhMjQuMDYgMjQuMDYgMCAwIDEgMC00OC4xMWg2Mi41NWE5OC42MyA5OC42MyAwIDAgMSAwIDE5Ny4yN0gxMS45YTc1LjMzIDc1LjMzIDAgMCAwIDYzLjUgMzQuNzdIMjY2QTc1LjQxIDc1LjQxIDAgMCAwIDM0MS4zOCAyNjZWODIuODh6IiBmaWxsPSJ1cmwoI2ExYTlmYzI1Ny05MGQyLTQyNzktOWNlNC1hZDJmOTEwNDFkZDEpIj48L3BhdGg+PC9nPjwvc3ZnPg==), default !important;
+}
+
+/* 自定义悬浮光标 */
+.cursor-pointer,
+a:hover,
+button:hover,
+.clickable:hover {
+  cursor: url(https://img.hi-linux.com/staticfile/hVX0Sf-2024-04-26-INwMSQ.png), pointer !important;
+}
+/* Sun-Panel-Helper CSS End: mouseCursor */
+
+
+/* Sun-Panel-Helper CSS Start: cardHover */
+/* 鼠标悬停动画 */
+.icon-info-box .rounded-2xl {
+  transform-origin: center center;
+{{#if enableScale}}
+  transition: transform 0.3s ease;
+{{/if}}
+}
+
+.icon-info-box .rounded-2xl:hover {
+{{#if enableScale}}
+  transform: scale(1.02);
+  animation: info-shake-bounce 1s 0.2s ease-in-out forwards;
+{{else}}
+  animation: info-shake-bounce 1s ease-in-out forwards;
+{{/if}}
+}
+
+@keyframes info-shake-bounce {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(14.5deg);
+  }
+  50% {
+    transform: rotate(-14.5deg);
+  }
+  75% {
+    transform: rotate({{shakeDegree/4}}deg);
+  }
+  85% {
+    transform: rotate(-{{shakeDegree/4}}deg);
+  }
+}
+
+/* 小图标的动画保持不变 */
+.icon-small-box .rounded-2xl:hover {
+  -webkit-animation: small-shake-bounce .5s alternate !important;
+  -moz-animation: small-shake-bounce .5s alternate !important;
+  -o-animation: small-shake-bounce .5s alternate !important;
+  animation: small-shake-bounce .5s alternate !important;
+}
+
+@keyframes small-shake-bounce {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  50% {
+    transform: rotate(-15deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+  85% {
+    transform: rotate(5deg);
+  }
+}
+/* Sun-Panel-Helper CSS End: cardHover */
+
+
+/* Sun-Panel-Helper CSS Start: xiantiao */
+/* 背景线条样式 BY 香水 [二群大佬提供] */
+
+/* 伪元素创建背景线条样式 */
+.w-full .font-semibold:before {
+  position: absolute;
+  width: 65px;
+  display: block;
+  height: 65px;
+  content: "";
+  border-radius: 60%;
+  z-index: -1;
+  right: -27px;
+  top: -35px;
+  background: #efcece2f;
+  box-shadow: -8px 21px 0 #ceefe132;
+}
+
+/* 伪元素创建另一种背景线条样式 */
+.w-full .font-semibold:after {
+  position: absolute;
+  width: 68px;
+  display: block;
+  height: 68px;
+  border: 4px solid #ebece342;
+  content: "";
+  border-radius: 70%;
+  top: -19px;
+  right: 48px;
+  z-index: -1;
+}
+
+/* 设置图标信息框的圆角样式 */
+.icon-info-box .rounded-2xl {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+/* Sun-Panel-Helper CSS End: xiantiao */
+
+
+/* Sun-Panel-Helper CSS Start: gradientBg */
+body {
+  height: 100vh;
+  background: linear-gradient(45deg, #00000050, #010101b9, #000000ad, #0101013c);
+  background-size: 400% 400%;
+  animation: gradientBg 30s ease-in-out infinite;
+}
+
+@keyframes gradientBg {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+/* Sun-Panel-Helper CSS End: gradientBg */

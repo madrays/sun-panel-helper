@@ -2,29 +2,67 @@
 venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.so
 
 # Node
 node_modules/
 /frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment
 .env
 .env.local
+.env.*.local
 
 # Editor
 .vscode/
 .idea/
-
-# System
+*.swp
+*.swo
+*.swn
 .DS_Store
 Thumbs.db
 
-# Deploy directory
-/backend/deploy/
-/deploy/
-*.css
-!frontend/src/**/*.css
+# Project specific
+/backend/data/          # 移除不需要的data目录
+/backend/deploy/        # 部署目录(仅用于开发)
+/deploy/               # 部署目录
+*.css                  # 编译后的CSS文件
+!frontend/src/**/*.css # 保留源码中的CSS
 
 # Logs
 *.log
-npm-debug.log* 
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local rules files (仅本地使用)
+.cursorrules           # AI助手规则
+RULES.md              # 项目规范
+.assistant_rules      # 其他助手规则文件
+sun_panel_helper_work_log.md  # 工作日志
+
+# Build
+/dist/
+/build/
+*.tgz
+*.tar.gz
+
+# Test
+/coverage/
+.nyc_output/
+.pytest_cache/
+
+# Docker (仅保留必要文件)
+.docker/
+docker-compose.override.yml
+
+# Temp files
+*.tmp
+*.temp
+.cache/ 

@@ -1,5 +1,0 @@
-{
-  "id": "1",
-  "name": "时钟小组件",
-  "code": "\n                    <div class=\"clock-widget\">\n                        <h3>当前时间</h3>\n                        <div id=\"time\"></div>\n                        <script>\n                            function updateTime() {\n                                document.getElementById('time').textContent = \n                                    new Date().toLocaleTimeString();\n                            }\n                            setInterval(updateTime, 1000);\n                            updateTime();\n                        </script>\n                        <style>\n                            .clock-widget {\n                                text-align: center;\n                                padding: 1rem;\n                            }\n                        </style>\n                    </div>\n                "
-}
