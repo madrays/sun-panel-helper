@@ -29,7 +29,6 @@ yarn-error.log*
 Thumbs.db
 
 # Project specific
-/backend/data/          # 移除不需要的data目录
 /backend/deploy/        # 部署目录(仅用于开发)
 /deploy/               # 部署目录
 *.css                  # 编译后的CSS文件
