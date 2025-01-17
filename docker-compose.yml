@@ -2,7 +2,7 @@ version: '3'
 
 services:
   sun-panel-helper:
-    image: madrays/sun-panel-helper:v1.7
+    image: madrays/sun-panel-helper:v1.7.1
     ports:
       - "33002:80"
     volumes:

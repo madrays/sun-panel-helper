@@ -1,0 +1,25 @@
+{
+  "id": "mouseCursor",
+  "name": "自定义鼠标",
+  "type": "css",
+  "description": "自定义鼠标指针和光标样式，支持上传自定义图片",
+  "tags": ["鼠标", "指针", "交互"],
+  "preview": null,
+  "params": [
+    {
+      "name": "defaultCursor",
+      "label": "默认指针",
+      "type": "image",
+      "default": "https://img.hi-linux.com/staticfile/P1i7yA-2024-04-26-hZZjUZ.png",
+      "description": "默认状态下的鼠标指针图片"
+    },
+    {
+      "name": "hoverCursor",
+      "label": "悬浮指针",
+      "type": "image",
+      "default": "https://img.hi-linux.com/staticfile/hVX0Sf-2024-04-26-INwMSQ.png",
+      "description": "悬浮状态下的鼠标指针图片"
+    }
+  ],
+  "template": "/* 定义新光标样式 */\nbody {\n  cursor: url({{defaultCursor}}), default !important;\n}\n\n/* 自定义悬浮光标 */\n.cursor-pointer,\na:hover,\nbutton:hover,\n.clickable:hover {\n  cursor: url({{hoverCursor}}), pointer !important;\n}"
+} 

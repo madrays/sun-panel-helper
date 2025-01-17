@@ -1,8 +1,41 @@
 <template>
   <div class="widget-preview" :data-widget-id="widget?.id">
     <div class="preview-area">
-      <div class="item-card" 
-        :style="cardStyle" 
+      <!-- 渐变背景预览 -->
+      <div v-if="widget?.id === 'gradientBg'" class="browser-window">
+        <div class="browser-header">
+          <div class="browser-buttons">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <div class="browser-content" :style="gradientStyle">
+        </div>
+      </div>
+      <!-- 鼠标指针预览 -->
+      <div v-if="widget?.id === 'mouseCursor'" class="cursor-preview">
+        <div class="cursor-preview-container">
+          <!-- 默认指针预览 -->
+          <div class="cursor-preview-area" :style="defaultCursorStyle">
+            <div class="cursor-icon">
+              <img :src="params?.defaultCursor" alt="默认指针">
+              <span class="cursor-label">默认指针</span>
+            </div>
+          </div>
+          
+          <!-- 悬浮指针预览 -->
+          <div class="cursor-preview-area hover" :style="hoverCursorStyle">
+            <div class="cursor-icon">
+              <img :src="params?.hoverCursor" alt="悬浮指针">
+              <span class="cursor-label">悬浮指针</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 原有组件预览 - 保持不变 -->
+      <div v-else-if="['xiantiao', 'cardHover'].includes(widget?.id)" class="item-card" 
+        :style="cardStyle"
         :data-enable-scale="params?.enableScale"
       >
         <div class="item-card-content">
@@ -107,6 +140,31 @@ export default {
         ...beforeCircle,
         ...afterCircle
       };
+    },
+    gradientStyle() {
+      if (!this.params || this.widget?.id !== 'gradientBg') return {};
+      
+      return {
+        background: `linear-gradient(${this.params.angle}deg, 
+          ${this.params.color1}, 
+          ${this.params.color2}, 
+          ${this.params.color3}, 
+          ${this.params.color4})`,
+        backgroundSize: '400% 400%',
+        animation: `gradientBg ${this.params.duration}s ease-in-out infinite`
+      };
+    },
+    defaultCursorStyle() {
+      if (!this.params || this.widget?.id !== 'mouseCursor') return {};
+      return {
+        cursor: `url(${this.params.defaultCursor}), default`
+      };
+    },
+    hoverCursorStyle() {
+      if (!this.params || this.widget?.id !== 'mouseCursor') return {};
+      return {
+        cursor: `url(${this.params.hoverCursor}), pointer`
+      };
     }
   }
 }
@@ -207,6 +265,7 @@ export default {
 /* 只对卡片悬停动画的预览生效 */
 .widget-preview[data-widget-id="cardHover"] .item-card {
   transform-origin: center center;
+  transition: transform 0.3s ease;
 }
 
 /* 基础悬停动画 */
@@ -215,11 +274,19 @@ export default {
 }
 
 /* 启用放大时的动画 */
-.widget-preview[data-widget-id="cardHover"] .item-card[data-enable-scale="true"]:hover {
-  transform: scale(var(--scale-size, 1.05));
-  animation: cardShake var(--shake-speed, 0.5s) var(--scale-delay, 0.2s) ease-in-out forwards;
+.widget-preview[data-widget-id="cardHover"] .item-card:hover[data-enable-scale="true"] {
+  animation: 
+    cardScale var(--shake-speed, 0.5s) forwards,
+    cardShakeWithScale var(--shake-speed, 0.5s) var(--scale-delay, 0.2s) ease-in-out forwards;
 }
 
+@keyframes cardScale {
+  to { 
+    transform: scale(var(--scale-size, 1.05)); 
+  }
+}
+
+/* 基础摇晃动画（不放大） */
 @keyframes cardShake {
   0%, 100% { 
     transform: rotate(0); 
@@ -236,5 +303,136 @@ export default {
   85% { 
     transform: rotate(calc(var(--shake-degree, 10deg) * -0.25)); 
   }
+}
+
+/* 带放大效果的摇晃动画 */
+@keyframes cardShakeWithScale {
+  0%, 100% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(0); 
+  }
+  25% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(var(--shake-degree, 10deg)); 
+  }
+  50% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * -1)); 
+  }
+  75% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * 0.25)); 
+  }
+  85% { 
+    transform: scale(var(--scale-size, 1.05)) rotate(calc(var(--shake-degree, 10deg) * -0.25)); 
+  }
+}
+
+/* 浏览器窗口样式 */
+.browser-window {
+  width: 300px;
+  height: 200px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.browser-header {
+  height: 32px;
+  background: #f1f3f4;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.browser-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.browser-buttons span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.browser-buttons span:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.browser-buttons span:nth-child(3) {
+  background: #28c940;
+}
+
+.browser-content {
+  height: calc(100% - 32px);
+}
+
+@keyframes gradientBg {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 鼠标指针预览样式 */
+.cursor-preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.cursor-preview-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.cursor-preview-area {
+  background: #f8f9fa;
+  border-radius: 12px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.cursor-preview-area:hover {
+  background: #f0f2f5;
+}
+
+.cursor-icon {
+  text-align: center;
+}
+
+.cursor-icon img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+.cursor-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.cursor-preview-area.hover {
+  background: #eef2ff;
+}
+
+.cursor-preview-area.hover:hover {
+  background: #e5ebff;
 }
 </style> 

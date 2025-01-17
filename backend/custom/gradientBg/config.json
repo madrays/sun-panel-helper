@@ -1,0 +1,59 @@
+{
+  "id": "gradientBg",
+  "name": "渐变背景",
+  "type": "css",
+  "description": "为页面添加优雅的渐变背景动画效果",
+  "tags": ["背景", "动画", "渐变"],
+  "preview": null,
+  "params": [
+    {
+      "name": "color1",
+      "label": "渐变色1",
+      "type": "color",
+      "default": "#2C3E50",
+      "description": "渐变起始颜色"
+    },
+    {
+      "name": "color2",
+      "label": "渐变色2",
+      "type": "color",
+      "default": "#2980B9",
+      "description": "渐变第二个颜色"
+    },
+    {
+      "name": "color3",
+      "label": "渐变色3",
+      "type": "color",
+      "default": "#8E44AD",
+      "description": "渐变第三个颜色"
+    },
+    {
+      "name": "color4",
+      "label": "渐变色4",
+      "type": "color",
+      "default": "#E74C3C",
+      "description": "渐变结束颜色"
+    },
+    {
+      "name": "angle",
+      "label": "渐变角度",
+      "type": "number",
+      "default": 45,
+      "min": 0,
+      "max": 360,
+      "step": 1,
+      "description": "渐变的方向角度"
+    },
+    {
+      "name": "duration",
+      "label": "动画时长",
+      "type": "number",
+      "default": 30,
+      "min": 5,
+      "max": 60,
+      "step": 1,
+      "description": "动画循环的时间（秒）"
+    }
+  ],
+  "template": "body {\n  height: 100vh;\n  background: linear-gradient({{angle}}deg, {{color1}}, {{color2}}, {{color3}}, {{color4}});\n  background-size: 400% 400%;\n  animation: gradientBg {{duration}}s ease-in-out infinite;\n}\n\n@keyframes gradientBg {\n  0% {\n    background-position: 0% 50%;\n  }\n  50% {\n    background-position: 100% 50%;\n  }\n  100% {\n    background-position: 0% 50%;\n  }\n}"
+} 

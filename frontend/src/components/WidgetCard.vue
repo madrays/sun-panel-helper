@@ -4,7 +4,35 @@
     
     <div class="preview-section">
       <div class="preview-area">
-        <div class="item-card">
+        <!-- 渐变背景预览 -->
+        <div v-if="widget.id === 'gradientBg'" class="browser-preview">
+          <div class="browser-header">
+            <div class="browser-buttons">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <div class="browser-content">
+            <!-- 自动播放的渐变背景预览 -->
+          </div>
+        </div>
+        
+        <!-- 鼠标指针卡片预览 -->
+        <div v-if="widget.id === 'mouseCursor'" class="cursor-card">
+          <div class="cursor-icons">
+            <img class="default-cursor" :src="widget.params[0].default" alt="默认指针">
+            <i class="fas fa-arrow-right"></i>
+            <img class="hover-cursor" :src="widget.params[1].default" alt="悬浮指针">
+          </div>
+          <div class="cursor-info">
+            <h3>自定义鼠标</h3>
+            <p>个性化指针样式</p>
+          </div>
+        </div>
+        
+        <!-- 原有的卡片预览 -->
+        <div v-else-if="['xiantiao', 'cardHover'].includes(widget.id)" class="item-card">
           <div class="item-card-content">
             <div class="github-icon">
               <svg viewBox="0 0 24 24" width="24" height="24">
@@ -197,6 +225,57 @@ export default {
   color: #666;
 }
 
+/* 浏览器预览样式 */
+.browser-preview {
+  width: 220px;
+  height: 140px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.browser-header {
+  height: 24px;
+  background: #f1f3f4;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.browser-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.browser-buttons span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.browser-buttons span:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.browser-buttons span:nth-child(3) {
+  background: #28c940;
+}
+
+.browser-content {
+  height: calc(100% - 24px);
+  background: linear-gradient(45deg, #2C3E50, #2980B9, #8E44AD, #E74C3C);
+  background-size: 400% 400%;
+  animation: previewGradient 8s ease-in-out infinite;
+}
+
+@keyframes previewGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* 卡片悬停动画的预览效果 - 只对特定卡片生效 */
 .widget-card[data-widget-id="cardHover"] :deep(.item-card) {
   transform-origin: center center;
@@ -253,5 +332,53 @@ export default {
   font-weight: 500;
   z-index: 10;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 鼠标指针卡片样式 */
+.cursor-card {
+  width: 220px;
+  height: 140px;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.cursor-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cursor-icons img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.cursor-icons i {
+  color: #666;
+  font-size: 1rem;
+}
+
+.cursor-info {
+  text-align: center;
+}
+
+.cursor-info h3 {
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0;
+}
+
+.cursor-info p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0.5rem 0 0;
 }
 </style> 

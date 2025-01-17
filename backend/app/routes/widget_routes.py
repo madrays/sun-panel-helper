@@ -11,6 +11,11 @@ def get_widgets_by_type(type):
         print(f"\n=== API Request ===")
         print(f"Requesting widgets of type: {type}")
         widgets = widget_service.get_widgets_by_type(type)
+        if type == 'css':
+            mouse_cursor = next((w for w in widgets if w['id'] == 'mouseCursor'), None)
+            if mouse_cursor:
+                widgets.remove(mouse_cursor)
+                widgets.append(mouse_cursor)
         print(f"Found widgets: {widgets}")
         return jsonify(widgets)
     except Exception as e:

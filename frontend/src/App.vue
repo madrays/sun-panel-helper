@@ -40,14 +40,24 @@
             返回
           </button>
           <h2>{{ selectedWidget.name }}</h2>
-          <button 
-            class="deploy-btn" 
-            @click="isDeployed ? undeployWidget() : deployWidget()"
-            :class="{ 'deployed': isDeployed }"
-          >
-            <i class="fas" :class="isDeployed ? 'fa-times' : 'fa-rocket'"></i>
-            {{ isDeployed ? '取消部署' : '部署' }}
-          </button>
+          <div class="deploy-buttons">
+            <button 
+              v-if="isDeployed"
+              class="undeploy-btn" 
+              @click="undeployWidget"
+            >
+              <i class="fas fa-times"></i>
+              取消部署
+            </button>
+            <button 
+              class="deploy-btn" 
+              @click="deployWidget"
+              :class="{ 'redeploy': isDeployed }"
+            >
+              <i class="fas fa-rocket"></i>
+              {{ isDeployed ? '重新部署' : '部署' }}
+            </button>
+          </div>
         </div>
         
         <div class="editor-content">
@@ -94,7 +104,16 @@ export default {
   data() {
     return {
       types: [
-        { id: 'css', name: 'CSS 样式库', icon: '🎨' },
+        {
+          id: 'css',
+          name: 'CSS 样式库',
+          icon: '🎨',
+          widgets: [
+            'xiantiao',     // 装饰线条
+            'cardHover',    // 卡片悬停
+            'gradientBg'    // 渐变背景放在最后
+          ]
+        },
         { id: 'js', name: 'JS 功能库', icon: '⚡' },
         { id: 'widget', name: '组件库', icon: '🧩' }
       ],
@@ -171,23 +190,28 @@ export default {
           params.enableScale = Boolean(params.enableScale)
         }
         
+        // 如果是重新部署，先取消部署
+        if (this.isDeployed) {
+          await this.undeployWidget(false) // 传入 false 表示不显示消息
+        }
+        
         const response = await fetch(`${API_BASE_URL}/api/widgets/${this.selectedWidget.id}/deploy`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(params)
-        })
+        });
         
-        const result = await response.json()
+        const result = await response.json();
         if (result.success) {
-          this.isDeployed = true
-          this.$message.success('部署成功')
+          this.isDeployed = true;
+          this.$message.success('部署成功');
         } else {
-          throw new Error(result.error || '部署失败')
+          throw new Error(result.error || '部署失败');
         }
       } catch (error) {
-        this.$message.error(error.message || '部署失败')
+        this.$message.error(error.message || '部署失败');
       }
     },
     updatePreview() {
@@ -215,7 +239,7 @@ export default {
       }
     },
     
-    async undeployWidget() {
+    async undeployWidget(showMessage = true) {
       try {
         const response = await fetch(`${API_BASE_URL}/api/widgets/${this.selectedWidget.id}/undeploy`, {
           method: 'POST'
@@ -224,21 +248,34 @@ export default {
         const result = await response.json()
         if (result.success) {
           this.isDeployed = false
-          this.$message.success('取消部署成功')
+          if (showMessage) {
+            this.$message.success('取消部署成功')
+          }
         } else {
           throw new Error(result.error || '取消部署失败')
         }
       } catch (error) {
-        this.$message.error(error.message || '取消部署失败')
+        if (showMessage) {
+          this.$message.error(error.message || '取消部署失败')
+        }
       }
     }
   },
   watch: {
     selectedWidget: {
-      immediate: true,
-      handler() {
-        this.checkDeployStatus()
-      }
+      async handler(newWidget) {
+        if (newWidget) {
+          // 检查部署状态
+          try {
+            const response = await fetch(`${API_BASE_URL}/api/widgets/${newWidget.id}/deployed`)
+            const data = await response.json()
+            this.isDeployed = data.deployed
+          } catch (error) {
+            console.error('Error checking deploy status:', error)
+          }
+        }
+      },
+      immediate: true
     }
   },
   mounted() {
@@ -379,10 +416,22 @@ export default {
 .deploy-btn {
   background: var(--primary-color);
   color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
 }
 
-.deploy-btn.deployed {
-  background: #f56c6c;
+.deploy-btn.redeploy {
+  background: #67c23a;
+}
+
+.deploy-btn.redeploy:hover {
+  background: #85ce61;
 }
 
 .editor-content {
@@ -437,5 +486,27 @@ export default {
   display: flex;
   min-height: 100vh;
   width: 100%;
+}
+
+.deploy-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.undeploy-btn {
+  background: #f56c6c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.undeploy-btn:hover {
+  background: #f78989;
 }
 </style> 

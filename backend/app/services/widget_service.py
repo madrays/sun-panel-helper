@@ -53,65 +53,25 @@ class WidgetService:
             print(f"Error loading config: {str(e)}")
             return None
         
-    def get_widgets_by_type(self, widget_type):
-        """按类型获取小组件列表"""
-        widgets = []
+    def get_widgets_by_type(self, type):
+        """获取指定类型的小组件列表"""
         try:
-            print("\n=== Debug Info ===")
-            print(f"Current working directory: {os.getcwd()}")
-            print(f"Custom path: {self.custom_path}")
-            print(f"Custom path (absolute): {os.path.abspath(self.custom_path)}")
-            print(f"Looking for type: {widget_type}")
+            # 读取类型配置
+            with open(os.path.join(self.custom_path, 'types.json'), 'r', encoding='utf-8') as f:
+                types = json.load(f)
             
-            # 检查目录是否存在
-            if not os.path.exists(self.custom_path):
-                print(f"ERROR: Custom path does not exist: {self.custom_path}")
-                return widgets
+            if type not in types:
+                return []
             
-            # 列出所有目录和文件
-            print("\nDirectory contents:")
-            for root, dirs, files in os.walk(self.custom_path):
-                print(f"\nDirectory: {root}")
-                print(f"Subdirectories: {dirs}")
-                print(f"Files: {files}")
-                
-            # 列出所有目录
-            dirs = os.listdir(self.custom_path)
-            print(f"\nFound directories: {dirs}")
+            # 确保渐变背景组件在最后
+            widgets = types[type]['widgets']
+            if 'gradientBg' in widgets:
+                widgets.remove('gradientBg')
+                widgets.append('gradientBg')
             
-            for widget_dir in dirs:
-                dir_path = os.path.join(self.custom_path, widget_dir)
-                config_path = os.path.join(dir_path, 'config.json')
-                print(f"\nChecking widget: {widget_dir}")
-                print(f"Config path: {config_path}")
-                print(f"Config exists: {os.path.exists(config_path)}")
-                
-                if not os.path.exists(config_path):
-                    print(f"Config file not found: {config_path}")
-                    continue
-                
-                try:
-                    with open(config_path, 'r', encoding='utf-8-sig') as f:
-                        config = json.load(f)
-                        print(f"Successfully loaded config: {config.get('name')}")
-                        print(f"Widget type: {config.get('type')}")
-                        
-                        if config.get('type') == widget_type:
-                            print(f"Adding widget: {config['name']}")
-                            widgets.append(config)
-                        else:
-                            print(f"Type mismatch: {config.get('type')} != {widget_type}")
-                except Exception as e:
-                    print(f"Error loading config file: {str(e)}")
-                    import traceback
-                    traceback.print_exc()
-                
-            print(f"\nReturning widgets: {len(widgets)} found")
-            return widgets
+            return [self.load_widget_config(widget_id) for widget_id in widgets]
         except Exception as e:
-            print(f"Error in get_widgets_by_type: {str(e)}")
-            import traceback
-            traceback.print_exc()
+            print(f"Error loading widgets: {str(e)}")
             return []
         
     def update_widget_params(self, widget_id, params):
@@ -127,8 +87,30 @@ class WidgetService:
     def deploy_widget(self, widget_id, params):
         """部署小组件"""
         try:
-            deploy_file = os.path.join(Config.DEPLOY_PATH, 'index.css')
             print(f"\n=== Deploy Debug Info ===")
+            print(f"Deploying widget {widget_id} with params: {params}")  # 添加日志
+            
+            # 1. 加载组件配置
+            config = self.load_widget_config(widget_id)
+            if not config:
+                return {'success': False, 'error': '组件配置不存在'}
+            
+            # 2. 获取模板
+            template = config.get('template')
+            if not template:
+                return {'success': False, 'error': '模板不存在'}
+            
+            # 确保所有必需的参数都存在
+            for param in config.get('params', []):
+                if param['name'] not in params:
+                    params[param['name']] = param['default']
+            
+            # 3. 处理模板中的变量替换
+            css_code = template
+            for key, value in params.items():
+                css_code = css_code.replace('{{' + key + '}}', str(value))
+            
+            deploy_file = os.path.join(Config.DEPLOY_PATH, 'index.css')
             print(f"Deploy path: {Config.DEPLOY_PATH}")
             print(f"Deploy file: {deploy_file}")
             
@@ -150,69 +132,6 @@ class WidgetService:
                     # 如果文件存在但没有头部注释，添加它
                     if not existing_content.startswith('/* Sun-Panel-Helper CSS */'):
                         existing_content = header_comment + existing_content
-            
-            # 部署文件路径 - 直接使用 index.css
-            deploy_file = os.path.join(Config.DEPLOY_PATH, 'index.css')
-            
-            print(f"Deploying widget {widget_id} with params: {params}")
-            
-            # 1. 加载组件配置
-            config = self.load_widget_config(widget_id)
-            if not config:
-                print(f"Widget config not found for {widget_id}")
-                return {'success': False, 'error': '组件配置不存在'}
-            
-            # 2. 获取模板
-            template = config.get('template')
-            if not template:
-                print(f"Template not found in config for {widget_id}")
-                return {'success': False, 'error': '模板不存在'}
-            
-            # 3. 处理模板中的条件语句
-            css_code = template
-            
-            # 处理条件语句
-            def replace_condition(match):
-                condition, if_block, else_block = match.groups()
-                value = params.get(condition)
-                # 确保布尔值正确处理
-                if isinstance(value, str):
-                    value = value.lower() == 'true'
-                elif isinstance(value, bool):
-                    value = bool(value)
-                else:
-                    value = False
-                    
-                print(f"Condition {condition}: {value} (type: {type(value)})")
-                return if_block.strip() if value else (else_block.strip() if else_block else '')
-            
-            # 首先处理条件语句
-            css_code = re.sub(
-                r'{{#if\s+(\w+)}}([\s\S]*?)(?:{{else}}([\s\S]*?))?{{/if}}',
-                replace_condition,
-                css_code
-            )
-            
-            # 然后处理数学表达式
-            def replace_math(match):
-                param, divisor = match.groups()
-                value = params.get(param)
-                if value is None:
-                    return '0'
-                try:
-                    return str(float(value) / float(divisor))
-                except (ValueError, TypeError):
-                    return '0'
-            
-            css_code = re.sub(r'{{(\w+)/(\d+)}}', replace_math, css_code)
-            
-            # 最后处理普通变量
-            for key, value in params.items():
-                if isinstance(value, bool):
-                    value = str(value).lower()
-                css_code = css_code.replace('{{' + key + '}}', str(value))
-            
-            print(f"Final CSS code:\n{css_code}")
             
             # 构建新的样式块
             style_block = f"""

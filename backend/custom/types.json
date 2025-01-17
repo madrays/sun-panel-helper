@@ -1,0 +1,22 @@
+{
+  "css": {
+    "name": "CSS 样式库",
+    "icon": "🎨",
+    "widgets": [
+      "xiantiao",
+      "cardHover",
+      "gradientBg",
+      "mouseCursor"
+    ]
+  },
+  "js": {
+    "name": "JS 功能库",
+    "icon": "⚡",
+    "widgets": []
+  },
+  "widget": {
+    "name": "组件库",
+    "icon": "🧩",
+    "widgets": []
+  }
+} 

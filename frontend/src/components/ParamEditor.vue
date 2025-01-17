@@ -44,72 +44,72 @@
             </div>
           </div>
 
-          <!-- 颜色设置 -->
+      <!-- 颜色设置 -->
           <div class="param-group" v-if="colorParams.length">
-            <h3 class="group-title">颜色设置</h3>
-            <div class="param-items">
-              <div v-for="param in colorParams" :key="param.name" class="param-item">
+        <h3 class="group-title">颜色设置</h3>
+        <div class="param-items">
+          <div v-for="param in colorParams" :key="param.name" class="param-item">
                 <div class="param-header">
                   <label :for="param.name">{{ param.label }}</label>
                   <div class="param-desc">{{ param.description }}</div>
                 </div>
                 <div class="color-picker" v-if="param.type === 'color'">
-                  <input 
-                    type="color" 
-                    :id="param.name"
-                    :value="convertToHex6(localValue[param.name])"
-                    @input="updateColorValue($event, param.name)"
-                  >
-                  <div class="color-controls">
-                    <input 
-                      type="text"
-                      :value="localValue[param.name]"
-                      @input="updateColorText($event, param.name)"
-                      class="color-text"
-                    >
-                    <div class="opacity-control">
+              <input 
+                type="color" 
+                :id="param.name"
+                :value="convertToHex6(localValue[param.name])"
+                @input="updateColorValue($event, param.name)"
+              >
+              <div class="color-controls">
+                <input 
+                  type="text"
+                  :value="localValue[param.name]"
+                  @input="updateColorText($event, param.name)"
+                  class="color-text"
+                >
+                <div class="opacity-control">
                       <i class="opacity-icon" title="调整透明度">▒</i>
-                      <input 
-                        type="range"
-                        :value="getColorOpacity(localValue[param.name])"
-                        @input="updateColorOpacity($event, param.name)"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        class="opacity-slider"
-                        :title="`调整透明度: ${Math.round(getColorOpacity(localValue[param.name]) * 100)}%`"
-                      >
-                      <span class="opacity-value" title="当前透明度">{{ Math.round(getColorOpacity(localValue[param.name]) * 100) }}%</span>
+                  <input 
+                    type="range"
+                    :value="getColorOpacity(localValue[param.name])"
+                    @input="updateColorOpacity($event, param.name)"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    class="opacity-slider"
+                    :title="`调整透明度: ${Math.round(getColorOpacity(localValue[param.name]) * 100)}%`"
+                  >
+                  <span class="opacity-value" title="当前透明度">{{ Math.round(getColorOpacity(localValue[param.name]) * 100) }}%</span>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
         <div class="right-column">
-          <!-- 尺寸设置 -->
+      <!-- 尺寸设置 -->
           <div class="param-group" v-if="sizeParams.length">
-            <h3 class="group-title">尺寸设置</h3>
-            <div class="param-items">
-              <div v-for="param in sizeParams" :key="param.name" class="param-item">
+        <h3 class="group-title">尺寸设置</h3>
+        <div class="param-items">
+          <div v-for="param in sizeParams" :key="param.name" class="param-item">
                 <div class="param-header">
                   <label :for="param.name">{{ param.label }}</label>
                   <div class="param-desc">{{ param.description }}</div>
                   <div class="param-value">当前值: {{ localValue[param.name] }}px</div>
                 </div>
                 <div class="number-input" v-if="param.type === 'number'">
-                  <input 
-                    type="range"
+                <input 
+                  type="range"
                     :id="param.name"
                     :value="localValue[param.name]"
-                    :min="param.min"
-                    :max="param.max"
-                    :step="param.step"
+                  :min="param.min"
+                  :max="param.max"
+                  :step="param.step"
                     @input="updateValue($event, param.name)"
-                    class="slider"
-                  >
+                  class="slider"
+                >
                   <span class="slider-value">{{ localValue[param.name] }}</span>
                 </div>
               </div>
@@ -126,13 +126,13 @@
                   <div class="param-desc">{{ param.description }}</div>
                 </div>
                 <div class="number-input" v-if="param.type === 'number'">
-                  <input 
+              <input 
                     type="range"
-                    :id="param.name"
+                :id="param.name"
                     :value="localValue[param.name]"
-                    :min="param.min"
-                    :max="param.max"
-                    :step="param.step"
+                :min="param.min"
+                :max="param.max"
+                :step="param.step"
                     @input="updateValue($event, param.name)"
                     class="slider"
                   >
@@ -247,10 +247,10 @@
                 class="slider"
               >
               <span class="slider-value">{{ localValue.scaleDelay }}s</span>
-            </div>
           </div>
         </div>
       </div>
+    </div>
 
       <!-- 晃动设置 -->
       <div class="param-group">
@@ -284,21 +284,175 @@
               <div class="param-desc">晃动动画的速度（秒）</div>
             </div>
             <div class="number-input">
-              <input 
-                type="range"
+                <input 
+                  type="range"
                 id="shakeSpeed"
                 :value="localValue.shakeSpeed"
                 :min="0.2"
                 :max="1"
                 :step="0.1"
                 @input="updateValue($event, 'shakeSpeed')"
-                class="slider"
-              >
+                  class="slider"
+                >
               <span class="slider-value">{{ localValue.shakeSpeed }}s</span>
             </div>
           </div>
         </div>
       </div>
+    </template>
+
+    <!-- 渐变背景的参数编辑界面 -->
+    <template v-if="widget?.id === 'gradientBg'">
+      <!-- 重要提示 -->
+      <div class="warning-tip">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>重要提示：使用此功能前请清空 SunPanel 背景链接！</span>
+              </div>
+      
+      <div class="param-group">
+        <h3 class="group-title">渐变颜色</h3>
+        <div class="param-items">
+          <div v-for="param in colorParams" :key="param.name" class="param-item">
+            <label :for="param.name" :title="param.description">{{ param.label }}</label>
+            <div class="color-picker">
+              <input 
+                type="color" 
+                :id="param.name"
+                :value="convertToHex6(localValue[param.name])"
+                @input="updateColorValue($event, param.name)"
+              >
+              <div class="color-controls">
+                <input 
+                  type="text"
+                  :value="localValue[param.name]"
+                  @input="updateColorText($event, param.name)"
+                  class="color-text"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="param-group">
+        <h3 class="group-title">动画设置</h3>
+        <div class="param-items">
+          <!-- 渐变角度 -->
+          <div class="param-item">
+            <label :for="'angle'" title="渐变的方向角度">渐变角度</label>
+            <div class="number-input">
+              <div class="slider-wrapper">
+                <input 
+                  type="range"
+                  id="angle-slider"
+                  :value="localValue.angle"
+                  :min="0"
+                  :max="360"
+                  :step="1"
+                  @input="updateValue($event, 'angle')"
+                  class="slider"
+                >
+                <div class="slider-value">{{ localValue.angle }}°</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 动画时长 -->
+          <div class="param-item">
+            <label :for="'duration'" title="动画循环的时间">动画时长</label>
+            <div class="number-input">
+              <div class="slider-wrapper">
+              <input 
+                  type="range"
+                  id="duration-slider"
+                  :value="localValue.duration"
+                  :min="5"
+                  :max="60"
+                  :step="1"
+                  @input="updateValue($event, 'duration')"
+                  class="slider"
+                >
+                <div class="slider-value">{{ localValue.duration }}s</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- 鼠标指针参数编辑 -->
+    <template v-if="widget?.id === 'mouseCursor'">
+      <div class="param-group">
+        <div class="param-items">
+          <div class="cursor-settings">
+            <div class="cursor-upload-area">
+              <!-- 默认指针 -->
+              <div class="cursor-upload-box">
+                <div 
+                  class="cursor-preview"
+                  :style="{
+                    cursor: `url(${localValue.defaultCursor}), default`
+                  }"
+                >
+                  <img :src="localValue.defaultCursor" alt="默认指针">
+                  <div class="cursor-label">默认指针</div>
+                </div>
+                <div class="upload-controls">
+                  <input 
+                    type="text"
+                    v-model="localValue.defaultCursor"
+                    placeholder="输入图片链接"
+                    @input="updateValue($event, 'defaultCursor')"
+                  >
+                  <button class="upload-btn" @click="triggerUpload('defaultCursor')">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    上传图片
+                  </button>
+                  <input 
+                    type="file"
+                    ref="defaultCursorUpload"
+                    accept="image/*"
+                    @change="handleImageUpload($event, 'defaultCursor')"
+                    style="display: none"
+                  >
+                </div>
+              </div>
+              
+              <!-- 悬浮指针 -->
+              <div class="cursor-upload-box">
+                <div 
+                  class="cursor-preview"
+                  :style="{
+                    cursor: `url(${localValue.hoverCursor}), pointer`
+                  }"
+                >
+                  <img :src="localValue.hoverCursor" alt="悬浮指针">
+                  <div class="cursor-label">悬浮指针</div>
+                </div>
+                <div class="upload-controls">
+                  <input 
+                    type="text"
+                    v-model="localValue.hoverCursor"
+                    placeholder="输入图片链接"
+                    @input="updateValue($event, 'hoverCursor')"
+                  >
+                  <button class="upload-btn" @click="triggerUpload('hoverCursor')">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    上传图片
+                  </button>
+                  <input 
+                    type="file"
+                    ref="hoverCursorUpload"
+                    accept="image/*"
+                    @change="handleImageUpload($event, 'hoverCursor')"
+                    style="display: none"
+                  >
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     </template>
   </div>
 </template>
@@ -332,9 +486,9 @@ export default {
       );
     },
     colorParams() {
-      return this.paramDefs.filter(p => 
-        p.type === 'color' && 
-        !['cardBackground', 'cardOpacity'].includes(p.name)
+      if (this.widget?.id !== 'gradientBg') return [];
+      return this.paramDefs.filter(param => 
+        param.name.startsWith('color')
       );
     },
     sizeParams() {
@@ -353,7 +507,10 @@ export default {
   methods: {
     updateValue(event, name) {
       if (!event || !name) return;
-      this.localValue[name] = event.target.value;
+      const value = event.target.type === 'number' || event.target.type === 'range' 
+        ? parseFloat(event.target.value) 
+        : event.target.value;
+      this.localValue[name] = value;
       this.$emit('input', { ...this.localValue });
       this.$emit('change');
     },
@@ -392,6 +549,26 @@ export default {
       this.localValue[name] = event.target.checked;
       this.$emit('input', { ...this.localValue });
       this.$emit('change');
+    },
+    handleImageUpload(event, name) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.localValue[name] = e.target.result;
+          this.$emit('input', { ...this.localValue });
+          this.$emit('change');
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    resetImage(name) {
+      this.localValue[name] = '';
+      this.$emit('input', { ...this.localValue });
+      this.$emit('change');
+    },
+    triggerUpload(type) {
+      this.$refs[`${type}Upload`].click();
     }
   },
   watch: {
@@ -629,5 +806,121 @@ export default {
 
 .switch-input input[type="checkbox"]:checked::before {
   left: 22px;
+}
+
+/* 渐变背景特有的样式 */
+.param-editor .param-group:not(:last-child) {
+  margin-bottom: 1rem;
+}
+
+/* 警告提示样式 */
+.warning-tip {
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  background: #fff6f6;
+  border-left: 4px solid #ff9090;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d03050;
+}
+
+.warning-tip i {
+  font-size: 1.1rem;
+}
+
+.warning-tip span {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.cursor-settings {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.cursor-upload-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.cursor-upload-box {
+  background: white;
+  padding: 1.2rem;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.cursor-preview {
+  width: 100%;
+  height: 120px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  transition: all 0.3s;
+}
+
+.cursor-preview:hover {
+  background: #f0f2f5;
+}
+
+.cursor-preview img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  margin-bottom: 0.8rem;
+}
+
+.cursor-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.upload-controls input[type="text"] {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.upload-controls input[type="text"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(64,158,255,0.1);
+}
+
+.upload-btn {
+  width: 100%;
+  padding: 0.6rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+}
+
+.upload-btn:hover {
+  background: var(--primary-color-dark, #3a8ee6);
 }
 </style> 

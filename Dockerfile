@@ -54,6 +54,6 @@ RUN mkdir -p /app/deploy
 
 # 添加环境变量标识 Docker 环境
 ENV DOCKER_ENV=1
-ENV APP_VERSION=1.7.0
+ENV APP_VERSION=1.7.1
 
 CMD ["./start.sh"] 
