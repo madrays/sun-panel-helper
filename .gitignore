@@ -1,0 +1,74 @@
+# 依赖目录
+node_modules/
+**/node_modules/
+
+# 构建输出
+dist/
+build/
+coverage/
+
+# 开发工具
+.vscode/
+.idea/
+*.sublime-*
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境配置
+.env
+.env.local
+.env.*.local
+
+# 数据文件
+data/*
+!data/.gitkeep
+
+# 自定义文件
+custom/*
+!custom/helper
+!custom/helper/font
+!custom/helper/font/江湖风古体.ttf
+!custom/helper/font/马赛克MC风.ttf
+!custom/helper/font/猫啃圆珠体.ttf
+!custom/helper/maxkb
+!custom/helper/maxkb/logo.gif
+!custom/helper/md
+!custom/helper/md/.gitkeep
+!custom/helper/mouse
+!custom/helper/mouse/.gitkeep
+!custom/helper/weather-widget
+!custom/helper/weather-widget/.gitkeep
+!custom/helper/freewidgets
+!custom/helper/freewidgets/setting
+!custom/helper/freewidgets/setting/.gitkeep
+
+# 临时文件
+*.swp
+*.swo
+*~
+
+# 文档
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+
+# Backend
+backend/node_modules
+backend/dist
+backend/.env
+backend/data/*.json
+
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.env 

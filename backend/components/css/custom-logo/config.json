@@ -1,0 +1,108 @@
+{
+  "id": "custom-logo",
+  "name": "自定义LOGO",
+  "type": "css",
+  "description": "自定义网站LOGO,支持PC/手机/平板三端适配",
+  "tags": ["LOGO", "图片", "响应式"],
+  "params": {
+    "pcLogo": {
+      "type": "string",
+      "name": "电脑端LOGO",
+      "description": "上传电脑端显示的LOGO图片",
+      "default": ""
+    },
+    "pcWidth": {
+      "type": "number",
+      "name": "电脑端宽度",
+      "description": "电脑端LOGO的宽度",
+      "default": 250,
+      "min": 100,
+      "max": 500,
+      "step": 10
+    },
+    "pcHeight": {
+      "type": "number",
+      "name": "电脑端高度",
+      "description": "电脑端LOGO的高度",
+      "default": 250,
+      "min": 100,
+      "max": 500,
+      "step": 10
+    },
+    "pcMarginTop": {
+      "type": "number",
+      "name": "电脑端上边距",
+      "description": "电脑端LOGO的上方间距",
+      "default": -70,
+      "min": -200,
+      "max": 200,
+      "step": 5
+    },
+    "mobileLogo": {
+      "type": "string",
+      "name": "手机端LOGO",
+      "description": "上传手机端显示的LOGO图片(不设置则使用电脑端LOGO)",
+      "default": ""
+    },
+    "mobileWidth": {
+      "type": "number",
+      "name": "手机端宽度",
+      "description": "手机端LOGO的宽度",
+      "default": 200,
+      "min": 50,
+      "max": 300,
+      "step": 10
+    },
+    "mobileHeight": {
+      "type": "number",
+      "name": "手机端高度",
+      "description": "手机端LOGO的高度",
+      "default": 150,
+      "min": 50,
+      "max": 300,
+      "step": 10
+    },
+    "mobileMarginTop": {
+      "type": "number",
+      "name": "手机端上边距",
+      "description": "手机端LOGO的上方间距",
+      "default": -30,
+      "min": -100,
+      "max": 100,
+      "step": 5
+    },
+    "tabletLogo": {
+      "type": "string",
+      "name": "平板端LOGO",
+      "description": "上传平板端显示的LOGO图片(不设置则使用电脑端LOGO)",
+      "default": ""
+    },
+    "tabletWidth": {
+      "type": "number",
+      "name": "平板端宽度",
+      "description": "平板端LOGO的宽度",
+      "default": 200,
+      "min": 100,
+      "max": 400,
+      "step": 10
+    },
+    "tabletHeight": {
+      "type": "number",
+      "name": "平板端高度",
+      "description": "平板端LOGO的高度",
+      "default": 200,
+      "min": 100,
+      "max": 400,
+      "step": 10
+    },
+    "tabletMarginTop": {
+      "type": "number",
+      "name": "平板端上边距",
+      "description": "平板端LOGO的上方间距",
+      "default": -50,
+      "min": -150,
+      "max": 150,
+      "step": 5
+    }
+  }
+} 

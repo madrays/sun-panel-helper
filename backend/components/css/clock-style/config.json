@@ -1,0 +1,23 @@
+{
+  "logoMarginTop": {
+    "name": "Logo上边距",
+    "type": "number",
+    "min": -100,
+    "max": 100,
+    "step": 1,
+    "default": 20
+  },
+  "logoMarginLeft": {
+    "name": "Logo左边距",
+    "type": "number",
+    "min": -100,
+    "max": 100,
+    "step": 1,
+    "default": 20
+  },
+  "fontFamily": {
+    "name": "时钟字体",
+    "type": "font",
+    "default": "Zen Dots"
+  }
+} 

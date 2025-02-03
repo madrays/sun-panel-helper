@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 圆角矩形背景 -->
+  <rect width="128" height="128" rx="32" fill="url(#bgGradient)"/>
+  
+  <!-- S 字母主体 -->
+  <path d="M84 44C84 39.5817 80.4183 36 76 36H52C47.5817 36 44 39.5817 44 44V52C44 56.4183 47.5817 60 52 60H76C80.4183 60 84 63.5817 84 68V76C84 80.4183 80.4183 84 76 84H52C47.5817 84 44 80.4183 44 76" 
+        stroke="white" 
+        stroke-width="12" 
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  
+  <!-- 装饰线条 -->
+  <path d="M38 92L90 36" 
+        stroke="white" 
+        stroke-width="4" 
+        stroke-linecap="round" 
+        stroke-opacity="0.3"/>
+  
+  <!-- 点缀 -->
+  <circle cx="44" cy="76" r="4" fill="white" fill-opacity="0.6"/>
+  <circle cx="84" cy="44" r="4" fill="white" fill-opacity="0.6"/>
+</svg> 

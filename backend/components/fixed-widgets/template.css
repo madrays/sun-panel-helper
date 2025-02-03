@@ -1,0 +1,57 @@
+/* ====================== Widget组件样式 开始 ====================== */
+/* Widget容器布局 */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Widget基础样式 */
+.widget {
+    box-sizing: content-box;
+    border-radius: 0px;
+    transition: transform 0.3s ease;
+    margin: 0px;
+    flex: 1 1 100px;
+}
+
+/* 换行控制器 */
+.widget-break {
+    flex-basis: 100%;
+    width: 100%;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    clear: both;
+}
+
+/* 移动端布局控制 */
+@media screen and (max-width: 768px) {
+    .row {
+        gap: -8px;
+        margin-top: -10px;
+        display: flex;
+        flex-grow: 150;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .widget {
+        display: none;
+    }
+
+    .widget.show-on-mobile {
+        display: block;
+    }
+}
+
+/* Widget hover效果 */
+@media screen and (min-width: 769px) {
+    .widget:hover {
+        transform: translateY(-5px);
+    }
+}
+/* ====================== Widget组件样式 结束 ====================== */ 

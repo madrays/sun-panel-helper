@@ -1,0 +1,57 @@
+/* 鼠标悬停动画 */
+.icon-info-box .rounded-2xl {
+  transform-origin: center center;
+  transition: transform 0.3s ease;
+}
+
+.icon-info-box .rounded-2xl:hover {
+  transform: scale(var(--scale-size, 1));
+}
+
+.icon-info-box .rounded-2xl:hover {
+  animation: info-shake-bounce var(--shake-speed, 0.5s) var(--scale-delay, 0s) ease-in-out forwards;
+}
+
+@keyframes info-shake-bounce {
+  0%, 100% {
+    transform: scale(var(--scale-size, 1)) rotate(0);
+  }
+  25% {
+    transform: scale(var(--scale-size, 1)) rotate(var(--shake-degree, 15deg));
+  }
+  50% {
+    transform: scale(var(--scale-size, 1)) rotate(calc(var(--shake-degree, 15deg) * -1));
+  }
+  75% {
+    transform: scale(var(--scale-size, 1)) rotate(calc(var(--shake-degree, 15deg) * 0.25));
+  }
+  85% {
+    transform: scale(var(--scale-size, 1)) rotate(calc(var(--shake-degree, 15deg) * -0.25));
+  }
+}
+
+/* 小图标的动画保持不变 */
+.icon-small-box .rounded-2xl:hover {
+  -webkit-animation: small-shake-bounce .5s alternate !important;
+  -moz-animation: small-shake-bounce .5s alternate !important;
+  -o-animation: small-shake-bounce .5s alternate !important;
+  animation: small-shake-bounce .5s alternate !important;
+}
+
+@keyframes small-shake-bounce {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  50% {
+    transform: rotate(-15deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+  85% {
+    transform: rotate(5deg);
+  }
+}

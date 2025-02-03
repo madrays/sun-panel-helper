@@ -1,0 +1,16 @@
+{
+  "widgets": [
+    {
+      "name": "打字机效果",
+      "url": "https://www.widgets.link/#/typed?t=Hi，这里是Coco的导航页&bg=&tf=28&tt=ffffff&s=40&p=10&br=20&_b=true&pbg=FFFFFF00&bs=true&cf=16&cc=EEE8E8FF&c=随意享用吧~~",
+      "position": {
+        "top": 1000,
+        "left": 100,
+        "width": "300px",
+        "height": "200px",
+        "isScrollMode": true,
+        "isPinned": false
+      }
+    }
+  ]
+}

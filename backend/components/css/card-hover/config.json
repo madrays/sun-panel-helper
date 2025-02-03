@@ -1,0 +1,57 @@
+{
+  "id": "card-hover",
+  "name": "卡片悬停动画",
+  "type": "css",
+  "description": "为卡片添加悬停时的晃动和放大效果",
+  "tags": ["动画", "交互"],
+  "params": {
+    "cardBackground": {
+      "type": "string",
+      "name": "卡片背景色",
+      "description": "卡片的背景颜色(仅预览用)",
+      "default": "#ffffff"
+    },
+    "shakeDegree": {
+      "type": "number",
+      "name": "晃动角度",
+      "description": "卡片晃动时的最大角度",
+      "default": 15,
+      "min": 0,
+      "max": 360,
+      "step": 1
+    },
+    "shakeSpeed": {
+      "type": "number",
+      "name": "晃动速度",
+      "description": "完成一次晃动动画的时间(秒)",
+      "default": 0.5,
+      "min": 0.1,
+      "max": 2,
+      "step": 0.1
+    },
+    "enableScale": {
+      "type": "boolean",
+      "name": "启用放大",
+      "description": "是否启用悬停时的放大效果",
+      "default": true
+    },
+    "scaleSize": {
+      "type": "number",
+      "name": "放大倍数",
+      "description": "悬停时的放大倍数",
+      "default": 1.1,
+      "min": 1,
+      "max": 2,
+      "step": 0.1
+    },
+    "scaleDelay": {
+      "type": "number",
+      "name": "放大延迟",
+      "description": "放大效果的延迟时间(秒)",
+      "default": 0.3,
+      "min": 0,
+      "max": 1,
+      "step": 0.1
+    }
+  }
+} 

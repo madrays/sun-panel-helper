@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  sun-panel-helper:
+    build: .
+    image: madrays/sun-panel-helper:latest
+    container_name: sun-panel-helper
+    ports:
+      - "33002:80"
+    volumes:
+      - /path/to/sunpanel/conf/custom:/app/backend/custom
+    restart: unless-stopped

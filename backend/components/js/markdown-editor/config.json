@@ -1,0 +1,33 @@
+{
+  "id": "markdown-editor",
+  "name": "Markdown编辑器",
+  "type": "js",
+  "description": "支持多用户的Markdown笔记编辑器,可在线编辑和预览",
+  "tags": ["编辑器", "Markdown", "笔记"],
+  "params": {
+    "users": {
+      "name": "用户列表",
+      "type": "array",
+      "description": "可访问的用户列表,不登录则使用浏览器缓存",
+      "items": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码"
+          },
+          "note": {
+            "type": "string",
+            "description": "备注",
+            "default": ""
+          }
+        }
+      },
+      "default": []
+    }
+  }
+} 

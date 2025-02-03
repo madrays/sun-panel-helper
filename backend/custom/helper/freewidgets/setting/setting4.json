@@ -1,0 +1,28 @@
+{
+  "widgets": [
+    {
+      "name": "打字机效果",
+      "url": "https://www.widgets.link/#/typed?t=Hi%EF%BC%8C%E8%BF%99%E9%87%8C%E6%98%AFCoco%E7%9A%84%E5%AF%BC%E8%88%AA%E9%A1%B5&bg=&tf=28&tt=ffffff&s=40&p=10&br=20&_b=true&pbg=FFFFFF00&bs=true&cf=16&cc=EEE8E8FF&c=%E9%9A%8F%E6%84%8F%E4%BA%AB%E7%94%A8%E5%90%A7~~",
+      "position": {
+        "top": 100,
+        "left": 100,
+        "width": "300px",
+        "height": "200px",
+        "isScrollMode": true,
+        "isPinned": false
+      }
+    },
+    {
+      "name": "热门资讯",
+      "url": "https://www.widgets.link/#/tools-hot-news?contentBoxShadowColor=FFFFFF0D&ac=F0B17F00&tc=19A7CE8C&ttc=ffffff&tic=ffffff&thc=ffffff&cc=FBE8D900&bg=&_b=true",
+      "position": {
+        "top": 600,
+        "left": 100,
+        "width": "300px",
+        "height": "200px",
+        "isScrollMode": true,
+        "isPinned": false
+      }
+    }
+  ]
+}

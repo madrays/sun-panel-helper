@@ -1,0 +1,25 @@
+{
+  "id": "layout-adjust",
+  "name": "布局调整",
+  "type": "css",
+  "description": "调整页面布局,包括时钟、搜索栏和系统信息的位置",
+  "tags": ["布局", "调整", "位置"],
+  "params": {
+    "showClock": {
+      "name": "时钟显示",
+      "type": "boolean"
+    },
+    "searchMarginTop": {
+      "name": "搜索栏上边距",
+      "type": "number",
+      "min": -100,
+      "max": 100
+    },
+    "systemMarginTop": {
+      "name": "系统信息上边距",
+      "type": "number",
+      "min": -100,
+      "max": 100
+    }
+  }
+} 

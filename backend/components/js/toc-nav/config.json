@@ -1,0 +1,38 @@
+{
+  "id": "toc-nav",
+  "name": "目录导航",
+  "type": "js",
+  "description": "为页面添加目录导航功能，支持自动识别标题并生成导航栏",
+  "tags": ["导航", "目录", "交互"],
+  "params": {
+    "scrollOffset": {
+      "name": "滚动偏移量",
+      "type": "number",
+      "description": "滚动到目标位置时的偏移距离(px)",
+      "default": 80
+    },
+    "displayStyle": {
+      "name": "显示风格",
+      "type": "string",
+      "description": "导航栏显示风格(auto:自动 | mobile:移动端 | sidebar:侧栏)",
+      "default": "auto"
+    },
+    "mobileWidth": {
+      "name": "移动端宽度",
+      "type": "number", 
+      "description": "移动端模式的触发宽度(px)",
+      "default": 800
+    },
+    "theme": {
+      "name": "主题配色",
+      "type": "object",
+      "description": "导航栏的主题配色",
+      "default": {
+        "background": "rgba(42, 42, 42, 0.42)",
+        "text": "#ffffff",
+        "hover": "rgba(255, 255, 255, 0.2)",
+        "active": "rgba(255, 255, 255, 0.3)"
+      }
+    }
+  }
+} 

@@ -1,0 +1,46 @@
+# 版本控制
+.git
+.gitignore
+.github
+
+# 依赖和构建
+**/node_modules
+**/dist
+**/build
+
+# 文档和配置
+docs
+*.md
+docker-compose.yml
+.dockerignore
+Dockerfile
+
+# 开发和调试
+.vscode
+.idea
+*.log
+.env.local
+.env.*.local
+.DS_Store
+
+# 测试
+**/tests
+**/__tests__
+**/*.test.*
+**/*.spec.*
+
+# 数据文件
+backend/custom/*
+!backend/custom/helper/font/江湖风古体.ttf
+!backend/custom/helper/font/马赛克MC风.ttf
+!backend/custom/helper/font/猫啃圆珠体.ttf
+!backend/custom/helper/maxkb/logo.gif
+!frontend/src/assets/logo.gif
+
+# 其他
+.editorconfig
+.prettierrc
+.eslintrc
+.eslintignore
+.gitattributes
+LICENSE 

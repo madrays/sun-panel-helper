@@ -1,0 +1,1 @@
+export const DEFAULT_LOGO_PATH = '/custom/helper/maxkb/logo.gif'; 

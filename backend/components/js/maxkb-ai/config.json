@@ -1,0 +1,55 @@
+{
+  "id": "maxkb-ai",
+  "name": "MaxKB AI助手",
+  "type": "js",
+  "description": "集成MaxKB聊天窗口，支持自定义样式和位置",
+  "tags": ["AI助手", "聊天窗口", "MaxKB"],
+  "params": {
+    "chatUrl": {
+      "name": "MaxKB链接",
+      "type": "string",
+      "description": "MaxKB应用链接，格式如：https://chat.xxx.com/ui/chat/xxx",
+      "default": ""
+    },
+    "logoPath": {
+      "name": "助手图标",
+      "type": "string",
+      "description": "AI助手图标路径",
+      "default": "/custom/helper/maxkb/logo.gif"
+    },
+    "pcPosition": {
+      "name": "电脑端位置",
+      "type": "object",
+      "description": "电脑端按钮位置",
+      "properties": {
+        "right": {
+          "type": "number",
+          "default": 20,
+          "description": "距离右侧距离(px)"
+        },
+        "bottom": {
+          "type": "number",
+          "default": 65,
+          "description": "距离底部距离(px)"
+        }
+      }
+    },
+    "mobilePosition": {
+      "name": "手机端位置",
+      "type": "object",
+      "description": "手机端按钮位置",
+      "properties": {
+        "right": {
+          "type": "number",
+          "default": 15,
+          "description": "距离右侧距离(px)"
+        },
+        "bottom": {
+          "type": "number",
+          "default": 90,
+          "description": "距离底部距离(px)"
+        }
+      }
+    }
+  }
+} 

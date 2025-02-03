@@ -1,0 +1,12 @@
+{
+  "params": {
+    "defaultCursor": {
+      "name": "默认指针",
+      "type": "string"
+    },
+    "hoverCursor": {
+      "name": "悬浮指针",
+      "type": "string"
+    }
+  }
+} 

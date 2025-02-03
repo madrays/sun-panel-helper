@@ -1,0 +1,51 @@
+{
+  "id": "gradient-bg",
+  "name": "渐变背景",
+  "type": "css",
+  "description": "为页面添加优雅的渐变背景动画效果",
+  "tags": ["背景", "动画", "渐变"],
+  "params": {
+    "color1": {
+      "type": "string",
+      "name": "渐变色1",
+      "description": "渐变起始颜色",
+      "default": "#2C3E50"
+    },
+    "color2": {
+      "type": "string",
+      "name": "渐变色2",
+      "description": "渐变第二个颜色",
+      "default": "#2980B9"
+    },
+    "color3": {
+      "type": "string",
+      "name": "渐变色3",
+      "description": "渐变第三个颜色",
+      "default": "#8E44AD"
+    },
+    "color4": {
+      "type": "string",
+      "name": "渐变色4",
+      "description": "渐变结束颜色",
+      "default": "#E74C3C"
+    },
+    "angle": {
+      "type": "number",
+      "name": "渐变角度",
+      "description": "渐变的方向角度",
+      "default": 45,
+      "min": 0,
+      "max": 360,
+      "step": 1
+    },
+    "duration": {
+      "type": "number",
+      "name": "动画时长",
+      "description": "动画循环的时间（秒）",
+      "default": 30,
+      "min": 5,
+      "max": 60,
+      "step": 1
+    }
+  }
+} 
