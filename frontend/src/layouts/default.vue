@@ -66,6 +66,9 @@
             <el-icon><Coffee /></el-icon>
             <span>支持作者</span>
           </el-menu-item>
+
+          <!-- 添加版本信息组件 -->
+          <VersionCheck :is-collapse="isCollapse" />
         </el-menu>
       </el-aside>
 
@@ -130,6 +133,7 @@ import {
   CircleClose,
   Coffee
 } from '@element-plus/icons-vue'
+import VersionCheck from '@/components/VersionCheck.vue'
 
 const route = useRoute()
 const router = useRouter()

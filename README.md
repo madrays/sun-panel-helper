@@ -35,6 +35,23 @@
 
 > 💡 提示：你可以在 Helper Demo 中编辑样式，然后在演示站中查看效果，体验完整的美化流程！
 
+## 🎉 更新内容 (v2.0.2)
+
+### 🔧 功能优化
+- ✨ 新增轻轻小组件入口
+  - 提供快捷访问轻轻小组件官网的入口
+  - 支持获取组件链接添加到固定/自由组件
+- 🔄 新增版本检测功能
+  - 支持自动检查新版本
+  - 提供详细的更新指南
+  - 优化版本信息展示
+
+### 📝 其他说明
+- 🎯 项目已趋于稳定，后续将以优化和修复为主
+- 🌟 欢迎大佬们投稿优质组件
+- 💼 由于作者已开始上班，更新节奏会相对放缓
+- 📮 如有好的创意和建议，欢迎通过QQ群或邮箱联系,期待大佬们投稿
+
 ## 🎉 更新内容 (v2.0.1)
 
 ### 🔧 功能优化
@@ -343,8 +360,17 @@ Sun Panel Helper 是一个专注于增强 Sun-Panel 功能的辅助工具。我�
 
 ## 🤝 技术支持
 
+<div align="center">
+  <div style="display: inline-block; text-align: center; margin: 20px;">
+    <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/qrcode_29172b7553992.jpg" width="200" alt="QQ群二维码"/>
+    <p style="margin: 10px 0; font-size: 16px;">
+      <span style="background: #12b7f5; color: white; padding: 4px 12px; border-radius: 4px;">QQ交流群</span>
+    </p>
+    <p style="color: #666; font-size: 14px;">1019956856</p>
+  </div>
+</div>
+
 - 作者：Madrays
-- QQ 交流群：1019956856
 - 投稿邮箱：2826910520@qq.com
 - 项目指导：感谢 Sun-Panel 作者红烧猎人的技术支持
 

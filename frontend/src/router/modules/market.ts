@@ -42,6 +42,17 @@ const routes: RouteRecordRaw[] = [
       parentTitle: '组件市场',
       parentPath: '/dashboard/market'
     }
+  },
+  {
+    path: 'market/widgets-link',
+    name: 'MarketWidgetsLink',
+    component: () => import('../../views/market/detail/widgets/widgets-link/index.vue'),
+    meta: {
+      title: '轻轻小组件',
+      hideInMenu: true,
+      parentTitle: '组件市场',
+      parentPath: '/dashboard/market'
+    }
   }
 ]
 

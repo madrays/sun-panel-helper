@@ -10,6 +10,7 @@
 
     <!-- 组件列表 -->
     <div class="widgets-grid">
+
       <!-- 热门资讯组件 -->
       <HotNewsCard
         :is-applied-to-fixed="isAppliedToFixed('hot-news')"
@@ -30,6 +31,15 @@
         :is-applied-to-free="isAppliedToFree('weather')"
         @click="() => handleWidgetClick('weather')"
       />
+
+      <!-- 轻轻小组件 -->
+      <WidgetsLinkCard
+        :is-applied-to-fixed="isAppliedToFixed('widgets-link')"
+        :is-applied-to-free="isAppliedToFree('widgets-link')"
+        @click="() => handleWidgetClick('widgets-link')"
+      />
+
+      
     </div>
   </div>
 </template>
@@ -41,6 +51,7 @@ import request from '@/utils/request'
 import HotNewsCard from './preview/widgets/HotNewsCard.vue'
 import TypedCard from './preview/widgets/TypedCard.vue'
 import WeatherCard from './preview/widgets/WeatherCard.vue'
+import WidgetsLinkCard from './preview/widgets/WidgetsLinkCard.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -88,6 +99,7 @@ const loadFreeWidgets = async () => {
 // 检查组件是否已应用到固定组件
 const isAppliedToFixed = (widgetId: string): boolean => {
   const widgetNames: Record<string, string> = {
+    'widgets-link': '轻轻小组件',
     'hot-news': '热门资讯',
     'typed': '打字机效果',
     'weather': '天气预报'
@@ -100,6 +112,7 @@ const isAppliedToFixed = (widgetId: string): boolean => {
 // 检查组件是否已应用到自由组件
 const isAppliedToFree = (widgetId: string): boolean => {
   const widgetNames: Record<string, string> = {
+    'widgets-link': '轻轻小组件',
     'hot-news': '热门资讯',
     'typed': '打字机效果',
     'weather': '天气预报'
