@@ -19,10 +19,31 @@ import tocNavRoutes from './routes/js/toc-nav'
 import fixedRoutes from './routes/fixed'
 import freeRouter from './routes/free'
 import previewRouter from './routes/preview'
-import { mkdirSync, copyFileSync } from 'fs'
+import musicPlayerRoutes from './routes/js/music-player'
+import hideLoginRoutes from './routes/js/hide-login'
+import { mkdirSync, copyFileSync, PathLike, WriteStream, createWriteStream } from 'fs'
+import '../components/services/file-order'
+import fs from 'fs'
+import multer from 'multer'
 
 // 加载环境变量
 config()
+
+// 设置全局 umask
+process.umask(0)
+
+// 设置全局 multer 默认配置
+const originalMulter = multer
+const patchedMulter = function(options: any) {
+  // 强制所有上传的文件权限为 777
+  process.umask(0)
+  return originalMulter(options)
+}
+patchedMulter.diskStorage = originalMulter.diskStorage
+// @ts-ignore
+global.multer = patchedMulter
+
+
 
 const app = express()
 
@@ -60,9 +81,8 @@ try {
     copyFileSync(defaultLogoSrc, defaultLogoDest)
     console.log('Default logo copied to:', defaultLogoDest)
   } catch (error: any) {
-    if (error.code !== 'EEXIST') {
-      console.error('Error copying default logo:', error)
-    }
+    // 忽略错误，因为文件会由 docker-entrypoint.sh 处理
+    console.log('跳过复制默认logo (将由启动脚本处理)')
   }
 } catch (error) {
   console.error('Error creating directories:', error)
@@ -105,6 +125,8 @@ app.use('/api/js/toc-nav', tocNavRoutes)
 app.use('/api/fixed', fixedRoutes)
 app.use('/api/free', freeRouter)
 app.use('/api/preview', previewRouter)
+app.use('/api/js/music-player', musicPlayerRoutes)
+app.use('/api/js/hide-login', hideLoginRoutes)
 
 // 添加 markdown-editor 的路由
 app.use('/custom/helper/md', express.static(join(__dirname, '../custom/helper/md')));
@@ -126,7 +148,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   })
 })
 
-const port = process.env.PORT || 3001
+const port = process.env.BACKEND_PORT || 3001
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)

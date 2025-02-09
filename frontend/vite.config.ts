@@ -15,7 +15,11 @@ export default defineConfig(({ command }) => ({
     host: '0.0.0.0',
     proxy: command === 'serve' ? {
       '/api': {
-        target: 'http://localhost:3001',
+        target: `http://localhost:${process.env.BACKEND_PORT || '3001'}`,
+        changeOrigin: true
+      },
+      '/custom/helper': {
+        target: `http://localhost:${process.env.BACKEND_PORT || '3001'}`,
         changeOrigin: true
       }
     } : {}

@@ -5,8 +5,10 @@ services:
     build: .
     image: madrays/sun-panel-helper:latest
     container_name: sun-panel-helper
+    environment:
+      - BACKEND_PORT=3001  # 后端服务端口,可自定义修改避免冲突
     ports:
-      - "33002:80"
+      - "33002:80"        # 前端页面访问端口
     volumes:
-      - /path/to/sunpanel/conf/custom:/app/backend/custom
+      - /path/to/sunpanel/conf/custom:/app/backend/custom  # Sun-Panel的custom目录路径
     restart: unless-stopped

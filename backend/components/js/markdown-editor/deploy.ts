@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, dirname } from 'path';
+import { readFileSync } from 'fs';
 
 // 运行时已在backend目录下，使用join拼接路径
 const outputPath = join('custom', 'index.js');
@@ -8,13 +9,17 @@ const outputPath = join('custom', 'index.js');
 const startMark = '/* Sun-Panel-Helper JS Start: markdown-editor */';
 const endMark = '/* Sun-Panel-Helper JS End: markdown-editor */';
 
+// 读取组件顺序配置
+const orderConfig = JSON.parse(
+  readFileSync(join(__dirname, '../../config/order.json'), 'utf-8')
+);
+
 /**
  * 生成头部注释
  */
 function generateHeaderComment(): string {
   const now = new Date();
   return `/* Sun-Panel-Helper JS */
-/* 组件：Markdown编辑器 */
 /* 此文件由系统自动管理，请勿手动修改 */
 /* 警告：手动修改可能导致功能冲突或程序异常 */
 /* 上次更新：${now.toLocaleString('zh-CN')} */
@@ -76,10 +81,27 @@ export async function deploy(js: string): Promise<void> {
       content = updateHeaderTime(content.trim());
     }
 
-    // 5. 添加新的组件代码，确保只有两个换行符
-    content = content.trim() + '\n\n' + `${startMark}\n${js.trim()}\n${endMark}`;
+    // 获取插入位置
+    const order = orderConfig.js;
+    const currentIndex = order.indexOf('markdown-editor');
+    let insertIndex = content.length;  // 默认插入到末尾
 
-    // 6. 写入文件，确保文件末尾只有一个换行符
+    // 找到应该插入的位置
+    for (let i = currentIndex + 1; i < order.length; i++) {
+      const nextComponent = order[i];
+      const nextMark = `/* Sun-Panel-Helper JS Start: ${nextComponent} */`;
+      const nextIndex = content.indexOf(nextMark);
+      if (nextIndex !== -1) {
+        insertIndex = nextIndex;
+        break;
+      }
+    }
+
+    // 在正确的位置插入组件代码
+    const newCode = `${startMark}\n${js.trim()}\n${endMark}`;
+    content = content.slice(0, insertIndex) + newCode + '\n\n' + content.slice(insertIndex);
+
+    // 写入文件
     await writeFile(outputPath, content.trim() + '\n', 'utf-8');
     console.log(isAlreadyDeployed ? '更新部署成功' : '新部署成功');
   } catch (error) {

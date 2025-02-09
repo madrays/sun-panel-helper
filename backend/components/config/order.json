@@ -1,0 +1,24 @@
+{
+  "js": [
+    "fish-animation",
+    "search-quote",
+    "toc-nav",
+    "fixed-widgets",
+    "markdown-editor",
+    "maxkb-ai",
+    "free-widgets",
+    "music-player",
+    "hide-login"
+  ],
+  "css": [
+    "clock-style",
+    "global-font",
+    "fixed-widgets",
+    "xiantiao",
+    "mouse-cursor",
+    "custom-logo",
+    "card-hover",
+    "gradient-bg",
+    "layout-adjust"
+  ]
+} 

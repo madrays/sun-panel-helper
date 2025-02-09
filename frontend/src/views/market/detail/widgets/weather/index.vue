@@ -18,7 +18,9 @@
       <template #params>
         <WeatherParams 
           v-model="config" 
+          :widget="widget"
           @guide="showGuide"
+          @update:url="updateUrl"
         />
       </template>
 
@@ -116,6 +118,10 @@ const handleReset = () => {
 const dialogVisible = ref(false)
 const showGuide = () => {
   dialogVisible.value = true
+}
+
+const updateUrl = (newUrl: string) => {
+  widget.value.url = newUrl
 }
 </script>
 

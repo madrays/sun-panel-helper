@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
+import { readFileSync } from 'fs'
 
 // 运行时已在backend目录下，直接使用custom目录
 const outputPath = 'custom/index.css'
@@ -7,6 +8,11 @@ const outputPath = 'custom/index.css'
 // 组件标记
 const startMark = '/* Sun-Panel-Helper CSS Start: gradient-bg */'
 const endMark = '/* Sun-Panel-Helper CSS End: gradient-bg */'
+
+// 读取组件顺序配置
+const orderConfig = JSON.parse(
+  readFileSync(join(__dirname, '../../config/order.json'), 'utf-8')
+);
 
 /**
  * 生成头部注释
@@ -109,15 +115,45 @@ export async function deploy(css: string): Promise<void> {
       content = updateHeaderTime(content.trim())
     }
 
-    // 5. 添加新的组件代码，确保只有两个换行符
-    content = content.trim() + '\n\n' + `${startMark}\n${css.trim()}\n${endMark}`
+    // 获取插入位置
+    const order = orderConfig.css;
+    const currentIndex = order.indexOf('gradient-bg');
+    let insertIndex = content.length;  // 默认插入到末尾
 
-    // 6. 写入文件，确保文件末尾只有一个换行符
-    await writeFile(outputPath, content.trim() + '\n', 'utf-8')
-    console.log(isAlreadyDeployed ? '更新部署成功' : '新部署成功')
+    // 先找前面最后一个已部署的组件
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const prevComponent = order[i];
+      const prevMark = `/* Sun-Panel-Helper CSS End: ${prevComponent} */`;
+      const prevIndex = content.lastIndexOf(prevMark);
+      if (prevIndex !== -1) {
+        insertIndex = prevIndex + prevMark.length;
+        break;
+      }
+    }
+
+    // 如果前面没找到，就找后面第一个已部署的组件
+    if (insertIndex === content.length) {
+      for (let i = currentIndex + 1; i < order.length; i++) {
+        const nextComponent = order[i];
+        const nextMark = `/* Sun-Panel-Helper CSS Start: ${nextComponent} */`;
+        const nextIndex = content.indexOf(nextMark);
+        if (nextIndex !== -1) {
+          insertIndex = nextIndex;
+          break;
+        }
+      }
+    }
+
+    // 在正确的位置插入组件代码
+    const newCode = `${startMark}\n${css.trim()}\n${endMark}`;
+    content = content.slice(0, insertIndex) + (insertIndex === content.length ? '\n\n' : '') + newCode + (insertIndex === content.length ? '' : '\n\n') + content.slice(insertIndex);
+
+    // 写入文件
+    await writeFile(outputPath, content.trim() + '\n', 'utf-8');
+    console.log(isAlreadyDeployed ? '更新部署成功' : '新部署成功');
   } catch (error) {
-    console.error('部署CSS失败:', error)
-    throw error
+    console.error('部署CSS失败:', error);
+    throw error;
   }
 }
 

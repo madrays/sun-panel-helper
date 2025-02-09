@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
+import { readFileSync } from 'fs'
 
 // 部署路径
 const jsOutputPath = join('custom', 'index.js')
@@ -8,13 +9,17 @@ const jsOutputPath = join('custom', 'index.js')
 const jsStartMark = '/* Sun-Panel-Helper JS Start: free-widgets */'
 const jsEndMark = '/* Sun-Panel-Helper JS End: free-widgets */'
 
+// 读取组件顺序配置
+const orderConfig = JSON.parse(
+  readFileSync(join(__dirname, '../config/order.json'), 'utf-8')
+);
+
 /**
  * 生成JS头部注释
  */
 function generateJSHeaderComment(): string {
   const now = new Date()
   return `/* Sun-Panel-Helper JS */
-/* 组件：自由组件 */
 /* 此文件由系统自动管理，请勿手动修改 */
 /* 警告：手动修改可能导致功能冲突或程序异常 */
 /* 上次更新：${now.toLocaleString('zh-CN')} */
@@ -107,12 +112,42 @@ async function deployFile(content: string, outputPath: string, startMark: string
     fileContent = removeOldComponent(fileContent, startMark, endMark)
   }
 
-  // 4. 添加新的组件代码
-  fileContent = addNewComponent(fileContent, content, startMark, endMark)
+  // 获取插入位置
+  const order = orderConfig.js;
+  const currentIndex = order.indexOf('free-widgets');
+  let insertIndex = fileContent.length;  // 默认插入到末尾
 
-  // 5. 写入文件
-  await writeFile(outputPath, fileContent, 'utf-8')
-  console.log(isAlreadyDeployed ? '更新部署成功' : '新部署成功')
+  // 先找前面最后一个已部署的组件
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const prevComponent = order[i];
+    const prevMark = `/* Sun-Panel-Helper JS End: ${prevComponent} */`;
+    const prevIndex = fileContent.lastIndexOf(prevMark);
+    if (prevIndex !== -1) {
+      insertIndex = prevIndex + prevMark.length;
+      break;
+    }
+  }
+
+  // 如果前面没找到，就找后面第一个已部署的组件
+  if (insertIndex === fileContent.length) {
+    for (let i = currentIndex + 1; i < order.length; i++) {
+      const nextComponent = order[i];
+      const nextMark = `/* Sun-Panel-Helper JS Start: ${nextComponent} */`;
+      const nextIndex = fileContent.indexOf(nextMark);
+      if (nextIndex !== -1) {
+        insertIndex = nextIndex;
+        break;
+      }
+    }
+  }
+
+  // 在正确的位置插入组件代码
+  const newCode = `${startMark}\n${content.trim()}\n${endMark}`;
+  fileContent = fileContent.slice(0, insertIndex) + (insertIndex === fileContent.length ? '\n\n' : '') + newCode + (insertIndex === fileContent.length ? '' : '\n\n') + fileContent.slice(insertIndex);
+
+  // 写入文件
+  await writeFile(outputPath, fileContent.trim() + '\n', 'utf-8');
+  console.log(isAlreadyDeployed ? '更新部署成功' : '新部署成功');
 }
 
 /**

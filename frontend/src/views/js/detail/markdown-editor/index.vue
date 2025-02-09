@@ -105,11 +105,7 @@ async function handleDeploy() {
   try {
     deploying.value = true;
     const res = await fetch('/api/js/markdown-editor/deploy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params.value)
+      method: 'POST'
     });
     
     if (!res.ok) throw new Error('部署失败');

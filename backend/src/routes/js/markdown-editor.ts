@@ -37,30 +37,6 @@ function validateApiPrefix(prefix: string): boolean {
 }
 
 // 保存配置
-function saveConfig(params: MarkdownEditorParams): void {
-  try {
-    writeFileSync(CONFIG_PATH, JSON.stringify(params, null, 2));
-  } catch (error) {
-    console.error('保存配置失败:', error);
-    throw error;
-  }
-}
-
-// 获取配置
-router.get('/config', (req, res) => {
-  try {
-    const config = readConfig();
-    res.json(config);
-  } catch (error) {
-    console.error('读取配置失败:', error);
-    res.status(500).json({ 
-      users: [],
-      apiPrefix: '' // 添加默认值
-    });
-  }
-});
-
-// 保存配置
 router.post('/config', (req, res) => {
   try {
     const params = req.body as MarkdownEditorParams;
@@ -87,13 +63,31 @@ router.post('/config', (req, res) => {
       params.apiPrefix = 'http://localhost:3000';
     }
 
-    // 保存配置
-    saveConfig(params);
+    // 同步写入配置文件
+    writeFileSync(CONFIG_PATH, JSON.stringify(params, null, 2));
+    
+    // 等待文件系统同步
+    require('fs').fsyncSync(require('fs').openSync(CONFIG_PATH, 'r+'));
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : '保存配置失败'
+    });
+  }
+});
+
+// 获取配置
+router.get('/config', (req, res) => {
+  try {
+    const config = readConfig();
+    res.json(config);
+  } catch (error) {
+    console.error('读取配置失败:', error);
+    res.status(500).json({ 
+      users: [],
+      apiPrefix: '' // 添加默认值
     });
   }
 });
@@ -112,9 +106,10 @@ router.get('/deployed', async (_req, res) => {
 });
 
 // 部署
-router.post('/deploy', async (req, res) => {
+router.post('/deploy', async (_req, res) => {
   try {
-    const params = req.body as MarkdownEditorParams;
+    // 读取最新配置
+    const params = readConfig();
 
     // 验证参数
     const errors = validateParams(params);

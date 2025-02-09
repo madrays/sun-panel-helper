@@ -156,17 +156,24 @@ router.get('/layout', async (_req, res) => {
 // 更新布局配置
 router.post('/layout', async (req, res) => {
   try {
-    const { widgets } = req.body
+    const { widgets, customCode } = req.body
+    console.log('收到布局更新请求:', {
+      widgets,
+      customCode
+    })
     
     // 读取当前配置
     const content = await readFile(LAYOUT_PATH, 'utf-8')
-    const currentConfig = JSON.parse(content)
+    console.log('当前配置:', content)
     
     // 更新组件列表
+    const currentConfig = JSON.parse(content)
     currentConfig.widgets = widgets
+    currentConfig.customCode = customCode  // 确保保存页脚代码
     
     // 写入文件
     await writeFile(LAYOUT_PATH, JSON.stringify(currentConfig, null, 2))
+    console.log('更新后的配置:', JSON.stringify(currentConfig, null, 2))
     
     res.json({
       code: 0,

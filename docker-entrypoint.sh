@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# 设置全局 umask
+umask 000
+
+# 确保 nginx 用 root 用户运行
+echo "Configuring nginx to run as root..."
+sed -i 's/^user .*$/user root;/' /etc/nginx/nginx.conf
+echo "Nginx user configuration:"
+cat /etc/nginx/nginx.conf | grep "^user"
+
 echo "Starting services..."
 
 # 确保目录存在
@@ -29,31 +38,26 @@ touch /app/backend/custom/index.js
 echo "Setting permissions..."
 chmod -R 777 /app/backend/data
 chmod -R 777 /app/backend/custom
-chmod -R 777 /app/backend/custom/helper/freewidgets  # 特别确保这个目录有写权限
-chmod -R 777 /app/backend/custom/helper/md  # 特别确保 md 目录有写权限
 
-# 添加更多日志
-echo "Starting server with configuration:"
-echo "NODE_ENV: production"
-echo "Data directory: $(ls -la /app/backend/data)"
-echo "Custom directory structure:"
-ls -R /app/backend/custom
-
-# 复制资源文件到挂载的目录
+# 复制资源文件
 echo "Copying resource files..."
 cp /app/resources/maxkb/logo.gif /app/backend/custom/helper/maxkb/
 cp /app/resources/font/江湖风古体.ttf /app/backend/custom/helper/font/
 cp /app/resources/font/马赛克MC风.ttf /app/backend/custom/helper/font/
 cp /app/resources/font/猫啃圆珠体.ttf /app/backend/custom/helper/font/
 
-# 验证文件是否复制成功
-ls -l /app/backend/custom/helper/maxkb/
-ls -l /app/backend/custom/helper/font/
+# 再次确保所有权限
+chmod -R 777 /app/backend/custom
+chmod -R 777 /app/backend/data
 
 # 启动后端服务
 echo "Starting backend service..."
 cd /app/backend
-node src/app.js &
+
+
+
+# 确保 node 进程继承正确的 umask
+sh -c 'umask 000 && PORT=${BACKEND_PORT:-3001} node src/app.js' &
 BACKEND_PID=$!
 
 # 等待后端启动
@@ -66,16 +70,14 @@ if ! kill -0 $BACKEND_PID 2>/dev/null; then
     exit 1
 fi
 
-echo "Backend started successfully on port 3001"
+echo "Backend started successfully on port ${BACKEND_PORT:-3001}"
 
 # 检查 nginx 配置
 echo "Checking nginx configuration..."
+echo "Replacing backend port in nginx config..."
+sed -i "s/\${BACKEND_PORT}/${BACKEND_PORT:-3001}/g" /etc/nginx/conf.d/default.conf
 nginx -t
 
 # 启动 nginx
 echo "Starting nginx..."
-nginx -g 'daemon off;'
-
-# 启动服务
-nginx
-cd /app/backend && node dist/app.js 
+nginx -g 'daemon off;' -c /etc/nginx/nginx.conf 

@@ -26,8 +26,9 @@
 
       <!-- 天气预报组件 -->
       <WeatherCard
-        :is-applied="isAppliedToFixed('weather')"
-        @apply="() => handleWidgetClick('weather')"
+        :is-applied-to-fixed="isAppliedToFixed('weather')"
+        :is-applied-to-free="isAppliedToFree('weather')"
+        @click="() => handleWidgetClick('weather')"
       />
     </div>
   </div>

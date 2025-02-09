@@ -59,13 +59,13 @@ export function validateParams(params: MarkdownEditorParams): string[] {
 export function generateJS(params: MarkdownEditorParams): string {
   const template = readFileSync(join(__dirname, 'template.js'), 'utf-8');
   
-  // 保存配置
-  saveConfig(params);
+  // 读取最新配置，而不是使用传入的参数
+  const config = readConfig();
   
-  // 替换模板中的配置
+  // 使用最新配置替换模板
   return template
-    .replace('{USERS_CONFIG}', JSON.stringify(params.users))
-    .replace('{API_PREFIX}', params.apiPrefix || 'http://localhost:3000');
+    .replace('{USERS_CONFIG}', JSON.stringify(config.users))
+    .replace('{API_PREFIX}', config.apiPrefix || 'http://localhost:3000');
 }
 
 export { deploy, undeploy, isDeployed }; 

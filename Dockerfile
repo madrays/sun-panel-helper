@@ -36,8 +36,15 @@ RUN echo "=== 编译后的文件 ===" && \
 FROM nginx:alpine
 WORKDIR /app
 
+
+
 # 复制前端构建产物
 COPY --from=frontend-builder /app/frontend/dist/ /usr/share/nginx/html/
+
+# 设置前端静态文件权限，确保 nginx 用户可以访问
+RUN chmod -R 644 /usr/share/nginx/html/* \
+    && chmod 755 /usr/share/nginx/html \
+    && chmod 755 /usr/share/nginx/html/assets
 
 # 复制后端文件
 COPY --from=backend-builder /app/backend/dist/ ./backend/  
@@ -48,15 +55,16 @@ COPY --from=backend-builder /app/backend/package*.json ./backend/
 # 创建 custom 目录结构
 RUN mkdir -p /app/backend/custom/helper && \
     cd /app/backend/custom/helper && \
-    mkdir -p font && \
-    mkdir -p freewidgets && \
-    mkdir -p logo && \
-    mkdir -p maxkb && \
-    mkdir -p md && \
-    mkdir -p mouse && \
-    mkdir -p weather-widget && \
+    mkdir -p font freewidgets logo maxkb md mouse weather-widget && \
     touch /app/backend/custom/index.css && \
-    touch /app/backend/custom/index.js
+    touch /app/backend/custom/index.js && \
+    chmod -R 777 /app/backend/custom
+
+# 确保挂载点有正确权限
+RUN mkdir -p /app/backend/custom && \
+    chmod 777 /app/backend/custom && \
+    # 设置 umask 确保新文件有正确权限
+    echo "umask 000" >> /etc/profile
 
 # 创建临时资源目录
 RUN mkdir -p /app/resources/maxkb \

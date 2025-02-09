@@ -64,6 +64,28 @@ const routes: RouteRecordRaw[] = [
       parentTitle: 'JS 功能库',
       parentPath: '/dashboard/js'
     }
+  },
+  {
+    path: 'js/music-player',
+    name: 'JSMusicPlayer',
+    component: () => import('../../views/js/detail/music-player/index.vue'),
+    meta: {
+      title: '音乐播放器',
+      hideInMenu: true,
+      parentTitle: 'JS 功能库',
+      parentPath: '/dashboard/js'
+    }
+  },
+  {
+    path: 'js/hide-login',
+    name: 'JSHideLogin',
+    component: () => import('../../views/js/detail/hide-login/index.vue'),
+    meta: {
+      title: '隐藏登录按钮',
+      hideInMenu: true,
+      parentTitle: 'JS 功能库',
+      parentPath: '/dashboard/js'
+    }
   }
 ]
 

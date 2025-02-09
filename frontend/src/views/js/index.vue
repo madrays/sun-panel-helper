@@ -41,6 +41,16 @@
           :is-deployed="deployedComponents.includes(id)"
           @click="handleCardClick(id)"
         />
+        <MusicPlayerCard
+          v-if="id === 'music-player'"
+          :is-deployed="deployedComponents.includes(id)"
+          @click="handleCardClick(id)"
+        />
+        <HideLoginCard
+          v-if="id === 'hide-login'"
+          :is-deployed="deployedComponents.includes(id)"
+          @click="handleCardClick(id)"
+        />
       </div>
     </div>
   </div>
@@ -54,9 +64,19 @@ import SearchQuoteCard from './preview/SearchQuoteCard.vue'
 import FishAnimationCard from './preview/FishAnimationCard.vue'
 import MarkdownEditorCard from './preview/MarkdownEditorCard.vue'
 import TocNavCard from './preview/TocNavCard.vue'
+import MusicPlayerCard from './preview/MusicPlayerCard.vue'
+import HideLoginCard from './preview/HideLoginCard.vue'
 
 const router = useRouter()
-const cardOrder = ref(['maxkb-ai', 'search-quote', 'fish-animation', 'markdown-editor', 'toc-nav'])
+const cardOrder = ref([
+  'maxkb-ai', 
+  'search-quote', 
+  'fish-animation', 
+  'markdown-editor', 
+  'toc-nav', 
+  'music-player',
+  'hide-login'
+])
 const deployedComponents = ref<string[]>([])
 
 // 检查部署状态

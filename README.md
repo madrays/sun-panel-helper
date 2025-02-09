@@ -35,6 +35,24 @@
 
 > 💡 提示：你可以在 Helper Demo 中编辑样式，然后在演示站中查看效果，体验完整的美化流程！
 
+## 🎉 更新内容 (v2.0.1)
+
+### 🔧 功能优化
+- ⚡️ 支持自定义后端端口,避免端口冲突
+- 🌤️ 优化天气组件404问题
+- 🛠️ 优化JS组件加载顺序,解决组件冲突
+- 🌟 Markdown编辑器配置保存和部署功能优化
+- 📝 修复部分描述文案错误
+- 🔗 尝试支持arm64架构（因手头没有arm64架构的设备，故未测试，请自行测试）
+
+### ✨ 新增组件
+- 🎵 音乐播放器组件 (by: MYHK/与末)
+  - 支持自定义播放列表
+  - 界面美观,操作流畅
+- 🔒 公开模式隐藏登录按钮CSS组件 (by: 与末)
+  - 适用于公开访问场景
+  - 提升界面简洁度
+
 ## ✨ 功能特点
 
 - 🔗 中转服务
@@ -63,22 +81,80 @@
 
 ## 🚀 快速部署
 
-### 单独部署 Sun-Panel-Helper
+### 重要参数说明
+- 端口配置:
+  - Sun-Panel端口: `3002:3002`
+    - 3002为访问端口,可自定义修改
+    - 3002为容器内端口(勿改)
+  - Helper前端端口: `33002:80`
+    - 33002为访问端口,可自定义修改
+    - 注意避免与其他服务冲突
+    - 80为容器内端口(勿改)
+  - Helper后端端口: `BACKEND_PORT=3001`
+    - 默认3001,可通过环境变量修改
+    - 注意避免与其他服务冲突
+- 数据目录:
+  - 必须挂载Sun-Panel的custom目录
+  - 确保目录权限正确(读写权限)
 
-使用 Docker Compose 一键部署:
+### 1. 命令行部署
 
+#### Docker命令部署
+```bash
+docker run -d \
+  --name sun-panel-helper \
+  -p 33002:80 \
+  -e BACKEND_PORT=3001 \
+  -v /path/to/sunpanel/conf/custom:/app/backend/custom \
+  madrays/sun-panel-helper:latest
+```
+
+#### Docker Compose部署
+创建docker-compose.yml文件:
 ```yaml
 version: '3'
 services:
   sun-panel-helper:
     image: madrays/sun-panel-helper:latest
     container_name: sun-panel-helper
+    environment:
+      - BACKEND_PORT=3001  # 后端服务端口,可自定义修改避免冲突
     ports:
-      - "33002:80"
+      - "33002:80"        # 前端页面访问端口,可自定义修改避免冲突
     volumes:
-      - /path/to/sunpanel/conf/custom:/app/backend/custom  # 替换为你的 Sun-Panel custom 目录路径
+      - /path/to/sunpanel/conf/custom:/app/backend/custom
     restart: unless-stopped
 ```
+
+运行命令:
+```bash
+docker-compose up -d
+```
+
+### 2. 图形化界面部署
+
+#### Portainer部署
+1. 打开Portainer界面
+2. 进入"Containers" > "Add Container"
+3. 填写以下信息:
+   - Name: sun-panel-helper
+   - Image: madrays/sun-panel-helper:latest
+   - Port mapping: 33002:80
+   - Environment variables: 
+     - BACKEND_PORT=3001
+   - Volumes: 
+     - host: /path/to/sunpanel/conf/custom
+     - container: /app/backend/custom
+4. 点击"Deploy the container"完成部署
+
+#### 群晖Docker部署
+1. 打开Docker套件
+2. 下载镜像madrays/sun-panel-helper:latest
+3. 创建容器时配置:
+   - 端口设置: 33002:80
+   - 环境变量: BACKEND_PORT=3001
+   - 卷: 选择Sun-Panel的custom目录映射到/app/backend/custom
+4. 应用设置并启动容器
 
 ### Sun-Panel + Helper 一键部署（以飞牛OS为例）
 
@@ -101,10 +177,12 @@ services:
   sun-panel-helper:
     image: madrays/sun-panel-helper:latest
     container_name: sun-panel-helper
+    environment:
+      - BACKEND_PORT=3001  # 后端服务端口,可自定义修改避免冲突
     ports:
-      - "33002:80"
+      - "33002:80"        # 前端页面访问端口
     volumes:
-      - /vol1/@appshare/sunpanel/conf/custom:/app/backend/custom
+      - /vol1/@appshare/sunpanel/conf/custom:/app/backend/custom  # Sun-Panel的custom目录
     restart: always
 ```
 
@@ -112,6 +190,23 @@ services:
 ```bash
 docker-compose up -d
 ```
+
+注意事项：
+- 端口说明:
+  - Sun-Panel默认端口3002可修改
+  - Helper前端默认端口33002可修改
+  - Helper后端默认端口3001可通过环境变量修改
+  - 所有端口请避免冲突
+- 首次启动可能需要拉取镜像，请耐心等待
+- Helper的数据目录必须正确挂载到Sun-Panel的custom目录
+- 路径说明:
+  - 飞牛OS默认路径: `/vol1/@appshare/sunpanel/conf/custom`
+  - 其他环境请根据实际情况调整
+- 建议先启动Sun-Panel,确认运行正常后再部署Helper
+- 端口冲突解决方案:
+  - Sun-Panel端口: 修改compose中的3002:3002
+  - Helper前端端口: 修改compose中的33002:80
+  - Helper后端端口: 修改环境变量BACKEND_PORT
 
 ### 📝 初始登录信息
 
@@ -133,13 +228,25 @@ docker-compose up -d
   </details>
 </div>
 
-注意事项：
-- 确保端口 3002 和 33002 未被占用
+🔧注意事项：
+- 端口说明:
+  - Sun-Panel默认端口3002可修改
+  - Helper前端默认端口33002可修改
+  - Helper后端默认端口3001可通过环境变量修改
+  - 所有端口请避免冲突
 - 首次启动可能需要拉取镜像，请耐心等待
-- Helper 的数据目录必须挂载到 Sun-Panel 的 custom 目录
-- 路径根据实际环境调整，飞牛OS示例中使用 `/vol1/@appshare/sunpanel/conf/custom`
+- Helper的数据目录必须正确挂载到Sun-Panel的custom目录
+- 路径说明:
+  - 飞牛OS默认路径: `/vol1/@appshare/sunpanel/conf/custom`
+  - 其他环境请根据实际情况调整
+  - 如无custom目录,请自行创建
+- 建议先启动Sun-Panel,确认运行正常后再部署Helper
+- 端口冲突解决方案:
+  - Sun-Panel端口: 修改compose中的3002:3002
+  - Helper前端端口: 修改compose中的33002:80
+  - Helper后端端口: 修改环境变量BACKEND_PORT
 
-## 📸 效果展示
+## 🎨 效果展示
 
 <div align="center">
   <p><strong>🏠 主页面</strong></p>
@@ -157,7 +264,7 @@ docker-compose up -d
   <p><strong>📌 固定组件</strong></p>
   <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/E_0766b65ab947c.png" width="100%" alt="固定组件" />
 
-  <p><strong>�� 自由组件</strong></p>
+  <p><strong>🚀 自由组件</strong></p>
   <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/F_306d0091e3254.png" width="100%" alt="自由组件" />
 
   <p><strong>🔧 实时预览与部署</strong></p>
@@ -181,34 +288,30 @@ docker-compose up -d
   </details>
 
   <details open>
-    <summary style="font-weight: bold; color: #ff4d4f; margin: 15px 0; font-size: 16px;">2. 组件冲突</summary>
+    <summary style="font-weight: bold; color: #ff4d4f; margin: 15px 0; font-size: 16px;">2. 组件加载顺序</summary>
     <ul style="margin: 0; padding-left: 20px; color: #434343;">
-      <li>MaxKB 浮窗和小鱼页脚等 JS 组件之间存在冲突</li>
-      <li>临时解决方案：尝试调整组件的部署顺序</li>
+      <li>已通过固定加载顺序解决组件间冲突问题</li>
+      <li>如MaxKB浮窗和小鱼页脚等组件现可正常共存</li>
+      <li style="color: #389e0d; font-weight: bold;">状态：已修复 ✅</li>
     </ul>
   </details>
 
   <details open>
-    <summary style="font-weight: bold; color: #ff4d4f; margin: 15px 0; font-size: 16px;">3. Markdown 编辑器配置问题 🔧</summary>
+    <summary style="font-weight: bold; color: #ff4d4f; margin: 15px 0; font-size: 16px;">3. Markdown编辑器配置</summary>
     <ul style="margin: 0; padding-left: 20px; color: #434343;">
-      <li>输入 API 前缀和用户名密码后保存配置，可能无法立即部署</li>
-      <li>临时解决方案：
-        <ul>
-          <li>刷新页面（配置不会丢失）</li>
-          <li>或切换到其他页面后再进行部署</li>
-        </ul>
-      </li>
-      <li style="color: #389e0d; font-weight: bold;">状态：正在修复中</li>
+      <li>配置保存和部署功能已优化</li>
+      <li>现可正常保存并即时生效</li>
+      <li style="color: #389e0d; font-weight: bold;">状态：已修复 ✅</li>
     </ul>
   </details>
 
   <details open>
     <summary style="font-weight: bold; color: #ff4d4f; margin: 15px 0; font-size: 16px;">4. 天气组件安全性 🔧</summary>
     <ul style="margin: 0; padding-left: 20px; color: #434343;">
-      <li>当前存在 API 密钥泄露风险</li>
-      <li>临时采用硬编码方式处理</li>
+      <li>组件功能已修复并可正常使用</li>
+      <li>API密钥泄露风险仍然存在</li>
       <li>建议：请谨慎在公网环境使用</li>
-      <li style="color: #389e0d; font-weight: bold;">状态：正在优化中</li>
+      <li style="color: #ff4d4f; font-weight: bold;">状态：安全性优化中</li>
     </ul>
   </details>
 </div>

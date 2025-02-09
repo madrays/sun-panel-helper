@@ -9,7 +9,7 @@ const router = Router();
 // 获取模板文件
 router.get('/template.js', (_req, res) => {
   try {
-    const templatePath = join(__dirname, '../../../components/js/fish-animation/template.js');
+    const templatePath = join(process.cwd(), 'components/js/fish-animation/template.js');
     res.sendFile(templatePath);
   } catch (error) {
     res.status(500).json({ 

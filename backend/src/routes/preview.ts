@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from 'fs'
-import { resolve, dirname } from 'path'
+import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs'
+import { resolve, dirname, join } from 'path'
 
 const router = Router()
 
@@ -60,13 +60,92 @@ router.get('/weather-widget', (req, res) => {
 })
 
 router.post('/weather-widget', (req, res) => {
-  const { html } = req.body
-  
-  // 写入预览文件
-  const previewPath = resolve(__dirname, '../../custom/helper/weather-widget/weather-widget.html')
-  writeFileSync(previewPath, html)
-  
-  res.send('ok')
+  try {
+    const { html, filename } = req.body
+    const templatePath = resolve(__dirname, '../../components/weather-widget/template.html')
+    const weatherDir = resolve(__dirname, '../../custom/helper/weather-widget')
+    
+    // 删除旧的配置文件（保留模板）
+    const files = readdirSync(weatherDir)
+    files.forEach(file => {
+      if (file !== 'weather-widget.html' && file.startsWith('weather-')) {
+        unlinkSync(join(weatherDir, file))
+      }
+    })
+    
+    // 读取模板并替换配置
+    let template = readFileSync(templatePath, 'utf-8')
+    template = template.replace(
+      /const WEATHER_API = {[\s\S]*?};/,
+      html
+    )
+    
+    // 保存新文件
+    const previewPath = resolve(weatherDir, filename)
+    writeFileSync(previewPath, template)
+    
+    res.json({ 
+      success: true,
+      url: `/custom/helper/weather-widget/${filename}` 
+    })
+  } catch (error: unknown) {
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
+  }
+})
+
+// 获取最新的配置文件
+router.get('/weather-widget/latest', (req, res) => {
+  try {
+    const weatherDir = resolve(__dirname, '../../custom/helper/weather-widget')
+    const files = readdirSync(weatherDir)
+    
+    // 找到最新的配置文件
+    const latestFile = files
+      .filter(file => file.startsWith('weather-') && file !== 'weather-widget.html')
+      .sort()
+      .pop()
+    
+    // 如果有配置文件，返回内容
+    if (latestFile) {
+      const content = readFileSync(join(weatherDir, latestFile), 'utf-8')
+      res.send(content)
+    } else {
+      // 否则返回模板
+      const templatePath = resolve(__dirname, '../../custom/helper/weather-widget/weather-widget.html')
+      const content = readFileSync(templatePath, 'utf-8')
+      res.send(content)
+    }
+  } catch (error) {
+    res.status(500).send('读取配置失败')
+  }
+})
+
+// 更新预览文件
+router.post('/weather-widget/preview', (req, res) => {
+  try {
+    const { html } = req.body
+    const templatePath = resolve(__dirname, '../../components/weather-widget/template.html')
+    const previewPath = resolve(__dirname, '../../custom/helper/weather-widget/weather-widget.html')
+    
+    // 读取模板并替换配置
+    let template = readFileSync(templatePath, 'utf-8')
+    template = template.replace(
+      /const WEATHER_API = {[\s\S]*?};/,
+      html
+    )
+    
+    // 更新预览文件
+    writeFileSync(previewPath, template)
+    res.json({ success: true })
+  } catch (error) {
+    res.status(500).json({ 
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
+  }
 })
 
 export default router 
