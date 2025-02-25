@@ -163,7 +163,7 @@ docker-compose up -d</pre>
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { 
-  Setting,  // 改用设置图标
+  Setting,
   Upload,
   CircleCheckFilled,
   ArrowRight,
@@ -176,7 +176,7 @@ const props = defineProps({
   isCollapse: Boolean
 })
 
-const currentVersion = '2.0.2'
+const currentVersion = '2.0.3'
 const latestVersion = ref('')
 const hasNewVersion = ref(false)
 const updateDesc = ref('')
@@ -203,86 +203,116 @@ const checkVersion = async () => {
 // 检查最新版本
 const checkLatestVersion = async () => {
   try {
-    // 优先使用Gitee API
-    const res = await fetch('https://gitee.com/api/v5/repos/madrays/sun-panel-helper/tags')
-    const data = await res.json()
-    if (data && data.length > 0) {
-      // 找出最大版本号
-      const versions = data.map(tag => tag.name.replace('v', ''))
-      const maxVersion = versions.reduce((max, ver) => 
-        compareVersions(ver, max) > 0 ? ver : max
-      , '0.0.0')
-      
-      latestVersion.value = maxVersion
-      hasNewVersion.value = compareVersions(maxVersion, currentVersion) > 0
-      
-      // 获取对应tag的完整更新说明
-      if (hasNewVersion.value) {
-        const tag = data.find(t => t.name.replace('v', '') === maxVersion)
-        if (tag) {
-          try {
-            // 获取commit详情来获取完整message
-            const commitRes = await fetch(`https://gitee.com/api/v5/repos/madrays/sun-panel-helper/commits/${tag.commit.sha}`)
-            const commitData = await commitRes.json()
-            updateDesc.value = commitData.commit.message
-          } catch {
-            updateDesc.value = `feat: v${maxVersion}版本更新`
-          }
-        }
-      }
-      return
-    }
-  } catch {
-    // Gitee失败后尝试GitHub
+    console.log('开始检查最新版本...')
+    
+    // 尝试从Gitee获取提交信息
     try {
-      const res = await fetch('https://api.github.com/repos/madrays/sun-panel-helper/tags')
-      const data = await res.json()
-      if (data && data.length > 0) {
-        const versions = data.map(tag => tag.name.replace('v', ''))
-        const maxVersion = versions.reduce((max, ver) => 
-          compareVersions(ver, max) > 0 ? ver : max
-        , '0.0.0')
+      console.log('尝试从Gitee获取提交信息...')
+      const commitsRes = await fetch('https://gitee.com/api/v5/repos/madrays/sun-panel-helper/commits')
+      const commitsData = await commitsRes.json()
+      console.log('Gitee提交信息:', commitsData)
+      
+      if (commitsData && commitsData.length > 0) {
+        // 从最新提交消息中提取版本号
+        const latestCommit = commitsData[0]
+        const commitMessage = latestCommit.commit.message
+        console.log('最新提交消息:', commitMessage)
         
-        latestVersion.value = maxVersion
-        hasNewVersion.value = compareVersions(maxVersion, currentVersion) > 0
-        
-        // 获取对应tag的完整更新说明
-        if (hasNewVersion.value) {
-          const tag = data.find(t => t.name.replace('v', '') === maxVersion)
-          if (tag) {
-            try {
-              const commitRes = await fetch(tag.commit.url)
-              const commitData = await commitRes.json()
-              updateDesc.value = commitData.commit.message
-            } catch {
-              updateDesc.value = `feat: v${maxVersion}版本更新`
-            }
+        // 尝试从提交消息中提取版本号
+        const versionMatch = commitMessage.match(/v(\d+\.\d+\.\d+)/)
+        if (versionMatch && versionMatch[1]) {
+          const extractedVersion = versionMatch[1]
+          console.log('从提交消息中提取的版本号:', extractedVersion)
+          
+          latestVersion.value = extractedVersion
+          hasNewVersion.value = compareVersions(extractedVersion, currentVersion) > 0
+          
+          if (hasNewVersion.value) {
+            updateDesc.value = commitMessage.split('\n\n')[1] || '新版本已发布，建议更新。'
           }
+          
+          console.log('版本比较结果:', {
+            当前版本: currentVersion,
+            最新版本: latestVersion.value,
+            需要更新: hasNewVersion.value
+          })
+          
+          return
         }
       }
-    } catch (err) {
-      console.error('版本检查失败:', err)
+    } catch (giteeError) {
+      console.error('从Gitee获取提交信息失败:', giteeError)
     }
+    
+    // 如果Gitee API失败，尝试GitHub API
+    try {
+      console.log('尝试从GitHub获取版本信息...')
+      const githubRes = await fetch('https://api.github.com/repos/madrays/sun-panel-helper/releases/latest')
+      const githubData = await githubRes.json()
+      console.log('GitHub版本信息:', githubData)
+      
+      if (githubData && githubData.tag_name) {
+        const version = githubData.tag_name.replace('v', '')
+        console.log('从GitHub获取的版本号:', version)
+        
+        latestVersion.value = version
+        hasNewVersion.value = compareVersions(version, currentVersion) > 0
+        
+        if (hasNewVersion.value) {
+          updateDesc.value = githubData.body || '新版本已发布，建议更新。'
+        }
+        
+        console.log('版本比较结果:', {
+          当前版本: currentVersion,
+          最新版本: latestVersion.value,
+          需要更新: hasNewVersion.value
+        })
+        
+        return
+      }
+    } catch (githubError) {
+      console.error('从GitHub获取版本信息失败:', githubError)
+    }
+    
+    // 如果所有API都失败，使用硬编码的版本信息
+    console.log('所有API请求失败，使用硬编码的版本信息')
+    latestVersion.value = currentVersion
+    hasNewVersion.value = false
+    
+  } catch (error) {
+    console.error('版本检查失败:', error)
+    latestVersion.value = currentVersion
+    hasNewVersion.value = false
   }
 }
-
-// 定时检查更新
-onMounted(() => {
-  checkLatestVersion()
-  // 每小时检查一次更新
-  setInterval(checkLatestVersion, 3600000)
-})
 
 // 打开链接
 const openLink = (type: string) => {
-  const links = {
-    github: 'https://github.com/madrays/sun-panel-helper',
-    gitee: 'https://gitee.com/madrays/sun-panel-helper',
-    bilibili: 'https://space.bilibili.com/1966866878',
-    tutorial: 'https://www.bilibili.com/video/BV124PkeFEwM'
+  let url = ''
+  switch (type) {
+    case 'github':
+      url = 'https://github.com/madrays/sun-panel-helper'
+      break
+    case 'gitee':
+      url = 'https://gitee.com/madrays/sun-panel-helper'
+      break
+    case 'bilibili':
+      url = 'https://space.bilibili.com/1690817544'
+      break
+    case 'tutorial':
+      url = 'https://www.bilibili.com/video/BV1Uj421Z7Yx'
+      break
   }
-  window.open(links[type], '_blank')
+  
+  if (url) {
+    window.open(url, '_blank')
+  }
 }
+
+// 组件挂载时检查版本
+onMounted(() => {
+  // 不自动检查，等用户点击时再检查
+})
 </script>
 
 <style scoped lang="scss">

@@ -66,6 +66,28 @@
               @change="updatePreview"
             />
           </el-form-item>
+          <el-form-item label="游动速度">
+            <el-slider 
+              v-model="params.speedRate" 
+              :min="0.1"
+              :max="1.1"
+              :step="0.1"
+              @change="updatePreview"
+            />
+            <div class="param-tip">默认为0.9，可调整鱼群游动速度以适应不同分辨率</div>
+          </el-form-item>
+          <el-form-item label="层级(z-index)">
+            <el-input-number 
+              v-model="params.zIndex" 
+              :min="0"
+              :max="99999"
+              @change="updatePreview"
+              size="large"
+              controls-position="right"
+              style="width: 100%"
+            />
+            <div class="param-tip">控制鱼群在页面中的层级，值越大越靠前</div>
+          </el-form-item>
         </el-form>
 
         <el-divider>功能说明</el-divider>
@@ -116,13 +138,25 @@ const defaultParams = {
   fishCount: 3,
   heightRate: 0.5,
   fishColor: 'hsl(0, 0%, 95%)',
-  opacity: 0.37
+  opacity: 0.37,
+  speedRate: 0.9,
+  zIndex: 9999
 }
 
 const params = reactive({ ...defaultParams })
 
 // 预览渲染器
 let previewRenderer: any = null
+// 全局配置对象引用
+let previewConfig: any = null
+// 保存原始方法
+let originalMethods: any = {
+  fishInit: null,
+  fishControlStatus: null,
+  pointInterfere: null,
+  pointUpdateSelf: null,
+  pointUpdateNeighbors: null
+}
 
 // 加载脚本
 const loadScript = () => {
@@ -148,6 +182,31 @@ const initPreview = () => {
     return
   }
 
+  // 保存原始方法
+  if (window.SunPanelFish.FISH && window.SunPanelFish.FISH.prototype) {
+    originalMethods.fishInit = window.SunPanelFish.FISH.prototype.init;
+    originalMethods.fishControlStatus = window.SunPanelFish.FISH.prototype.controlStatus;
+  }
+  
+  if (window.SunPanelFish.SURFACE_POINT && window.SunPanelFish.SURFACE_POINT.prototype) {
+    originalMethods.pointInterfere = window.SunPanelFish.SURFACE_POINT.prototype.interfere;
+    originalMethods.pointUpdateSelf = window.SunPanelFish.SURFACE_POINT.prototype.updateSelf;
+    originalMethods.pointUpdateNeighbors = window.SunPanelFish.SURFACE_POINT.prototype.updateNeighbors;
+  }
+
+  // 创建一个新的配置对象，包含所有参数
+  previewConfig = {
+    fishCount: params.fishCount,
+    heightRate: params.heightRate,
+    fishColor: params.fishColor,
+    opacity: params.opacity,
+    speedRate: params.speedRate,
+    zIndex: params.zIndex
+  };
+  
+  // 直接替换模板中的方法，使其使用我们的配置对象
+  patchFishMethods();
+
   // 创建预览渲染器实例
   const renderer = Object.create(window.SunPanelFish.RENDERER)
   
@@ -172,6 +231,9 @@ const initPreview = () => {
     reverse: boolean
     render: () => void
     controlStatus: () => void
+    setup: () => void
+    reconstructMethods: () => void
+    bindEvent: () => void
   }
 
   Object.assign(renderer as Renderer, {
@@ -214,6 +276,9 @@ const initPreview = () => {
 
   // 设置初始透明度
   container.style.opacity = params.opacity.toString()
+  
+  // 设置初始z-index
+  container.style.zIndex = params.zIndex.toString()
 
   // 确保所有依赖都已加载
   if (window.SunPanelFish.SURFACE_POINT && window.SunPanelFish.FISH) {
@@ -224,6 +289,119 @@ const initPreview = () => {
     previewRenderer.render()
   }
 }
+
+// 修补鱼群方法，使其使用我们的配置对象
+const patchFishMethods = () => {
+  if (!window.SunPanelFish) return;
+  
+  // 修改FISH.prototype.init
+  if (window.SunPanelFish.FISH && window.SunPanelFish.FISH.prototype && originalMethods.fishInit) {
+    window.SunPanelFish.FISH.prototype.init = function() {
+      this.direction = Math.random() < 0.5;
+      this.x = this.direction ? (this.renderer.width + this.renderer.THRESHOLD) : -this.renderer.THRESHOLD;
+      this.previousY = this.y;
+      this.vx = this.getRandomValue(4, 10) * (this.direction ? -1 : 1) * previewConfig.speedRate;
+
+      if(this.renderer.reverse) {
+        this.y = this.getRandomValue(this.renderer.height * 1 / 10, this.renderer.height * 4 / 10);
+        this.vy = this.getRandomValue(2, 5) * previewConfig.speedRate;
+        this.ay = this.getRandomValue(0.05, 0.2) * previewConfig.speedRate;
+      } else {
+        this.y = this.getRandomValue(this.renderer.height * 6 / 10, this.renderer.height * 9 / 10);
+        this.vy = this.getRandomValue(-5, -2) * previewConfig.speedRate;
+        this.ay = this.getRandomValue(-0.2, -0.05) * previewConfig.speedRate;
+      }
+      this.isOut = false;
+      this.theta = 0;
+      this.phi = 0;
+    };
+  }
+  
+  // 修改FISH.prototype.controlStatus
+  if (window.SunPanelFish.FISH && window.SunPanelFish.FISH.prototype && originalMethods.fishControlStatus) {
+    window.SunPanelFish.FISH.prototype.controlStatus = function(context) {
+      this.previousY = this.y;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += this.ay;
+
+      if(this.renderer.reverse) {
+        if(this.y > this.renderer.height * this.renderer.INIT_HEIGHT_RATE) {
+          this.vy -= this.GRAVITY * previewConfig.speedRate;
+          this.isOut = true;
+        } else {
+          if(this.isOut) {
+            this.ay = this.getRandomValue(0.05, 0.2) * previewConfig.speedRate;
+          }
+          this.isOut = false;
+        }
+      } else {
+        if(this.y < this.renderer.height * this.renderer.INIT_HEIGHT_RATE) {
+          this.vy += this.GRAVITY * previewConfig.speedRate;
+          this.isOut = true;
+        } else {
+          if(this.isOut) {
+            this.ay = this.getRandomValue(-0.2, -0.05) * previewConfig.speedRate;
+          }
+          this.isOut = false;
+        }
+      }
+      if(!this.isOut) {
+        this.theta += (Math.PI / 20) * previewConfig.speedRate;
+        this.theta %= Math.PI * 2;
+        this.phi += (Math.PI / 30) * previewConfig.speedRate;
+        this.phi %= Math.PI * 2;
+      }
+      
+      // 这是关键部分 - 生成波纹效果
+      this.renderer.generateEpicenter(this.x + (this.direction ? -1 : 1) * this.renderer.THRESHOLD, this.y, this.y - this.previousY);
+      
+      // 这是关键部分 - 当鱼游出屏幕时重新初始化
+      if((this.vx > 0 && this.x > this.renderer.width + this.renderer.THRESHOLD) || 
+         (this.vx < 0 && this.x < -this.renderer.THRESHOLD)) {
+        this.init();
+      }
+    };
+  }
+  
+  // 修改SURFACE_POINT.prototype方法
+  if (window.SunPanelFish.SURFACE_POINT && window.SunPanelFish.SURFACE_POINT.prototype) {
+    if (originalMethods.pointInterfere) {
+      window.SunPanelFish.SURFACE_POINT.prototype.interfere = function(y, velocity) {
+        // 添加速度限制，防止水面波动过大
+        const limitedVelocity = Math.max(-10, Math.min(10, velocity));
+        const speedFactor = Math.min(2.0, previewConfig.speedRate); // 限制最大速度因子
+        
+        this.fy = this.renderer.height * this.ACCELARATION_RATE * 
+          ((this.renderer.height - this.height - y) >= 0 ? -1 : 1) * 
+          Math.abs(limitedVelocity) * speedFactor;
+      };
+    }
+    
+    if (originalMethods.pointUpdateSelf) {
+      window.SunPanelFish.SURFACE_POINT.prototype.updateSelf = function() {
+        const speedFactor = Math.min(2.0, previewConfig.speedRate); // 限制最大速度因子
+        
+        this.fy += this.SPRING_CONSTANT * (this.initHeight - this.height) * speedFactor;
+        this.fy *= this.SPRING_FRICTION;
+        this.height += this.fy;
+      };
+    }
+    
+    if (originalMethods.pointUpdateNeighbors) {
+      window.SunPanelFish.SURFACE_POINT.prototype.updateNeighbors = function() {
+        const speedFactor = Math.min(2.0, previewConfig.speedRate); // 限制最大速度因子
+        
+        if(this.previous) {
+          this.force.previous = this.WAVE_SPREAD * (this.height - this.previous.height) * speedFactor;
+        }
+        if(this.next) {
+          this.force.next = this.WAVE_SPREAD * (this.height - this.next.height) * speedFactor;
+        }
+      };
+    }
+  }
+};
 
 // 使用防抖优化更新预览
 const debounce = (fn: Function, delay: number) => {
@@ -244,16 +422,31 @@ const updatePreview = debounce(() => {
     // 对鱼群数量取整，因为不能有小数个鱼
     previewRenderer.FISH_COUNT = Math.round(params.fishCount)
     previewRenderer.INIT_HEIGHT_RATE = params.heightRate
-    // 不需要设置 fillStyle，因为在 render 方法中直接使用 params.fishColor
     
     const container = document.getElementById('preview-fish-container')
     if (container) {
       container.style.opacity = params.opacity.toString()
+      container.style.zIndex = params.zIndex.toString()
       previewRenderer.width = container.offsetWidth
       previewRenderer.height = container.offsetHeight
     }
     
-    previewRenderer.setup()
+    // 更新配置对象
+    if (previewConfig) {
+      previewConfig.fishCount = params.fishCount;
+      previewConfig.heightRate = params.heightRate;
+      previewConfig.fishColor = params.fishColor;
+      previewConfig.opacity = params.opacity;
+      previewConfig.speedRate = params.speedRate;
+      previewConfig.zIndex = params.zIndex;
+      
+      console.log('更新预览配置:', previewConfig);
+    }
+    
+    // 重新初始化预览渲染器
+    previewRenderer.points = [];
+    previewRenderer.fishes = [];
+    previewRenderer.setup();
   } catch (error) {
     console.error('更新预览失败:', error)
   }
@@ -341,6 +534,9 @@ declare global {
       SURFACE_POINT: any
       FISH: any
       init: () => void
+      updateConfig?: (config: any) => void
+      _getConfig?: () => any
+      config?: any
     }
   }
 }

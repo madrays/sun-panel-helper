@@ -41,7 +41,9 @@ router.post('/deploy', async (req: Request, res: Response) => {
             fishCount: ${params.fishCount},
             heightRate: ${params.heightRate},
             fishColor: '${params.fishColor}',
-            opacity: ${params.opacity}
+            opacity: ${params.opacity},
+            speedRate: ${params.speedRate},
+            zIndex: ${params.zIndex}
         }`
     );
     await fs.writeFile(deployPath, configuredTemplate);

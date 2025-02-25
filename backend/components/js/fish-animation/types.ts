@@ -3,4 +3,6 @@ export interface FishAnimationParams {
   heightRate: number;
   fishColor: string;
   opacity: number;
+  speedRate: number;
+  zIndex: number;
 } 

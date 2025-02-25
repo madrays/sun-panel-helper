@@ -5,7 +5,9 @@ window.SunPanelFish = (function() {
             fishCount: 3,
             heightRate: 0.5,
             fishColor: 'hsl(0, 0%, 95%)',
-            opacity: 0.37
+            opacity: 0.37,
+            speedRate: 0.2,
+            zIndex: 999
         };
 
     // 定义构造函数
@@ -38,21 +40,21 @@ window.SunPanelFish = (function() {
         },
 
         interfere: function(y, velocity) {
-            this.fy = this.renderer.height * this.ACCELARATION_RATE * ((this.renderer.height - this.height - y) >= 0 ? -1 : 1) * Math.abs(velocity);
+            this.fy = this.renderer.height * this.ACCELARATION_RATE * ((this.renderer.height - this.height - y) >= 0 ? -1 : 1) * Math.abs(velocity) * config.speedRate;
         },
 
         updateSelf: function() {
-            this.fy += this.SPRING_CONSTANT * (this.initHeight - this.height);
+            this.fy += this.SPRING_CONSTANT * (this.initHeight - this.height) * config.speedRate;
             this.fy *= this.SPRING_FRICTION;
             this.height += this.fy;
         },
 
         updateNeighbors: function() {
             if(this.previous) {
-                this.force.previous = this.WAVE_SPREAD * (this.height - this.previous.height);
+                this.force.previous = this.WAVE_SPREAD * (this.height - this.previous.height) * config.speedRate;
             }
             if(this.next) {
-                this.force.next = this.WAVE_SPREAD * (this.height - this.next.height);
+                this.force.next = this.WAVE_SPREAD * (this.height - this.next.height) * config.speedRate;
             }
         },
 
@@ -82,16 +84,16 @@ window.SunPanelFish = (function() {
             this.direction = Math.random() < 0.5;
             this.x = this.direction ? (this.renderer.width + this.renderer.THRESHOLD) : -this.renderer.THRESHOLD;
             this.previousY = this.y;
-            this.vx = this.getRandomValue(4, 10) * (this.direction ? -1 : 1);
+            this.vx = this.getRandomValue(4, 10) * (this.direction ? -1 : 1) * config.speedRate;
 
             if(this.renderer.reverse) {
                 this.y = this.getRandomValue(this.renderer.height * 1 / 10, this.renderer.height * 4 / 10);
-                this.vy = this.getRandomValue(2, 5);
-                this.ay = this.getRandomValue(0.05, 0.2);
+                this.vy = this.getRandomValue(2, 5) * config.speedRate;
+                this.ay = this.getRandomValue(0.05, 0.2) * config.speedRate;
             } else {
                 this.y = this.getRandomValue(this.renderer.height * 6 / 10, this.renderer.height * 9 / 10);
-                this.vy = this.getRandomValue(-5, -2);
-                this.ay = this.getRandomValue(-0.2, -0.05);
+                this.vy = this.getRandomValue(-5, -2) * config.speedRate;
+                this.ay = this.getRandomValue(-0.2, -0.05) * config.speedRate;
             }
             this.isOut = false;
             this.theta = 0;
@@ -115,29 +117,29 @@ window.SunPanelFish = (function() {
 
             if(this.renderer.reverse) {
                 if(this.y > this.renderer.height * this.renderer.INIT_HEIGHT_RATE) {
-                    this.vy -= this.GRAVITY;
+                    this.vy -= this.GRAVITY * config.speedRate;
                     this.isOut = true;
                 } else {
                     if(this.isOut) {
-                        this.ay = this.getRandomValue(0.05, 0.2);
+                        this.ay = this.getRandomValue(0.05, 0.2) * config.speedRate;
                     }
                     this.isOut = false;
                 }
             } else {
                 if(this.y < this.renderer.height * this.renderer.INIT_HEIGHT_RATE) {
-                    this.vy += this.GRAVITY;
+                    this.vy += this.GRAVITY * config.speedRate;
                     this.isOut = true;
                 } else {
                     if(this.isOut) {
-                        this.ay = this.getRandomValue(-0.2, -0.05);
+                        this.ay = this.getRandomValue(-0.2, -0.05) * config.speedRate;
                     }
                     this.isOut = false;
                 }
             }
             if(!this.isOut) {
-                this.theta += Math.PI / 20;
+                this.theta += (Math.PI / 20) * config.speedRate;
                 this.theta %= Math.PI * 2;
-                this.phi += Math.PI / 30;
+                this.phi += (Math.PI / 30) * config.speedRate;
                 this.phi %= Math.PI * 2;
             }
             this.renderer.generateEpicenter(this.x + (this.direction ? -1 : 1) * this.renderer.THRESHOLD, this.y, this.y - this.previousY);
@@ -225,7 +227,6 @@ window.SunPanelFish = (function() {
             this.jdugeToStopResize = this.jdugeToStopResize.bind(this);
             this.startEpicenter = this.startEpicenter.bind(this);
             this.moveEpicenter = this.moveEpicenter.bind(this);
-            this.reverseVertical = this.reverseVertical.bind(this);
             this.render = this.render.bind(this);
         },
 
@@ -239,7 +240,6 @@ window.SunPanelFish = (function() {
             this.fishCount = Math.ceil(this.FISH_COUNT * (this.width / 1000));
             this.$canvas.width = this.width;
             this.$canvas.height = this.height;
-            this.reverse = false;
             
             while(this.fishes.length < this.fishCount) {
                 this.fishes.push(new FISH(this));
@@ -303,7 +303,6 @@ window.SunPanelFish = (function() {
                 }, 100);
             });
 
-            this.$container.onclick = this.reverseVertical;
             this.$container.onmouseenter = this.startEpicenter;
             this.$container.addEventListener('mousemove', this.moveEpicenter);
         },
@@ -356,14 +355,6 @@ window.SunPanelFish = (function() {
             this.points[index].interfere(y, velocity);
         },
 
-        reverseVertical: function() {
-            this.reverse = !this.reverse;
-            
-            for(var i = 0, count = this.fishes.length; i < count; i++) {
-                this.fishes[i].reverseVertical();
-            }
-        },
-
         controlStatus: function() {
             for(var i = 0, count = this.points.length; i < count; i++) {
                 this.points[i].updateSelf();
@@ -391,12 +382,12 @@ window.SunPanelFish = (function() {
             this.context.save();
             this.context.globalCompositeOperation = 'xor';
             this.context.beginPath();
-            this.context.moveTo(0, this.reverse ? 0 : this.height);
+            this.context.moveTo(0, this.height);
 
             for(var i = 0, count = this.points.length; i < count; i++) {
                 this.points[i].render(this.context);
             }
-            this.context.lineTo(this.width, this.reverse ? 0 : this.height);
+            this.context.lineTo(this.width, this.height);
             this.context.closePath();
             this.context.fill();
             this.context.restore();
@@ -420,13 +411,47 @@ window.SunPanelFish = (function() {
                 width: "100vw",
                 height: "200px",
                 position: "fixed",
-                zIndex: "0",
+                zIndex: config.zIndex.toString(),
                 opacity: config.opacity.toString(),
                 bottom: "0",
                 left: "0",
                 right: "0",
-                overflow: "hidden"
+                overflow: "hidden",
+                pointerEvents: "all",     // 改为 all 确保捕获所有鼠标事件
+                touchAction: "none"       // 防止触摸事件被浏览器处理
             });
+            
+            // 确保父元素不会阻止鼠标事件
+            if (wallpaperDiv) {
+                wallpaperDiv.style.pointerEvents = "all";
+                // 遍历所有父元素，确保它们不会阻止事件
+                let parent = wallpaperDiv.parentElement;
+                while (parent && parent !== document.body) {
+                    parent.style.pointerEvents = "all";
+                    parent = parent.parentElement;
+                }
+            }
+            
+            // 添加事件监听器到 document，以确保即使有覆盖元素也能捕获事件
+            const handleMouseMove = (e) => {
+                const container = document.querySelector('.fishcontainer');
+                if (!container) return;
+                
+                const rect = container.getBoundingClientRect();
+                if (e.clientY >= rect.top && e.clientY <= rect.bottom &&
+                    e.clientX >= rect.left && e.clientX <= rect.right) {
+                    // 在容器范围内时触发事件
+                    if (RENDERER.moveEpicenter) {
+                        RENDERER.moveEpicenter(e);
+                    }
+                }
+            };
+
+            // 移除之前的事件监听器
+            document.removeEventListener('mousemove', handleMouseMove);
+
+            // 添加新的事件监听器
+            document.addEventListener('mousemove', handleMouseMove, { passive: true });
             
             wallpaperDiv.appendChild(newDiv);
             RENDERER.init();
@@ -468,6 +493,11 @@ window.SunPanelFish = (function() {
             const container = document.querySelector('.fishcontainer');
             if (container) {
                 container.style.opacity = config.opacity.toString();
+                container.style.zIndex = config.zIndex.toString();
+            }
+            // 重新初始化鱼群以应用新的速度
+            if (RENDERER.setup) {
+                RENDERER.setup();
             }
         }
     };
@@ -475,4 +505,4 @@ window.SunPanelFish = (function() {
 
 // 启动初始化
 window.SunPanelFish.init();
-// ====================== 鱼群动画系统 结束 ====================== 
+ // ====================== 鱼群动画系统 结束 ======================

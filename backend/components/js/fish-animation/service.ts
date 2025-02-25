@@ -14,7 +14,9 @@ window.SunPanelFish = (function() {
         fishCount: ${params.fishCount},
         heightRate: ${params.heightRate},
         fishColor: '${params.fishColor}',
-        opacity: ${params.opacity}
+        opacity: ${params.opacity},
+        speedRate: ${params.speedRate},
+        zIndex: ${params.zIndex}
     };
 
     // ... (其余代码从模板中读取)
@@ -99,6 +101,14 @@ export function validateParams(params: FishAnimationParams): string[] {
     
     if (typeof params.opacity !== 'number' || params.opacity < 0.1 || params.opacity > 1) {
         errors.push('透明度必须在0.1-1之间');
+    }
+    
+    if (typeof params.speedRate !== 'number' || params.speedRate < 0.1 || params.speedRate > 1.1) {
+        errors.push('游动速度必须在0.1-1.1之间');
+    }
+    
+    if (typeof params.zIndex !== 'number' || params.zIndex < 0 || params.zIndex > 99999) {
+        errors.push('层级(z-index)必须在0-99999之间');
     }
     
     return errors;
