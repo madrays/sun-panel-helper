@@ -15,6 +15,8 @@
   一款为 Sun-Panel 设计的可视化美化工具，让你的 Sun-Panel 锦上添花~
 </div>
 
+
+
 ## 🌟 在线体验
 
 我们提供了完整的演示环境，让你在部署前可以充分体验：
@@ -35,6 +37,42 @@
 
 > 💡 提示：你可以在 Helper Demo 中编辑样式，然后在演示站中查看效果，体验完整的美化流程！
 
+## 🎉 更新内容 (v2.0.4)
+
+### ✨ 重磅更新
+- 🚀 **全新TR/QB状态小组件终于来了**
+  - 支持qBittorrent和Transmission下载器状态监控
+  - 精美紧凑的UI设计
+  - 实时显示下载/上传速度、活动任务数等自定义参数
+  - 可添加为自由/固定组件，灵活布局
+  - 支持自定义刷新间隔，确保信息实时准确
+  
+### 🔧 重要功能修复
+- 📝 修复MD笔记本导致的浏览器密码错误填充搜索栏问题
+  - 解决浏览器自动填充功能与搜索栏冲突的问题
+  - 优化表单结构，避免误识别为密码输入框
+  - 提升整体用户体验
+- 🧩 修复自由组件布局删除功能的错乱问题
+  - 解决删除组件后布局错位的问题
+  - 优化组件删除交互逻辑
+  - 提高操作体验与直观性
+
+### 🔧 IPv6兼容性优化
+- ⚡️ 支持自定义前端监听端口，解决IPv6兼容性问题
+  - 通过环境变量`FRONTEND_PORT`灵活设置监听端口
+  - 支持Host网络模式部署，彻底解决IPv6连接问题
+  - 向后兼容保证现有用户无需修改配置
+- 🌈 优化组件IPv6兼容性提示
+  - 为TR/QB组件添加清晰的IPv6提示信息
+  - 引导用户正确配置IPv6环境下的下载器
+  - 美观直观的用户界面优化
+
+  ### 📝 其他说明
+- 🎯 项目已趋于稳定，后续将以优化和修复为主
+- 🌟 欢迎大佬们投稿优质组件
+- 💼 由于作者已开始上班，更新节奏会相对放缓
+- 📮 如有好的创意和建议，欢迎通过QQ群或邮箱联系,期待大佬们投稿
+
 ## 🎉 更新内容 (v2.0.3)
 
 ### 🔧 功能优化
@@ -50,12 +88,6 @@
 - 🛠️ 组件兼容性提升
   - 进一步优化组件间的协同工作
   - 减少样式冲突可能性
-
-### 📝 其他说明
-- 🎯 项目已趋于稳定，后续将以优化和修复为主
-- 🌟 欢迎大佬们投稿优质组件
-- 💼 由于作者已开始上班，更新节奏会相对放缓
-- 📮 如有好的创意和建议，欢迎通过QQ群或邮箱联系,期待大佬们投稿
 
 
 ## 🎉 更新内容 (v2.0.2)
@@ -122,10 +154,10 @@
   - Sun-Panel端口: `3002:3002`
     - 3002为访问端口,可自定义修改
     - 3002为容器内端口(勿改)
-  - Helper前端端口: `33002:80`
-    - 33002为访问端口,可自定义修改
-    - 注意避免与其他服务冲突
-    - 80为容器内端口(勿改)
+  - Helper前端端口: 
+    - 普通模式: `33002:80` (33002为访问端口,可自定义修改)
+    - 自定义内部端口: `FRONTEND_PORT=8080` (可选,默认80)
+    - Host模式: `FRONTEND_PORT=33002` (必须设置)
   - Helper后端端口: `BACKEND_PORT=3001`
     - 默认3001,可通过环境变量修改
     - 注意避免与其他服务冲突
@@ -137,17 +169,29 @@
 
 #### Docker命令部署
 ```bash
+# 标准模式
 docker run -d \
   --name sun-panel-helper \
   -p 33002:80 \
   -e BACKEND_PORT=3001 \
   -v /path/to/sunpanel/conf/custom:/app/backend/custom \
   madrays/sun-panel-helper:latest
+
+# Host网络模式 (解决IPv6问题)
+docker run -d \
+  --name sun-panel-helper \
+  --network host \
+  -e BACKEND_PORT=3001 \
+  -e FRONTEND_PORT=33002 \
+  -v /path/to/sunpanel/conf/custom:/app/backend/custom \
+  madrays/sun-panel-helper:latest
 ```
 
 #### Docker Compose部署
 创建docker-compose.yml文件:
+
 ```yaml
+# 标准模式
 version: '3'
 services:
   sun-panel-helper:
@@ -162,14 +206,51 @@ services:
     restart: unless-stopped
 ```
 
+```yaml
+# Host网络模式 (解决IPv6问题)
+version: '3'
+services:
+  sun-panel-helper:
+    image: madrays/sun-panel-helper:latest
+    container_name: sun-panel-helper
+    network_mode: host    # 使用Host网络模式
+    environment:
+      - BACKEND_PORT=3001     # 后端服务端口
+      - FRONTEND_PORT=33002   # 前端页面访问端口(Host模式必须设置)
+    volumes:
+      - /path/to/sunpanel/conf/custom:/app/backend/custom
+    restart: unless-stopped
+```
+
 运行命令:
 ```bash
 docker-compose up -d
 ```
 
+### IPv6兼容性说明
+
+如果您需要管理位于纯IPv6网络的TR/QB下载器，请使用Host网络模式部署Helper:
+
+1. **为什么需要Host模式?**
+   - Docker默认网络模式下容器无法直接访问IPv6网络
+   - Host模式让容器直接使用宿主机网络，支持IPv6连接
+   - 解决TR/QB组件无法连接IPv6下载器的问题
+
+2. **如何使用Host模式部署?**
+   - 设置`network_mode: host`
+   - 必须设置`FRONTEND_PORT`指定前端监听端口
+   - 确保指定的端口未被占用
+
+3. **注意事项**
+   - Host模式下端口映射(-p)参数无效
+   - 使用环境变量`FRONTEND_PORT`指定前端访问端口
+   - 多个容器端口不能冲突
+
 ### 2. 图形化界面部署
 
 #### Portainer部署
+
+##### 标准模式
 1. 打开Portainer界面
 2. 进入"Containers" > "Add Container"
 3. 填写以下信息:
@@ -183,7 +264,25 @@ docker-compose up -d
      - container: /app/backend/custom
 4. 点击"Deploy the container"完成部署
 
+##### Host网络模式 (解决IPv6问题)
+1. 打开Portainer界面
+2. 进入"Containers" > "Add Container"
+3. 填写以下信息:
+   - Name: sun-panel-helper
+   - Image: madrays/sun-panel-helper:latest
+   - Network: Host
+   - 不需要设置端口映射
+   - Environment variables: 
+     - BACKEND_PORT=3001
+     - FRONTEND_PORT=33002
+   - Volumes: 
+     - host: /path/to/sunpanel/conf/custom
+     - container: /app/backend/custom
+4. 点击"Deploy the container"完成部署
+
 #### 群晖Docker部署
+
+##### 标准模式
 1. 打开Docker套件
 2. 下载镜像madrays/sun-panel-helper:latest
 3. 创建容器时配置:
@@ -192,8 +291,20 @@ docker-compose up -d
    - 卷: 选择Sun-Panel的custom目录映射到/app/backend/custom
 4. 应用设置并启动容器
 
+##### Host网络模式 (解决IPv6问题)
+1. 打开Docker套件
+2. 下载镜像madrays/sun-panel-helper:latest
+3. 创建容器时配置:
+   - 高级设置 > 网络 > 使用与Docker Host相同的网络
+   - 环境变量: 
+     - BACKEND_PORT=3001
+     - FRONTEND_PORT=33002
+   - 卷: 选择Sun-Panel的custom目录映射到/app/backend/custom
+4. 应用设置并启动容器
+
 ### Sun-Panel + Helper 一键部署（以飞牛OS为例）
 
+#### 标准模式
 ```yaml
 version: "3.2"
 services:
@@ -222,6 +333,35 @@ services:
     restart: always
 ```
 
+#### Host网络模式 (解决IPv6问题)
+```yaml
+version: "3.2"
+services:
+  # Sun-Panel 服务
+  sun-panel:
+    image: "hslr/sun-panel:latest"
+    container_name: sun-panel
+    volumes:
+      - /vol1/@appshare/sunpanel/conf:/app/conf
+      - /var/run/docker.sock:/var/run/docker.sock # 挂载docker.sock
+      - /vol1:/os # 硬盘挂载点（根据自己需求修改）
+    ports:
+      - 3002:3002
+    restart: always
+
+  # Sun-Panel-Helper 服务 (Host网络模式)
+  sun-panel-helper:
+    image: madrays/sun-panel-helper:latest
+    container_name: sun-panel-helper
+    network_mode: host
+    environment:
+      - BACKEND_PORT=3001  # 后端服务端口
+      - FRONTEND_PORT=33002  # 前端页面访问端口
+    volumes:
+      - /vol1/@appshare/sunpanel/conf/custom:/app/backend/custom  # Sun-Panel的custom目录
+    restart: always
+```
+
 启动命令：
 ```bash
 docker-compose up -d
@@ -230,9 +370,15 @@ docker-compose up -d
 注意事项：
 - 端口说明:
   - Sun-Panel默认端口3002可修改
-  - Helper前端默认端口33002可修改
+  - Helper前端默认端口33002:
+    - 标准模式: 通过映射到容器内部80端口实现
+    - Host模式: 通过FRONTEND_PORT环境变量设置
   - Helper后端默认端口3001可通过环境变量修改
   - 所有端口请避免冲突
+- IPv6支持:
+  - 如需管理IPv6下载器，建议使用Host网络模式
+  - Host模式需要明确设置FRONTEND_PORT环境变量
+  - 使用Host模式后，不需要设置端口映射
 - 首次启动可能需要拉取镜像，请耐心等待
 - Helper的数据目录必须正确挂载到Sun-Panel的custom目录
 - 路径说明:
@@ -241,7 +387,7 @@ docker-compose up -d
 - 建议先启动Sun-Panel,确认运行正常后再部署Helper
 - 端口冲突解决方案:
   - Sun-Panel端口: 修改compose中的3002:3002
-  - Helper前端端口: 修改compose中的33002:80
+  - Helper前端端口: 修改compose中的33002:80或设置FRONTEND_PORT
   - Helper后端端口: 修改环境变量BACKEND_PORT
 
 ### 📝 初始登录信息
@@ -267,9 +413,15 @@ docker-compose up -d
 🔧注意事项：
 - 端口说明:
   - Sun-Panel默认端口3002可修改
-  - Helper前端默认端口33002可修改
+  - Helper前端默认端口33002:
+    - 标准模式: 通过映射到容器内部80端口实现
+    - Host模式: 通过FRONTEND_PORT环境变量设置
   - Helper后端默认端口3001可通过环境变量修改
   - 所有端口请避免冲突
+- IPv6支持:
+  - 如需管理IPv6下载器，建议使用Host网络模式
+  - Host模式需要明确设置FRONTEND_PORT环境变量
+  - 使用Host模式后，不需要设置端口映射
 - 首次启动可能需要拉取镜像，请耐心等待
 - Helper的数据目录必须正确挂载到Sun-Panel的custom目录
 - 路径说明:
@@ -279,7 +431,7 @@ docker-compose up -d
 - 建议先启动Sun-Panel,确认运行正常后再部署Helper
 - 端口冲突解决方案:
   - Sun-Panel端口: 修改compose中的3002:3002
-  - Helper前端端口: 修改compose中的33002:80
+  - Helper前端端口: 修改compose中的33002:80或设置FRONTEND_PORT
   - Helper后端端口: 修改环境变量BACKEND_PORT
 
 ## 🎨 效果展示
@@ -362,14 +514,14 @@ Sun Panel Helper 是一个专注于增强 Sun-Panel 功能的辅助工具。我�
 
 <div align="center">
   <div style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/1_dd096325eadb7.jpg" alt="微信赞赏码" width="200"/>
+    <img src="https://pic2.ziyuan.wang/user/madrays/2025/03/wechat-qr_3b12b18852890.jpg" alt="微信赞赏码" width="200"/>
     <p style="margin: 10px 0; font-size: 16px;">
       <span style="background: #07c160; color: white; padding: 4px 12px; border-radius: 4px;">微信赞赏</span>
     </p>
     <p style="color: #666; font-size: 14px;">感谢支持💗</p>
   </div>
   <div style="display: inline-block; text-align: center; margin: 0 20px;">
-    <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/2_0c5298607b84c.jpg" alt="支付宝赞赏码" width="200"/>
+    <img src="https://pic2.ziyuan.wang/user/madrays/2025/03/alipay-qr_053c36d2fe096.jpg" alt="支付宝赞赏码" width="200"/>
     <p style="margin: 10px 0; font-size: 16px;">
       <span style="background: #1677ff; color: white; padding: 4px 12px; border-radius: 4px;">支付宝赞赏</span>
     </p>

@@ -450,7 +450,8 @@ const removeFromPool = async (widget: any) => {
 }
 
 const removeFromLayout = async (widget: any) => {
-  const index = layoutWidgets.value.findIndex(item => item.id === widget.id)
+  // 使用indexOf直接通过对象引用查找，不依赖id属性
+  const index = layoutWidgets.value.indexOf(widget)
   if (index > -1) {
     layoutWidgets.value.splice(index, 1)
     

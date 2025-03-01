@@ -44,6 +44,28 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: 'market/qb-status',
+    name: 'MarketQBStatus',
+    component: () => import('../../views/market/detail/widgets/qb-status/index.vue'),
+    meta: {
+      title: 'QB下载器状态',
+      hideInMenu: true,
+      parentTitle: '组件市场',
+      parentPath: '/dashboard/market'
+    }
+  },
+  {
+    path: 'market/tr-status',
+    name: 'MarketTRStatus',
+    component: () => import('../../views/market/detail/widgets/tr-status/index.vue'),
+    meta: {
+      title: 'Transmission下载器状态',
+      hideInMenu: true,
+      parentTitle: '组件市场',
+      parentPath: '/dashboard/market'
+    }
+  },
+  {
     path: 'market/widgets-link',
     name: 'MarketWidgetsLink',
     component: () => import('../../views/market/detail/widgets/widgets-link/index.vue'),

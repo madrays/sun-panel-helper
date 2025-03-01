@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transmission下载器状态</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // 获取URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const configId = urlParams.get('id');
+    
+    console.log('TR状态页面加载，URL参数:', window.location.search);
+    console.log('解析到的配置ID:', configId);
+    
+    if (!configId) {
+      console.error('缺少配置ID参数');
+      document.body.innerHTML = '<div style="color: red; text-align: center; padding: 20px;">错误: 缺少配置ID参数</div>';
+    } else {
+      // 加载Vue组件
+      console.log('开始加载Vue组件...');
+      fetch('/widgets/tr-status.vue')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`加载组件失败: ${response.status} ${response.statusText}`);
+          }
+          return response.text();
+        })
+        .then(componentText => {
+          try {
+            console.log('Vue组件加载成功，开始解析...');
+            // 解析Vue单文件组件
+            const templateMatch = componentText.match(/<template>([\s\S]*?)<\/template>/);
+            const scriptMatch = componentText.match(/<script>([\s\S]*?)<\/script>/);
+            const styleMatch = componentText.match(/<style[^>]*>([\s\S]*?)<\/style>/);
+            
+            if (!templateMatch || !scriptMatch) {
+              throw new Error('无法解析Vue组件');
+            }
+            
+            const template = templateMatch[1].trim();
+            const scriptContent = scriptMatch[1].trim();
+            const style = styleMatch ? styleMatch[1].trim() : '';
+            
+            console.log('Vue组件解析成功');
+            
+            // 添加样式
+            if (style) {
+              const styleElement = document.createElement('style');
+              styleElement.textContent = style;
+              document.head.appendChild(styleElement);
+            }
+            
+            // 创建一个安全的方式来执行脚本内容
+            // 不使用eval，而是创建一个函数来返回组件选项
+            const getComponentOptions = new Function(`
+              let componentOptions;
+              ${scriptContent.replace('export default', 'componentOptions =')}
+              return componentOptions;
+            `);
+            
+            // 获取组件选项
+            const componentOptions = getComponentOptions();
+            
+            if (!componentOptions) {
+              throw new Error('无法获取组件选项');
+            }
+            
+            // 创建Vue应用
+            console.log('创建Vue应用，配置ID:', configId);
+            const app = Vue.createApp({
+              template,
+              ...componentOptions,
+              data() {
+                const originalData = typeof componentOptions.data === 'function' 
+                  ? componentOptions.data() 
+                  : {};
+                console.log('初始化Vue应用数据，配置ID:', configId);
+                return {
+                  ...originalData,
+                  configId
+                };
+              }
+            });
+            
+            console.log('挂载Vue应用...');
+            app.mount('#app');
+            console.log('Vue应用挂载完成');
+          } catch (error) {
+            console.error('解析Vue组件失败:', error);
+            document.body.innerHTML = `
+              <div style="color: red; text-align: center; padding: 20px;">
+                <h3>加载组件失败</h3>
+                <p>${error.message}</p>
+                <pre>${error.stack}</pre>
+              </div>
+            `;
+          }
+        })
+        .catch(error => {
+          console.error('加载组件失败:', error);
+          document.body.innerHTML = `
+            <div style="color: red; text-align: center; padding: 20px;">
+              <h3>加载组件失败</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        });
+    }
+  </script>
+</body>
+</html> 

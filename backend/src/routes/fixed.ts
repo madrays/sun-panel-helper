@@ -2,11 +2,26 @@ import { Router } from 'express'
 import { readFile, writeFile, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { deployFixedWidgets, undeploy, isDeployed } from '../../components/fixed-widgets/service'
+import fs from 'fs'
+
+// 定义配置对象的接口
+interface WidgetConfig {
+  name: string;
+  url: string;
+  [key: string]: any;
+}
+
+interface PoolConfig {
+  widgets: WidgetConfig[];
+  customCode?: string;
+}
 
 const router = Router()
 const CONFIG_DIR = join(__dirname, '../../data')
 const POOL_PATH = join(CONFIG_DIR, 'fixed-pool.json')
 const LAYOUT_PATH = join(CONFIG_DIR, 'fixed-layout.json')
+const TR_CONFIG_FILE = join(CONFIG_DIR, 'tr-configs.json')
+const QB_CONFIG_FILE = join(CONFIG_DIR, 'qb-configs.json')
 
 // 确保配置目录存在
 async function ensureConfigDir() {
@@ -51,13 +66,64 @@ router.get('/pool', async (_req, res) => {
   }
 })
 
+// 更新TR和QB配置中的isAppliedToFixed字段
+function updateConfigIsApplied(widgetName: string, isApplied: boolean) {
+  try {
+    // 更新TR配置
+    if (fs.existsSync(TR_CONFIG_FILE)) {
+      const trConfigsRaw = fs.readFileSync(TR_CONFIG_FILE, 'utf-8')
+      const trConfigs = JSON.parse(trConfigsRaw || '{}')
+      
+      let updated = false
+      // 遍历所有配置，如果名称包含在URL中，更新其isAppliedToFixed字段
+      Object.keys(trConfigs).forEach(configId => {
+        // TR组件的URL通常包含id参数
+        const widgetUrl = `tr-status.html?id=${configId}`
+        if (widgetName.includes(widgetUrl)) {
+          trConfigs[configId].isAppliedToFixed = isApplied
+          updated = true
+          console.log(`已更新TR配置 ${configId} 的isAppliedToFixed为 ${isApplied}`)
+        }
+      })
+      
+      if (updated) {
+        fs.writeFileSync(TR_CONFIG_FILE, JSON.stringify(trConfigs, null, 2))
+      }
+    }
+    
+    // 更新QB配置
+    if (fs.existsSync(QB_CONFIG_FILE)) {
+      const qbConfigsRaw = fs.readFileSync(QB_CONFIG_FILE, 'utf-8')
+      const qbConfigs = JSON.parse(qbConfigsRaw || '{}')
+      
+      let updated = false
+      // 遍历所有配置，如果名称包含在URL中，更新其isAppliedToFixed字段
+      Object.keys(qbConfigs).forEach(configId => {
+        // QB组件的URL通常包含id参数
+        const widgetUrl = `qb-status/widget?id=${configId}`
+        if (widgetName.includes(widgetUrl)) {
+          qbConfigs[configId].isAppliedToFixed = isApplied
+          updated = true
+          console.log(`已更新QB配置 ${configId} 的isAppliedToFixed为 ${isApplied}`)
+        }
+      })
+      
+      if (updated) {
+        fs.writeFileSync(QB_CONFIG_FILE, JSON.stringify(qbConfigs, null, 2))
+      }
+    }
+  } catch (error) {
+    console.error('更新配置时出错:', error)
+  }
+}
+
 // 保存组件池配置
 router.post('/pool', async (req, res) => {
   try {
     await ensureConfigDir()
     
     // 读取现有配置
-    let currentConfig
+    let currentConfig: PoolConfig
     try {
       const content = await readFile(POOL_PATH, 'utf-8')
       currentConfig = JSON.parse(content)
@@ -78,15 +144,33 @@ router.post('/pool', async (req, res) => {
       }
       
       currentConfig.widgets.push(req.body.widget)
+      // 更新配置文件中的isAppliedToFixed为true
+      updateConfigIsApplied(req.body.widget.url, true)
     } 
     // 如果是更新组件
     else if (req.body.action === 'update' && req.body.name && req.body.widget) {
+      // 找到要更新的组件
+      const oldWidget = currentConfig.widgets.find((w: any) => w.name === req.body.name)
+      if (oldWidget && oldWidget.url !== req.body.widget.url) {
+        // 如果URL发生变化，更新旧URL对应的配置为false
+        updateConfigIsApplied(oldWidget.url, false)
+        // 更新新URL对应的配置为true
+        updateConfigIsApplied(req.body.widget.url, true)
+      }
+      
       currentConfig.widgets = currentConfig.widgets.map((w: any) => 
         w.name === req.body.name ? req.body.widget : w
       )
     }
     // 如果是移除组件
     else if (req.body.action === 'remove' && req.body.name) {
+      // 找到要删除的组件
+      const widgetToRemove = currentConfig.widgets.find((w: any) => w.name === req.body.name)
+      if (widgetToRemove) {
+        // 更新配置文件中的isAppliedToFixed为false
+        updateConfigIsApplied(widgetToRemove.url, false)
+      }
+      
       currentConfig.widgets = currentConfig.widgets.filter((w: any) => w.name !== req.body.name)
     }
     // 如果是完整更新
@@ -102,6 +186,26 @@ router.post('/pool', async (req, res) => {
           })
         }
         names.add(widget.name)
+      }
+      
+      // 找到被删除的组件
+      const removedWidgets = currentConfig.widgets.filter(
+        (w: any) => !req.body.widgets.some((nw: any) => nw.name === w.name)
+      )
+      
+      // 更新所有被删除组件的配置
+      for (const widget of removedWidgets) {
+        updateConfigIsApplied(widget.url, false)
+      }
+      
+      // 找到新添加的组件
+      const addedWidgets = req.body.widgets.filter(
+        (w: any) => !currentConfig.widgets.some((cw: any) => cw.name === w.name)
+      )
+      
+      // 更新所有新添加组件的配置
+      for (const widget of addedWidgets) {
+        updateConfigIsApplied(widget.url, true)
       }
       
       currentConfig.widgets = req.body.widgets
@@ -167,7 +271,7 @@ router.post('/layout', async (req, res) => {
     console.log('当前配置:', content)
     
     // 更新组件列表
-    const currentConfig = JSON.parse(content)
+    const currentConfig: PoolConfig = JSON.parse(content)
     currentConfig.widgets = widgets
     currentConfig.customCode = customCode  // 确保保存页脚代码
     

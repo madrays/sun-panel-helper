@@ -32,6 +32,20 @@
         @click="() => handleWidgetClick('weather')"
       />
 
+      <!-- QB下载器状态组件 -->
+      <QBStatusCard
+        :is-applied-to-fixed="isAppliedToFixed('qb-status')"
+        :is-applied-to-free="isAppliedToFree('qb-status')"
+        @click="() => handleWidgetClick('qb-status')"
+      />
+
+      <!-- TR下载器状态组件 -->
+      <TRStatusCard
+        :is-applied-to-fixed="isAppliedToFixed('tr-status')"
+        :is-applied-to-free="isAppliedToFree('tr-status')"
+        @click="() => handleWidgetClick('tr-status')"
+      />
+
       <!-- 轻轻小组件 -->
       <WidgetsLinkCard
         :is-applied-to-fixed="isAppliedToFixed('widgets-link')"
@@ -51,6 +65,8 @@ import request from '@/utils/request'
 import HotNewsCard from './preview/widgets/HotNewsCard.vue'
 import TypedCard from './preview/widgets/TypedCard.vue'
 import WeatherCard from './preview/widgets/WeatherCard.vue'
+import QBStatusCard from './preview/widgets/QBStatusCard.vue'
+import TRStatusCard from './preview/widgets/TRStatusCard.vue'
 import WidgetsLinkCard from './preview/widgets/WidgetsLinkCard.vue'
 
 const router = useRouter()
@@ -98,11 +114,18 @@ const loadFreeWidgets = async () => {
 
 // 检查组件是否已应用到固定组件
 const isAppliedToFixed = (widgetId: string): boolean => {
+  // QB下载器状态组件和TR下载器状态组件特殊处理，不进行检测
+  if (widgetId === 'qb-status' || widgetId === 'tr-status') {
+    return false
+  }
+  
   const widgetNames: Record<string, string> = {
     'widgets-link': '轻轻小组件',
     'hot-news': '热门资讯',
     'typed': '打字机效果',
-    'weather': '天气预报'
+    'weather': '天气预报',
+    'qb-status': 'QB下载器状态',
+    'tr-status': 'Transmission下载器状态'
   }
   const isApplied = fixedWidgets.value.includes(widgetNames[widgetId])
   console.log(`检查组件 ${widgetId} (${widgetNames[widgetId]}) 是否已应用:`, isApplied)
@@ -111,11 +134,18 @@ const isAppliedToFixed = (widgetId: string): boolean => {
 
 // 检查组件是否已应用到自由组件
 const isAppliedToFree = (widgetId: string): boolean => {
+  // QB下载器状态组件和TR下载器状态组件特殊处理，不进行检测
+  if (widgetId === 'qb-status' || widgetId === 'tr-status') {
+    return false
+  }
+  
   const widgetNames: Record<string, string> = {
     'widgets-link': '轻轻小组件',
     'hot-news': '热门资讯',
     'typed': '打字机效果',
-    'weather': '天气预报'
+    'weather': '天气预报',
+    'qb-status': 'QB下载器状态',
+    'tr-status': 'Transmission下载器状态'
   }
   const isApplied = freeWidgets.value.includes(widgetNames[widgetId])
   console.log(`检查组件 ${widgetId} (${widgetNames[widgetId]}) 是否已应用到自由组件:`, isApplied)

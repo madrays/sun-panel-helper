@@ -54,8 +54,6 @@ chmod -R 777 /app/backend/data
 echo "Starting backend service..."
 cd /app/backend
 
-
-
 # 确保 node 进程继承正确的 umask
 sh -c 'umask 000 && PORT=${BACKEND_PORT:-3001} node src/app.js' &
 BACKEND_PID=$!
@@ -74,10 +72,24 @@ echo "Backend started successfully on port ${BACKEND_PORT:-3001}"
 
 # 检查 nginx 配置
 echo "Checking nginx configuration..."
-echo "Replacing backend port in nginx config..."
-sed -i "s/\${BACKEND_PORT}/${BACKEND_PORT:-3001}/g" /etc/nginx/conf.d/default.conf
+# 设置环境变量默认值
+export BACKEND_PORT=${BACKEND_PORT:-3001}
+export FRONTEND_PORT=${FRONTEND_PORT:-80}
+
+# 替换nginx配置中的变量
+echo "Replacing environment variables in nginx config..."
+echo "- Backend port: ${BACKEND_PORT}"
+echo "- Frontend port: ${FRONTEND_PORT}"
+
+# 修改listen指令的端口
+sed -i "s/listen 80;/listen ${FRONTEND_PORT};/g" /etc/nginx/conf.d/default.conf
+
+# 替换后端端口变量
+sed -i "s/\${BACKEND_PORT}/${BACKEND_PORT}/g" /etc/nginx/conf.d/default.conf
+
+# 检查nginx配置是否有效
 nginx -t
 
 # 启动 nginx
-echo "Starting nginx..."
+echo "Starting nginx on port ${FRONTEND_PORT}..."
 nginx -g 'daemon off;' -c /etc/nginx/nginx.conf 

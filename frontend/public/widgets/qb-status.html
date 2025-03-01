@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QB下载器状态</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // 获取URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const configId = urlParams.get('id');
+    
+    if (!configId) {
+      document.body.innerHTML = '<div style="color: red; text-align: center; padding: 20px;">错误: 缺少配置ID参数</div>';
+    } else {
+      // 加载Vue组件
+      fetch('/widgets/qb-status.vue')
+        .then(response => response.text())
+        .then(componentText => {
+          try {
+            // 解析Vue单文件组件
+            const templateMatch = componentText.match(/<template>([\s\S]*?)<\/template>/);
+            const scriptMatch = componentText.match(/<script>([\s\S]*?)<\/script>/);
+            const styleMatch = componentText.match(/<style[^>]*>([\s\S]*?)<\/style>/);
+            
+            if (!templateMatch || !scriptMatch) {
+              throw new Error('无法解析Vue组件');
+            }
+            
+            const template = templateMatch[1].trim();
+            const scriptContent = scriptMatch[1].trim();
+            const style = styleMatch ? styleMatch[1].trim() : '';
+            
+            // 添加样式
+            if (style) {
+              const styleElement = document.createElement('style');
+              styleElement.textContent = style;
+              document.head.appendChild(styleElement);
+            }
+            
+            // 创建一个安全的方式来执行脚本内容
+            // 不使用eval，而是创建一个函数来返回组件选项
+            const getComponentOptions = new Function(`
+              let componentOptions;
+              ${scriptContent.replace('export default', 'componentOptions =')}
+              return componentOptions;
+            `);
+            
+            // 获取组件选项
+            const componentOptions = getComponentOptions();
+            
+            if (!componentOptions) {
+              throw new Error('无法获取组件选项');
+            }
+            
+            // 创建Vue应用
+            const app = Vue.createApp({
+              template,
+              ...componentOptions,
+              data() {
+                const originalData = typeof componentOptions.data === 'function' 
+                  ? componentOptions.data() 
+                  : {};
+                return {
+                  ...originalData,
+                  configId
+                };
+              }
+            });
+            
+            app.mount('#app');
+          } catch (error) {
+            console.error('解析Vue组件失败:', error);
+            document.body.innerHTML = `
+              <div style="color: red; text-align: center; padding: 20px;">
+                <h3>加载组件失败</h3>
+                <p>${error.message}</p>
+                <pre>${error.stack}</pre>
+              </div>
+            `;
+          }
+        })
+        .catch(error => {
+          console.error('加载组件失败:', error);
+          document.body.innerHTML = `
+            <div style="color: red; text-align: center; padding: 20px;">
+              <h3>加载组件失败</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        });
+    }
+  </script>
+</body>
+</html> 

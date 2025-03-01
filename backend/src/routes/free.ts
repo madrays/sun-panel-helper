@@ -12,11 +12,14 @@ import {
   getLayout,
   updateLayout
 } from '../../components/free-widgets/service'
+import fs from 'fs'
 
 const router = Router()
 const CONFIG_DIR = join(__dirname, '../../data')
 const SETTINGS_DIR = join(__dirname, '../../custom/helper/freewidgets/setting')
 const POOL_PATH = join(CONFIG_DIR, 'free-pool.json')
+const TR_CONFIG_FILE = join(CONFIG_DIR, 'tr-configs.json')
+const QB_CONFIG_FILE = join(CONFIG_DIR, 'qb-configs.json')
 
 // 确保配置目录存在
 async function ensureConfigDir() {
@@ -36,6 +39,57 @@ async function ensureConfigDir() {
     }
   } catch (error) {
     console.error('创建配置目录失败:', error)
+  }
+}
+
+// 更新TR和QB配置中的isAppliedToFree字段
+function updateConfigIsApplied(widgetUrl: string, isApplied: boolean) {
+  try {
+    // 更新TR配置
+    if (fs.existsSync(TR_CONFIG_FILE)) {
+      const trConfigsRaw = fs.readFileSync(TR_CONFIG_FILE, 'utf-8')
+      const trConfigs = JSON.parse(trConfigsRaw || '{}')
+      
+      let updated = false
+      // 遍历所有配置，如果URL包含配置ID，更新其isAppliedToFree字段
+      Object.keys(trConfigs).forEach(configId => {
+        // TR组件的URL通常包含id参数
+        const idPattern = `tr-status.html?id=${configId}`
+        if (widgetUrl.includes(idPattern)) {
+          trConfigs[configId].isAppliedToFree = isApplied
+          updated = true
+          console.log(`已更新TR配置 ${configId} 的isAppliedToFree为 ${isApplied}`)
+        }
+      })
+      
+      if (updated) {
+        fs.writeFileSync(TR_CONFIG_FILE, JSON.stringify(trConfigs, null, 2))
+      }
+    }
+    
+    // 更新QB配置
+    if (fs.existsSync(QB_CONFIG_FILE)) {
+      const qbConfigsRaw = fs.readFileSync(QB_CONFIG_FILE, 'utf-8')
+      const qbConfigs = JSON.parse(qbConfigsRaw || '{}')
+      
+      let updated = false
+      // 遍历所有配置，如果URL包含配置ID，更新其isAppliedToFree字段
+      Object.keys(qbConfigs).forEach(configId => {
+        // QB组件的URL通常包含id参数
+        const idPattern = `qb-status/widget?id=${configId}`
+        if (widgetUrl.includes(idPattern)) {
+          qbConfigs[configId].isAppliedToFree = isApplied
+          updated = true
+          console.log(`已更新QB配置 ${configId} 的isAppliedToFree为 ${isApplied}`)
+        }
+      })
+      
+      if (updated) {
+        fs.writeFileSync(QB_CONFIG_FILE, JSON.stringify(qbConfigs, null, 2))
+      }
+    }
+  } catch (error) {
+    console.error('更新配置时出错:', error)
   }
 }
 
@@ -92,6 +146,8 @@ router.post('/pool', async (req, res) => {
       }
       
       currentConfig.widgets.push(req.body.widget)
+      // 更新配置文件中的isAppliedToFree为true
+      updateConfigIsApplied(req.body.widget.url, true)
       console.log('添加后的配置:', currentConfig)
     } else if (req.body.id && req.body.name && req.body.url) {
       // 直接添加组件
@@ -101,17 +157,46 @@ router.post('/pool', async (req, res) => {
         url: req.body.url,
         source: req.body.source || 'custom'
       }
+      // 检查是否已存在相同名称的组件
+      const exists = currentConfig.widgets.some((w: any) => w.name === widget.name)
+      if (exists) {
+        console.log('组件名称已存在:', widget.name)
+        return res.json({
+          code: 1,
+          message: '组件名称已存在，请使用其他名称',
+          data: null
+        })
+      }
+      
       currentConfig.widgets.push(widget)
+      // 更新配置文件中的isAppliedToFree为true
+      updateConfigIsApplied(widget.url, true)
       console.log('直接添加组件后的配置:', currentConfig)
     } 
     // 如果是更新组件
     else if (req.body.action === 'update' && req.body.name && req.body.widget) {
+      // 找到要更新的组件
+      const oldWidget = currentConfig.widgets.find((w: any) => w.name === req.body.name)
+      if (oldWidget && oldWidget.url !== req.body.widget.url) {
+        // 如果URL发生变化，更新旧URL对应的配置为false
+        updateConfigIsApplied(oldWidget.url, false)
+        // 更新新URL对应的配置为true
+        updateConfigIsApplied(req.body.widget.url, true)
+      }
+      
       currentConfig.widgets = currentConfig.widgets.map((w: any) => 
         w.name === req.body.name ? req.body.widget : w
       )
     }
     // 如果是移除组件
     else if (req.body.action === 'remove' && req.body.name) {
+      // 找到要删除的组件
+      const widgetToRemove = currentConfig.widgets.find((w: any) => w.name === req.body.name)
+      if (widgetToRemove) {
+        // 更新配置文件中的isAppliedToFree为false
+        updateConfigIsApplied(widgetToRemove.url, false)
+      }
+      
       currentConfig.widgets = currentConfig.widgets.filter((w: any) => w.name !== req.body.name)
     }
     
@@ -141,7 +226,25 @@ router.post('/pool', async (req, res) => {
 router.delete('/pool/:id', (req, res) => {
   try {
     const id = parseInt(req.params.id)
-    removeFromPool(id)
+    
+    // 获取当前组件池配置
+    const poolContent = fs.readFileSync(POOL_PATH, 'utf-8')
+    const poolConfig = JSON.parse(poolContent)
+    
+    // 找到要删除的组件
+    const widgetToRemove = poolConfig.widgets.find((w: any) => w.id === id || w.id === id.toString())
+    
+    if (widgetToRemove) {
+      // 更新配置文件中的isAppliedToFree为false
+      updateConfigIsApplied(widgetToRemove.url, false)
+      
+      // 从池中移除组件
+      poolConfig.widgets = poolConfig.widgets.filter((w: any) => w.id !== id && w.id !== id.toString())
+      
+      // 保存更新后的池配置
+      fs.writeFileSync(POOL_PATH, JSON.stringify(poolConfig, null, 2))
+    }
+    
     res.json({
       code: 0,
       message: 'success'

@@ -21,6 +21,7 @@ import freeRouter from './routes/free'
 import previewRouter from './routes/preview'
 import musicPlayerRoutes from './routes/js/music-player'
 import hideLoginRoutes from './routes/js/hide-login'
+import widgetsRouter from './routes/widgets'
 import { mkdirSync, copyFileSync, PathLike, WriteStream, createWriteStream } from 'fs'
 import '../components/services/file-order'
 import fs from 'fs'
@@ -91,6 +92,18 @@ try {
 // 静态文件服务
 app.use(express.static(join(__dirname, '../public')))
 
+// 为前端public目录提供静态文件服务
+const frontendPublicDir = join(__dirname, '../../frontend/public')
+console.log('Setting up static file service for frontend public directory:', frontendPublicDir)
+// 添加对.vue文件的MIME类型支持
+app.use(express.static(frontendPublicDir, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.vue')) {
+      res.setHeader('Content-Type', 'text/plain');
+    }
+  }
+}))
+
 // 为上传的文件提供静态服务
 const customDir = join(__dirname, '../custom')
 console.log('Setting up static file service for custom directory:', customDir)
@@ -127,6 +140,7 @@ app.use('/api/free', freeRouter)
 app.use('/api/preview', previewRouter)
 app.use('/api/js/music-player', musicPlayerRoutes)
 app.use('/api/js/hide-login', hideLoginRoutes)
+app.use('/api/widgets', widgetsRouter)
 
 // 添加 markdown-editor 的路由
 app.use('/custom/helper/md', express.static(join(__dirname, '../custom/helper/md')));

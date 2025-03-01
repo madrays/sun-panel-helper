@@ -1867,8 +1867,20 @@ let md;
                 <div class="login-dialog-content">
                     <h3>用户登录</h3>
                     <div class="login-form">
-                        <input type="text" id="username" placeholder="用户名" />
-                        <input type="password" id="password" placeholder="密码" />
+                        <input 
+                            type="text" 
+                            id="username" 
+                            placeholder="用户名" 
+                            autocomplete="new-password" 
+                            data-form-type="other"
+                            name="sunpanel_username">
+                        <input 
+                            type="text" 
+                            id="password" 
+                            placeholder="密码" 
+                            autocomplete="new-password" 
+                            data-form-type="other"
+                            name="sunpanel_password">
                         <div class="login-buttons">
                             <button id="loginButton">登录</button>
                             <button id="cancelLogin">取消</button>

@@ -176,7 +176,7 @@ const props = defineProps({
   isCollapse: Boolean
 })
 
-const currentVersion = '2.0.3'
+const currentVersion = '2.0.4'
 const latestVersion = ref('')
 const hasNewVersion = ref(false)
 const updateDesc = ref('')
@@ -297,10 +297,10 @@ const openLink = (type: string) => {
       url = 'https://gitee.com/madrays/sun-panel-helper'
       break
     case 'bilibili':
-      url = 'https://space.bilibili.com/1690817544'
+      url = 'https://space.bilibili.com/1966866878'
       break
     case 'tutorial':
-      url = 'https://www.bilibili.com/video/BV1Uj421Z7Yx'
+      url = 'https://www.bilibili.com/video/BV1cYPJeoEoG'
       break
   }
   
