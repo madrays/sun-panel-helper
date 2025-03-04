@@ -85,12 +85,9 @@ const loadFixedWidgets = async () => {
     })
     
     const widgets = res.widgets || []
-    console.log('获取到的组件:', widgets)
     
     fixedWidgets.value = widgets.map((w: { name: string }) => w.name)
-    console.log('已应用的组件名称:', fixedWidgets.value)
   } catch (error) {
-    console.error('加载固定组件状态失败:', error)
   }
 }
 
@@ -103,12 +100,9 @@ const loadFreeWidgets = async () => {
     })
     
     const widgets = res.widgets || []
-    console.log('获取到的自由组件:', widgets)
     
     freeWidgets.value = widgets.map((w: { name: string }) => w.name)
-    console.log('已应用的自由组件名称:', freeWidgets.value)
   } catch (error) {
-    console.error('加载自由组件状态失败:', error)
   }
 }
 
@@ -128,7 +122,6 @@ const isAppliedToFixed = (widgetId: string): boolean => {
     'tr-status': 'Transmission下载器状态'
   }
   const isApplied = fixedWidgets.value.includes(widgetNames[widgetId])
-  console.log(`检查组件 ${widgetId} (${widgetNames[widgetId]}) 是否已应用:`, isApplied)
   return isApplied
 }
 
@@ -148,7 +141,6 @@ const isAppliedToFree = (widgetId: string): boolean => {
     'tr-status': 'Transmission下载器状态'
   }
   const isApplied = freeWidgets.value.includes(widgetNames[widgetId])
-  console.log(`检查组件 ${widgetId} (${widgetNames[widgetId]}) 是否已应用到自由组件:`, isApplied)
   return isApplied
 }
 

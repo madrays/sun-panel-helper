@@ -91,7 +91,7 @@
           上传字体文件
         </el-button>
         <template #tip>
-          <div class="upload-tip">支持 TTF、OTF 格式，单个文件不超过 10MB</div>
+          <div class="upload-tip">支持 TTF、OTF 格式，单个文件不超过 50MB</div>
         </template>
       </el-upload>
     </div>
@@ -107,7 +107,7 @@
           <h4>重要提示</h4>
           <ul class="guide-list">
             <li>支持格式：TTF、OTF 字体文件</li>
-            <li>文件大小：单个文件不超过 10MB</li>
+            <li>文件大小：单个文件不超过 50MB</li>
             <li>字体版权：请确保使用的字体拥有合法授权</li>
             <li>中文支持：建议使用包含完整中文字符的字体</li>
           </ul>
@@ -219,14 +219,14 @@ const deleteFont = async (id: string) => {
 // 上传前检查
 const beforeUpload = (file: File) => {
   const isFontFile = file.name.match(/\.(ttf|otf)$/)
-  const isLt10M = file.size / 1024 / 1024 < 10
+  const isLt50M = file.size / 1024 / 1024 < 50
 
   if (!isFontFile) {
     ElMessage.error('只能上传 TTF/OTF 格式的字体文件!')
     return false
   }
-  if (!isLt10M) {
-    ElMessage.error('字体文件大小不能超过 10MB!')
+  if (!isLt50M) {
+    ElMessage.error('字体文件大小不能超过 50MB!')
     return false
   }
   return true

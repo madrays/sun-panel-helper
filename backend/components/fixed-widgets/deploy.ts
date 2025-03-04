@@ -106,7 +106,7 @@ export async function deploy(js: string, css: string): Promise<void> {
  * 部署单个文件
  */
 async function deployFile(content: string, outputPath: string, startMark: string, endMark: string, isJS: boolean): Promise<void> {
-  console.log('部署路径:', outputPath)
+  
   
   // 1. 确保部署目录存在
   await mkdir(dirname(outputPath), { recursive: true })
@@ -116,7 +116,6 @@ async function deployFile(content: string, outputPath: string, startMark: string
   let isAlreadyDeployed = false
   try {
     fileContent = await readFile(outputPath, 'utf-8')
-    console.log('读取现有文件成功')
     isAlreadyDeployed = fileContent.includes(startMark)
     if (isAlreadyDeployed) {
       console.log('检测到已部署，将更新现有部署')
@@ -188,13 +187,12 @@ export async function undeploy(): Promise<void> {
  */
 async function undeployFile(outputPath: string, startMark: string, endMark: string): Promise<void> {
   try {
-    console.log('准备取消部署，路径:', outputPath)
     
     // 1. 读取现有文件
     let content = ''
     try {
       content = await readFile(outputPath, 'utf-8')
-      console.log('成功读取现有文件')
+  
     } catch (error) {
       console.log('文件不存在，无需取消部署')
       return

@@ -52,6 +52,17 @@
             <span>自由组件</span>
           </el-menu-item>
 
+          <!-- 分割线 -->
+          <div class="menu-divider">
+            <span class="divider-text" v-show="!isCollapse">系统工具</span>
+          </div>
+
+          <!-- 系统工具区 -->
+          <el-menu-item index="/dashboard/backup">
+            <el-icon><CopyDocument /></el-icon>
+            <span>备份恢复</span>
+          </el-menu-item>
+
           <!-- 添加弹性空间 -->
           <div class="flex-spacer"></div>
 
@@ -131,7 +142,8 @@ import {
   House,
   Setting,
   CircleClose,
-  Coffee
+  Coffee,
+  CopyDocument
 } from '@element-plus/icons-vue'
 import VersionCheck from '@/components/VersionCheck.vue'
 

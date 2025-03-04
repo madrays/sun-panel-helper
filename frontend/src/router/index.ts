@@ -5,6 +5,7 @@ import marketRoutes from './modules/market'
 import fixedRoutes from './modules/fixed'
 import freeRoutes from './modules/free'
 import profileRoutes from './modules/profile'
+import backupRoutes from './modules/backup'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -42,6 +43,7 @@ const routes: RouteRecordRaw[] = [
       ...fixedRoutes,
       ...freeRoutes,
       ...profileRoutes,
+      ...backupRoutes,
       {
         path: '/dashboard/support',
         component: () => import('@/views/support/index.vue'),

@@ -40,7 +40,7 @@ router.get('/pool', async (_req, res) => {
     let content
     try {
       content = await readFile(POOL_PATH, 'utf-8')
-      console.log('读取到的文件内容:', content)
+
     } catch (error) {
       content = JSON.stringify({
         widgets: []
@@ -49,7 +49,6 @@ router.get('/pool', async (_req, res) => {
     }
     
     const data = JSON.parse(content)
-    console.log('返回的数据:', data)
     
     res.json({
       code: 0,
@@ -82,7 +81,6 @@ function updateConfigIsApplied(widgetName: string, isApplied: boolean) {
         if (widgetName.includes(widgetUrl)) {
           trConfigs[configId].isAppliedToFixed = isApplied
           updated = true
-          console.log(`已更新TR配置 ${configId} 的isAppliedToFixed为 ${isApplied}`)
         }
       })
       
@@ -104,7 +102,6 @@ function updateConfigIsApplied(widgetName: string, isApplied: boolean) {
         if (widgetName.includes(widgetUrl)) {
           qbConfigs[configId].isAppliedToFixed = isApplied
           updated = true
-          console.log(`已更新QB配置 ${configId} 的isAppliedToFixed为 ${isApplied}`)
         }
       })
       
@@ -261,14 +258,10 @@ router.get('/layout', async (_req, res) => {
 router.post('/layout', async (req, res) => {
   try {
     const { widgets, customCode } = req.body
-    console.log('收到布局更新请求:', {
-      widgets,
-      customCode
-    })
+
     
     // 读取当前配置
     const content = await readFile(LAYOUT_PATH, 'utf-8')
-    console.log('当前配置:', content)
     
     // 更新组件列表
     const currentConfig: PoolConfig = JSON.parse(content)
@@ -277,7 +270,6 @@ router.post('/layout', async (req, res) => {
     
     // 写入文件
     await writeFile(LAYOUT_PATH, JSON.stringify(currentConfig, null, 2))
-    console.log('更新后的配置:', JSON.stringify(currentConfig, null, 2))
     
     res.json({
       code: 0,

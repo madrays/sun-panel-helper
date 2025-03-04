@@ -17,7 +17,6 @@ class UserModel {
       ? '/app/backend/data/users.json'  // 生产环境固定路径
       : join(__dirname, '../../data/users.json')  // 开发环境相对路径
     
-    console.log('Users file path:', this.filePath)
     this.users = this.loadUsers()
     
     // 确保默认用户存在
@@ -26,11 +25,8 @@ class UserModel {
 
   private loadUsers(): User[] {
     try {
-      console.log('Attempting to load users from:', this.filePath)
       const data = readFileSync(this.filePath, 'utf8')
-      console.log('Successfully read file, contents:', data)
       const users = JSON.parse(data)
-      console.log('Parsed users:', users)
       return users.length > 0 ? [users[users.length - 1]] : []
     } catch (error) {
       console.error('Error loading users:', error)
@@ -59,19 +55,13 @@ class UserModel {
   }
 
   public findByUsername(username: string): User | undefined {
-    console.log('Finding user by username:', username)
-    console.log('Available users:', this.users)
     const user = this.users.find(user => user.username === username)
-    console.log('Found user:', user)
     return user
   }
 
   public async validatePassword(user: User, password: string): Promise<boolean> {
     try {
-      console.log('Validating password for user:', user.username)
-      console.log('Stored password hash:', user.password)
       const isValid = await bcrypt.compare(password, user.password)
-      console.log('Password validation result:', isValid)
       return isValid
     } catch (error) {
       console.error('Password validation error:', error)

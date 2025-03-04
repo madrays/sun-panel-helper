@@ -298,7 +298,7 @@
           <h4>重要提示</h4>
           <ul class="guide-list">
             <li>图片格式：支持 JPG、PNG、GIF、SVG、WEBP 等常见图片格式</li>
-            <li>文件大小：单个文件不超过 2MB</li>
+            <li>文件大小：单个文件不超过 15MB</li>
             <li>建议尺寸：根据设备类型选择合适的尺寸</li>
             <li>透明背景：建议使用透明背景的图片以获得最佳效果</li>
           </ul>
@@ -398,9 +398,9 @@ const beforeUpload = (file: File) => {
     ElMessage.error('只能上传图片文件!')
     return false
   }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB!')
+  const isLt15M = file.size / 1024 / 1024 < 15
+  if (!isLt15M) {
+    ElMessage.error('图片大小不能超过 15MB!')
     return false
   }
   return true

@@ -38,7 +38,6 @@ async function ensureConfigDir() {
       }, null, 2))
     }
   } catch (error) {
-    console.error('创建配置目录失败:', error)
   }
 }
 
@@ -58,7 +57,6 @@ function updateConfigIsApplied(widgetUrl: string, isApplied: boolean) {
         if (widgetUrl.includes(idPattern)) {
           trConfigs[configId].isAppliedToFree = isApplied
           updated = true
-          console.log(`已更新TR配置 ${configId} 的isAppliedToFree为 ${isApplied}`)
         }
       })
       
@@ -80,7 +78,6 @@ function updateConfigIsApplied(widgetUrl: string, isApplied: boolean) {
         if (widgetUrl.includes(idPattern)) {
           qbConfigs[configId].isAppliedToFree = isApplied
           updated = true
-          console.log(`已更新QB配置 ${configId} 的isAppliedToFree为 ${isApplied}`)
         }
       })
       
@@ -89,7 +86,6 @@ function updateConfigIsApplied(widgetUrl: string, isApplied: boolean) {
       }
     }
   } catch (error) {
-    console.error('更新配置时出错:', error)
   }
 }
 
@@ -117,7 +113,6 @@ router.get('/pool', async (req, res) => {
 // 保存组件池配置
 router.post('/pool', async (req, res) => {
   try {
-    console.log('收到请求体:', req.body)
     await ensureConfigDir()
     
     // 读取现有配置
@@ -125,19 +120,15 @@ router.post('/pool', async (req, res) => {
     try {
       const content = await readFile(POOL_PATH, 'utf-8')
       currentConfig = JSON.parse(content)
-      console.log('读取到的现有配置:', currentConfig)
     } catch (error) {
-      console.log('配置文件不存在，创建默认配置')
       currentConfig = { widgets: [], apiPrefix: '' }
     }
     
     // 如果是添加单个组件
     if (req.body.action === 'add' && req.body.widget) {
-      console.log('添加组件:', req.body.widget)
       // 检查是否已存在相同名称的组件
       const exists = currentConfig.widgets.some((w: any) => w.name === req.body.widget.name)
       if (exists) {
-        console.log('组件名称已存在:', req.body.widget.name)
         return res.json({
           code: 1,
           message: '组件名称已存在，请使用其他名称',
@@ -148,7 +139,6 @@ router.post('/pool', async (req, res) => {
       currentConfig.widgets.push(req.body.widget)
       // 更新配置文件中的isAppliedToFree为true
       updateConfigIsApplied(req.body.widget.url, true)
-      console.log('添加后的配置:', currentConfig)
     } else if (req.body.id && req.body.name && req.body.url) {
       // 直接添加组件
       const widget = {
@@ -160,7 +150,6 @@ router.post('/pool', async (req, res) => {
       // 检查是否已存在相同名称的组件
       const exists = currentConfig.widgets.some((w: any) => w.name === widget.name)
       if (exists) {
-        console.log('组件名称已存在:', widget.name)
         return res.json({
           code: 1,
           message: '组件名称已存在，请使用其他名称',
@@ -171,7 +160,6 @@ router.post('/pool', async (req, res) => {
       currentConfig.widgets.push(widget)
       // 更新配置文件中的isAppliedToFree为true
       updateConfigIsApplied(widget.url, true)
-      console.log('直接添加组件后的配置:', currentConfig)
     } 
     // 如果是更新组件
     else if (req.body.action === 'update' && req.body.name && req.body.widget) {
@@ -201,18 +189,12 @@ router.post('/pool', async (req, res) => {
     }
     
     await writeFile(POOL_PATH, JSON.stringify(currentConfig, null, 2))
-    console.log('保存配置成功，返回:', {
-      code: 0,
-      message: 'success',
-      data: currentConfig
-    })
     res.json({
       code: 0,
       message: 'success',
       data: currentConfig
     })
   } catch (error) {
-    console.error('保存失败，完整错误:', error)
     res.status(500).json({
       code: 500,
       message: '保存配置失败',
@@ -396,7 +378,6 @@ router.post('/freewidgets/save-config', async (req, res) => {
       message: 'success'
     });
   } catch (error) {
-    console.error('保存配置失败:', error);
     res.status(500).json({
       code: 500,
       message: '保存配置失败',

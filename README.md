@@ -1,5 +1,7 @@
 # Sun-Panel-Helper
 
+
+
 <div align="center">
   <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/logo _1__216e59a7de7ac.png" width="300" height="275" alt="Sun-Panel-Helper Logo" />
 
@@ -14,7 +16,10 @@
 
   一款为 Sun-Panel 设计的可视化美化工具，让你的 Sun-Panel 锦上添花~
 </div>
-
+<div align="center">
+  <h2><a href="https://helper.cocoyoo.cn" target="_blank">📚 官方文档 | Official Documentation</a></h2>
+  <p>详细的安装指南、使用教程和最佳实践，尽在官方文档！<br>Visit our official documentation for detailed installation guides, tutorials, and best practices!</p>
+</div>
 
 
 ## 🌟 在线体验
@@ -36,6 +41,39 @@
   - 感受流畅的交互体验
 
 > 💡 提示：你可以在 Helper Demo 中编辑样式，然后在演示站中查看效果，体验完整的美化流程！
+
+## 🎉 更新内容 (v2.0.5)
+
+### ✨ 功能增强
+- 🎨 **TR/QB状态组件自定义主题**
+  - 支持完全自定义TR/QB状态组件主题颜色
+  - 更丰富的配色选项，打造专属个性化效果
+  - 可随时切换明暗色调，适应不同时段使用
+  - 自动保存主题配置，便于多处复用
+
+- 🌤️ **天气组件主题定制**
+  - 新增自定义背景色和文字颜色设置
+  - 支持翻转动画背景透明化
+  - 优化圆角显示效果，视觉体验更加统一
+  - 提升天气图标清晰度和显示质量
+
+- 💾 **新增备份功能**
+  - 增加备份功能
+  - 新增备份添加备注功能，方便管理和识别
+  - 优化备份列表分页和搜索功能
+  - 完善备份还原流程，提高操作便捷性
+
+- 📤 **上传限制优化**
+  - 修复文件上传限制
+  - 字体文件上传上限从10MB提升至50MB
+  - 自定义Logo上传上限从2MB提升至15MB
+  - 优化Nginx配置，支持大文件上传
+
+### 🔧 其他优化
+- ⚡️ 优化组件加载速度和性能
+- 🛠️ 修复多个已知的小问题
+- 📝 完善代码注释和文档说明
+- 💪 提升系统整体稳定性
 
 ## 🎉 更新内容 (v2.0.4)
 
@@ -162,8 +200,16 @@
     - 默认3001,可通过环境变量修改
     - 注意避免与其他服务冲突
 - 数据目录:
-  - 必须挂载Sun-Panel的custom目录
-  - 确保目录权限正确(读写权限)
+  - 必须挂载三个重要目录:
+    - `/app/backend/custom`: Sun-Panel的custom目录(必需)
+    - `/app/backend/data`: Helper的数据目录(必需)
+    - `/app/backend/backups`: 备份文件存储目录(必需)
+  - 确保目录权限正确(需要读写权限)
+
+### 重要变更通知 (v2.0.5+)
+⚠️ **v2.0.5版本新增两个重要数据目录挂载，请务必添加以下挂载点：**
+- `/app/backend/data`：用户数据目录，存储重要配置信息
+- `/app/backend/backups`：备份文件存储目录，保存系统备份
 
 ### 1. 命令行部署
 
@@ -175,6 +221,8 @@ docker run -d \
   -p 33002:80 \
   -e BACKEND_PORT=3001 \
   -v /path/to/sunpanel/conf/custom:/app/backend/custom \
+  -v /path/to/helper/data:/app/backend/data \
+  -v /path/to/helper/backups:/app/backend/backups \
   madrays/sun-panel-helper:latest
 
 # Host网络模式 (解决IPv6问题)
@@ -184,6 +232,8 @@ docker run -d \
   -e BACKEND_PORT=3001 \
   -e FRONTEND_PORT=33002 \
   -v /path/to/sunpanel/conf/custom:/app/backend/custom \
+  -v /path/to/helper/data:/app/backend/data \
+  -v /path/to/helper/backups:/app/backend/backups \
   madrays/sun-panel-helper:latest
 ```
 
@@ -203,6 +253,8 @@ services:
       - "33002:80"        # 前端页面访问端口,可自定义修改避免冲突
     volumes:
       - /path/to/sunpanel/conf/custom:/app/backend/custom
+      - /path/to/helper/data:/app/backend/data
+      - /path/to/helper/backups:/app/backend/backups
     restart: unless-stopped
 ```
 
@@ -219,6 +271,8 @@ services:
       - FRONTEND_PORT=33002   # 前端页面访问端口(Host模式必须设置)
     volumes:
       - /path/to/sunpanel/conf/custom:/app/backend/custom
+      - /path/to/helper/data:/app/backend/data
+      - /path/to/helper/backups:/app/backend/backups
     restart: unless-stopped
 ```
 
@@ -226,6 +280,21 @@ services:
 ```bash
 docker-compose up -d
 ```
+
+### 🔧 更新注意事项
+- **数据目录挂载**：
+  - 必须挂载三个目录：custom, data, backups
+  - 如从旧版升级，请创建新的data和backups目录
+  - 备份目录需要足够空间存储100份备份
+- **文件上传限制**：
+  - 已增大Nginx上传限制至60MB
+  - 支持更大的字体和Logo文件上传
+- **备份功能**：
+  - 系统最多保留100份备份，自动清理旧备份
+  - 建议定期手动清理不需要的备份释放空间
+- **镜像更新**：
+  - 请删除旧版容器后重新部署，不建议直接更新
+  - 更新前请先备份重要数据
 
 ### IPv6兼容性说明
 
@@ -262,6 +331,10 @@ docker-compose up -d
    - Volumes: 
      - host: /path/to/sunpanel/conf/custom
      - container: /app/backend/custom
+     - host: /path/to/helper/data
+     - container: /app/backend/data
+     - host: /path/to/helper/backups
+     - container: /app/backend/backups
 4. 点击"Deploy the container"完成部署
 
 ##### Host网络模式 (解决IPv6问题)
@@ -278,6 +351,10 @@ docker-compose up -d
    - Volumes: 
      - host: /path/to/sunpanel/conf/custom
      - container: /app/backend/custom
+     - host: /path/to/helper/data
+     - container: /app/backend/data
+     - host: /path/to/helper/backups
+     - container: /app/backend/backups
 4. 点击"Deploy the container"完成部署
 
 #### 群晖Docker部署
@@ -289,6 +366,8 @@ docker-compose up -d
    - 端口设置: 33002:80
    - 环境变量: BACKEND_PORT=3001
    - 卷: 选择Sun-Panel的custom目录映射到/app/backend/custom
+   - 卷: 选择Helper的数据目录映射到/app/backend/data
+   - 卷: 选择Helper的备份目录映射到/app/backend/backups
 4. 应用设置并启动容器
 
 ##### Host网络模式 (解决IPv6问题)
@@ -300,6 +379,8 @@ docker-compose up -d
      - BACKEND_PORT=3001
      - FRONTEND_PORT=33002
    - 卷: 选择Sun-Panel的custom目录映射到/app/backend/custom
+   - 卷: 选择Helper的数据目录映射到/app/backend/data
+   - 卷: 选择Helper的备份目录映射到/app/backend/backups
 4. 应用设置并启动容器
 
 ### Sun-Panel + Helper 一键部署（以飞牛OS为例）
@@ -330,6 +411,8 @@ services:
       - "33002:80"        # 前端页面访问端口
     volumes:
       - /vol1/@appshare/sunpanel/conf/custom:/app/backend/custom  # Sun-Panel的custom目录
+      - /vol1/@appshare/helper/data:/app/backend/data
+      - /vol1/@appshare/helper/backups:/app/backend/backups
     restart: always
 ```
 
@@ -359,6 +442,8 @@ services:
       - FRONTEND_PORT=33002  # 前端页面访问端口
     volumes:
       - /vol1/@appshare/sunpanel/conf/custom:/app/backend/custom  # Sun-Panel的custom目录
+      - /vol1/@appshare/helper/data:/app/backend/data
+      - /vol1/@appshare/helper/backups:/app/backend/backups
     restart: always
 ```
 
@@ -441,13 +526,13 @@ docker-compose up -d
   <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/A_75f5f43bbdc0a.png" width="100%" alt="主界面" />
   
   <p><strong>🎨 CSS 样式库</strong></p>
-  <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/B_b7b4eb8d92320.png" width="100%" alt="CSS 样式" />
+  <img src="https://pic2.ziyuan.wang/user/madrays/2025/03/css_2590b28a29b11.png" width="100%" alt="CSS 样式" />
   
   <p><strong>⚡ JS 功能库</strong></p>
-  <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/C_589854676665c.png" width="100%" alt="JS 功能" />
+  <img src="https://pic2.ziyuan.wang/user/madrays/2025/03/js_3e0ac321875b3.png" width="100%" alt="JS 功能" />
   
   <p><strong>🛍️ 组件市场</strong></p>
-  <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/D_268df6470994e.png" width="100%" alt="组件市场" />
+  <img src="https://pic2.ziyuan.wang/user/madrays/2025/03/mk_4c42feec033a9.png" width="100%" alt="组件市场" />
 
   <p><strong>📌 固定组件</strong></p>
   <img src="https://pic2.ziyuan.wang/user/madrays/2025/02/E_0766b65ab947c.png" width="100%" alt="固定组件" />

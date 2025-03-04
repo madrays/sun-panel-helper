@@ -334,7 +334,6 @@ const loadConfig = async () => {
       method: 'GET'
     })
     
-    console.log('加载到的组件池配置:', poolRes)
     
     if (poolRes.widgets) {
       poolWidgets.value = [...poolRes.widgets]
@@ -460,7 +459,7 @@ const removeFromLayout = (widget: Widget) => {
 // 从池中移除
 const removeFromPool = async (widget: Widget) => {
   try {
-    console.log('移除组件:', widget.name)
+    
     
     // 发送删除请求
     await request({
@@ -480,7 +479,6 @@ const removeFromPool = async (widget: Widget) => {
     
     // 通知组件市场
     if (widget.source === 'market') {
-      console.log('发送移除事件:', widget.name)
       eventBus.emit('fixed:widget-removed', widget.name)
     }
     

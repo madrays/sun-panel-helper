@@ -14,6 +14,7 @@ echo "Starting services..."
 # 确保目录存在
 mkdir -p /app/backend/data
 mkdir -p /app/backend/custom/helper  # 先创建父目录
+mkdir -p /app/backend/backups  # 创建备份目录
 
 # 创建 custom 目录结构
 echo "Creating custom directory structure..."
@@ -38,6 +39,7 @@ touch /app/backend/custom/index.js
 echo "Setting permissions..."
 chmod -R 777 /app/backend/data
 chmod -R 777 /app/backend/custom
+chmod -R 777 /app/backend/backups  # 设置备份目录权限
 
 # 复制资源文件
 echo "Copying resource files..."

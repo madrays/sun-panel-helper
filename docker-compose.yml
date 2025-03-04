@@ -11,4 +11,6 @@ services:
       - "33002:80"        # 前端页面访问端口
     volumes:
       - /path/to/sunpanel/conf/custom:/app/backend/custom  # Sun-Panel的custom目录路径
+      - /path/to/sunpanel/conf/data:/app/backend/data  # Sun-Panel-Helper的data目录路径
+      - /path/to/sunpanel/conf/backups:/app/backend/backups  # Sun-Panel-Helper的backups目录路径
     restart: unless-stopped

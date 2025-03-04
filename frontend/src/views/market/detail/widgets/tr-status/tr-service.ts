@@ -27,13 +27,39 @@ export interface TRConfig {
     errorTorrents: boolean
     uploadLimit: boolean
     downloadLimit: boolean
-    [key: string]: boolean
   }
   displayOrder?: string[]
-  isConfigValid?: boolean
+  isConfigValid: boolean
   lastTested?: number
   isAppliedToFixed?: boolean
   isAppliedToFree?: boolean
+  theme?: any
+  themeSettings?: {
+    wallpaper?: {
+      backgroundColor: string
+      style: 'gradient' | 'solid'
+      gradientDirection: string
+      animation: boolean
+      [key: string]: any
+    }
+    componentSize?: {
+      width: number
+      height: number
+      [key: string]: any
+    }
+    theme?: {
+      backgroundColor: string
+      headerBackgroundColor: string
+      headerTextColor: string
+      onlineStatusColor: string
+      offlineStatusColor: string
+      labelTextColor: string
+      valueTextColor: string
+      borderRadius: string
+      [key: string]: any
+    }
+    [key: string]: any
+  }
 }
 
 // Transmission状态数据类型
@@ -150,8 +176,8 @@ export class TRService {
   static createDefaultConfig(): TRConfig {
     return {
       id: Date.now().toString(),
-      name: `Transmission下载器 ${new Date().toLocaleString('zh-CN', { hour12: false }).replace(/[\/\s:]/g, '')}`,
-      url: 'http://localhost:9091/transmission/rpc',
+      name: '新建Transmission下载器',
+      url: '',
       username: '',
       password: '',
       updateInterval: 30,
@@ -180,7 +206,113 @@ export class TRService {
         'seedingTorrents', 'globalRatio', 'averageRatio',
         'globalDownloaded', 'globalUploaded', 'uploadLimit', 'downloadLimit',
         'freeSpace', 'totalSize'
-      ]
+      ],
+      isConfigValid: false,
+      lastTested: 0,
+      theme: {
+        backgroundColor: '#2d3436',
+        backgroundOpacity: 1,
+        headerBackgroundColor: '#2980b9',
+        headerTextColor: '#ffffff',
+        onlineStatusColor: 'rgba(46, 204, 113, 0.8)',
+        offlineStatusColor: 'rgba(231, 76, 60, 0.8)',
+        
+        // 下载速度
+        downloadSpeedBgColor: 'rgba(33, 150, 243, 0.15)',
+        downloadSpeedTextColor: '#3498db',
+        
+        // 上传速度
+        uploadSpeedBgColor: 'rgba(76, 175, 80, 0.15)',
+        uploadSpeedTextColor: '#27ae60',
+        
+        // 活跃下载
+        activeDownloadsBgColor: 'rgba(33, 150, 243, 0.1)',
+        activeDownloadsTextColor: '#4fc3f7',
+        
+        // 活跃任务
+        activeTorrentsBgColor: 'rgba(156, 39, 176, 0.1)',
+        activeTorrentsTextColor: '#9c27b0',
+        
+        // 暂停任务
+        pausedTorrentsBgColor: 'rgba(255, 152, 0, 0.1)',
+        pausedTorrentsTextColor: '#ff9800',
+        
+        // 完成任务
+        completedTorrentsBgColor: 'rgba(76, 175, 80, 0.1)',
+        completedTorrentsTextColor: '#4caf50',
+        
+        // 总任务数
+        totalTorrentsBgColor: 'rgba(158, 158, 158, 0.1)',
+        totalTorrentsTextColor: '#9e9e9e',
+        
+        // 错误任务
+        errorTorrentsBgColor: 'rgba(244, 67, 54, 0.1)',
+        errorTorrentsTextColor: '#f44336',
+        
+        // 做种数
+        seedingTorrentsBgColor: 'rgba(0, 188, 212, 0.1)',
+        seedingTorrentsTextColor: '#00bcd4',
+        
+        // 分享率
+        globalRatioBgColor: 'rgba(3, 169, 244, 0.1)',
+        globalRatioTextColor: '#03a9f4',
+        
+        // 平均分享率
+        averageRatioBgColor: 'rgba(63, 81, 181, 0.1)',
+        averageRatioTextColor: '#3f51b5',
+        
+        // 已下载
+        globalDownloadedBgColor: 'rgba(0, 188, 212, 0.1)',
+        globalDownloadedTextColor: '#00bcd4',
+        
+        // 已上传
+        globalUploadedBgColor: 'rgba(233, 30, 99, 0.1)',
+        globalUploadedTextColor: '#e91e63',
+        
+        // 上传限制
+        uploadLimitBgColor: 'rgba(255, 87, 34, 0.1)',
+        uploadLimitTextColor: '#ff5722',
+        
+        // 下载限制
+        downloadLimitBgColor: 'rgba(121, 85, 72, 0.1)',
+        downloadLimitTextColor: '#795548',
+        
+        // 可用空间
+        freeSpaceBgColor: 'rgba(96, 125, 139, 0.1)',
+        freeSpaceTextColor: '#607d8b',
+        
+        // 总体积
+        totalSizeBgColor: 'rgba(97, 97, 97, 0.1)',
+        totalSizeTextColor: '#616161',
+        
+        // 通用
+        labelTextColor: 'rgba(255, 255, 255, 0.7)',
+        valueTextColor: '#ffffff',
+        
+        borderRadius: '8px'
+      },
+      themeSettings: {
+        wallpaper: {
+          backgroundColor: '#2d3436',
+          style: 'solid',
+          gradientDirection: '',
+          animation: false
+        },
+        componentSize: {
+          width: 300,
+          height: 200
+        },
+        theme: {
+          backgroundColor: '#2d3436',
+          headerBackgroundColor: '2d3436',
+          headerTextColor: '#ffffff',
+          onlineStatusColor: 'rgba(46, 204, 113, 0.8)',
+          offlineStatusColor: 'rgba(231, 76, 60, 0.8)',
+          labelTextColor: 'rgba(255, 255, 255, 0.7)',
+          valueTextColor: '#ffffff',
+          borderRadius: '8px'
+        }
+      }
     }
   }
 

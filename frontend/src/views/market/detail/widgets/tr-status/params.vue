@@ -232,7 +232,6 @@ const fetchTRConfigs = async () => {
   try {
     const response = await axios.get('/api/widgets/tr-status/configs')
     trConfigs.value = response.data || {}
-    console.log('获取到TR配置列表:', Object.keys(trConfigs.value).length, '个配置')
     checkNameDuplicate()
   } catch (error) {
     console.error('获取TR配置列表失败:', error)
@@ -248,8 +247,6 @@ const checkNameDuplicate = () => {
   }
   
   try {
-    console.log('开始检查名称重复，当前名称:', trConfig.value.name)
-    console.log('TR配置数量:', Object.keys(trConfigs.value).length)
     
     // 检查名称是否在其他配置中重复
     const isDuplicate = Object.values(trConfigs.value).some((config: any) => {
@@ -265,7 +262,6 @@ const checkNameDuplicate = () => {
     })
     
     isNameDuplicated.value = isDuplicate
-    console.log('名称重复检查结果:', isNameDuplicated.value ? '重复' : '不重复')
     
     if (isNameDuplicated.value) {
       ElMessage.warning(`名称 "${trConfig.value.name}" 已存在，请使用其他名称`)
@@ -279,7 +275,6 @@ const checkNameDuplicate = () => {
 
 // 监听名称变化
 watch(() => trConfig.value.name, (newName) => {
-  console.log('名称变化:', newName)
   if (newName) {
     checkNameDuplicate()
   } else {
@@ -366,23 +361,23 @@ watch(displayOrder, (newOrder) => {
     .map(item => item.key);
   
   trConfig.value.displayOrder = selectedItems;
-  console.log('显示顺序已更新:', trConfig.value.displayOrder);
+
 }, { deep: true })
 
 // 监听配置中displayItems的变化
 watch(() => trConfig.value.displayItems, (newDisplayItems) => {
-  console.log('显示项配置已更新:', newDisplayItems);
+
   
   // 当显示项状态变化时，更新排序列表中的项目状态
   displayOrder.value.forEach(item => {
     const isEnabled = newDisplayItems[item.key] === true;
-    console.log(`项目 ${item.key} 状态更新为: ${isEnabled ? '启用' : '禁用'}`);
+
   });
 }, { deep: true })
 
 // 初始化时获取TR配置列表
 onMounted(() => {
-  console.log('初始化显示顺序，当前配置:', JSON.stringify(trConfig.value))
+
   
   // 获取TR配置列表并检查名称重复
   fetchTRConfigs()
@@ -438,7 +433,6 @@ onMounted(() => {
   
   // 如果配置中已有显示顺序，则使用配置中的顺序
   if (trConfig.value.displayOrder && trConfig.value.displayOrder.length > 0) {
-    console.log('使用配置中的显示顺序:', trConfig.value.displayOrder);
     
     // 根据配置中的顺序重新排列
     const newOrder: DisplayItem[] = [];
@@ -474,7 +468,6 @@ onMounted(() => {
       ['downloadSpeed', 'uploadSpeed'];
   }
   
-  console.log('初始化后的显示顺序:', displayOrder.value.map(item => item.key));
 })
 
 // 获取项目标签

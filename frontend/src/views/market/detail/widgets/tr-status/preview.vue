@@ -1,95 +1,59 @@
 <template>
-  <div class="tr-preview">
+  <div class="tr-preview" :style="previewStyle">
+    <!-- 添加渐变背景层 -->
+    <div v-if="hasGradientBg" class="gradient-bg" :style="gradientBgStyle"></div>
     <div class="tr-preview-card">
-      <div class="tr-header">
+      <div class="tr-header" :style="headerStyle">
         <div class="tr-logo">
           <img src="/tr.png" alt="Transmission" />
-          <span>{{ previewData.name || 'Transmission' }}</span>
+          <span :style="{ color: themeSettings.headerTextColor }">{{ previewData.name || 'Transmission' }}</span>
         </div>
-        <div class="tr-status" :class="{ 'is-online': previewData.isOnline }">
+        <div class="tr-status" :class="{ 'is-online': previewData.isOnline }" :style="statusStyle">
           {{ previewData.isOnline ? '在线' : '离线' }}
         </div>
       </div>
 
-      <div class="tr-content">
+      <div class="tr-content" :style="contentStyle">
         <template v-if="previewData.isOnline">
           <!-- 下载/上传速度 -->
           <div v-if="shouldShow('downloadSpeed') || shouldShow('uploadSpeed')" class="tr-speeds">
-            <div v-if="shouldShow('downloadSpeed')" class="tr-speed download">
+            <div v-if="shouldShow('downloadSpeed')" class="tr-speed download" :style="getItemStyle('downloadSpeed')">
               <el-icon><Download /></el-icon>
-              <span>{{ formatSpeed(previewData.downloadSpeed) }}</span>
+              <span :style="{ color: themeSettings.downloadSpeedTextColor }">{{ formatSpeed(previewData.downloadSpeed) }}</span>
             </div>
-            <div v-if="shouldShow('uploadSpeed')" class="tr-speed upload">
+            <div v-if="shouldShow('uploadSpeed')" class="tr-speed upload" :style="getItemStyle('uploadSpeed')">
               <el-icon><Upload /></el-icon>
-              <span>{{ formatSpeed(previewData.uploadSpeed) }}</span>
+              <span :style="{ color: themeSettings.uploadSpeedTextColor }">{{ formatSpeed(previewData.uploadSpeed) }}</span>
             </div>
           </div>
 
           <!-- 任务统计 -->
           <div class="tr-stats">
-            <div v-if="shouldShow('activeTorrents')" class="tr-stat-item">
-              <span class="stat-label">活跃任务:</span>
-              <span class="stat-value">{{ previewData.activeTorrents || 0 }}</span>
-            </div>
-            <div v-if="shouldShow('pausedTorrents')" class="tr-stat-item">
-              <span class="stat-label">暂停任务:</span>
-              <span class="stat-value">{{ previewData.pausedTorrents || 0 }}</span>
-            </div>
-            <div v-if="shouldShow('completedTorrents')" class="tr-stat-item">
-              <span class="stat-label">已完成:</span>
-              <span class="stat-value">{{ previewData.completedTorrents || 0 }}</span>
-            </div>
-            <div v-if="shouldShow('totalTorrents')" class="tr-stat-item">
-              <span class="stat-label">总任务数:</span>
-              <span class="stat-value">{{ previewData.totalTorrents || 0 }}</span>
-            </div>
-            <div v-if="shouldShow('activeDownloads')" class="tr-stat-item">
-              <span class="stat-label">下载中:</span>
-              <span class="stat-value">{{ previewData.activeDownloads || 0 }}</span>
-            </div>
-            <div v-if="shouldShow('globalRatio')" class="tr-stat-item">
-              <span class="stat-label">分享率:</span>
-              <span class="stat-value">{{ formatRatio(previewData.globalRatio) }}</span>
-            </div>
-            <div v-if="shouldShow('freeSpace')" class="tr-stat-item">
-              <span class="stat-label">剩余空间:</span>
-              <span class="stat-value">{{ formatSize(previewData.freeSpace) }}</span>
-            </div>
-            <div v-if="shouldShow('seedingTorrents')" class="tr-stat-item">
-              <span class="stat-label">做种数量:</span>
-              <span class="stat-value">{{ previewData.seedingTorrents || 0 }}</span>
-            </div>
-            <div v-if="shouldShow('errorTorrents')" class="tr-stat-item">
-              <span class="stat-label">错误种子:</span>
-              <span class="stat-value">{{ previewData.errorTorrents || 0 }}</span>
-            </div>
-            <div v-if="shouldShow('uploadLimit')" class="tr-stat-item">
-              <span class="stat-label">上传限速:</span>
-              <span class="stat-value">{{ formatSpeed(previewData.uploadLimit) }}</span>
-            </div>
-            <div v-if="shouldShow('downloadLimit')" class="tr-stat-item">
-              <span class="stat-label">下载限速:</span>
-              <span class="stat-value">{{ formatSpeed(previewData.downloadLimit) }}</span>
-            </div>
-            <div v-if="shouldShow('averageRatio')" class="tr-stat-item">
-              <span class="stat-label">平均分享率:</span>
-              <span class="stat-value">{{ formatRatio(previewData.averageRatio) }}</span>
-            </div>
-            <div v-if="shouldShow('totalSize')" class="tr-stat-item">
-              <span class="stat-label">总大小:</span>
-              <span class="stat-value">{{ formatSize(previewData.totalSize) }}</span>
-            </div>
+            <template v-for="(label, key) in displayItemLabels" :key="key">
+              <div v-if="shouldShow(key) && key !== 'downloadSpeed' && key !== 'uploadSpeed' && key !== 'globalDownloaded' && key !== 'globalUploaded'" 
+                   class="tr-stat-item"
+                   :style="getItemStyle(key)">
+                <span class="stat-label" :style="{ color: themeSettings.labelTextColor || 'var(--el-text-color-secondary)' }">{{ label }}:</span>
+                <span class="stat-value" :style="{ color: themeSettings[`${key}TextColor`] || themeSettings.valueTextColor }">
+                  {{ formatItemValue(key, previewData[key]) }}
+                </span>
+              </div>
+            </template>
           </div>
 
           <!-- 总计数据 -->
           <div v-if="shouldShow('globalDownloaded') || shouldShow('globalUploaded')" class="tr-totals">
-            <div v-if="shouldShow('globalDownloaded')" class="tr-total-item">
-              <span class="total-label">总下载:</span>
-              <span class="total-value">{{ formatSize(previewData.globalDownloaded) }}</span>
+            <div v-if="shouldShow('globalDownloaded')" class="tr-total-item" :style="getItemStyle('globalDownloaded')">
+              <span class="total-label" :style="{ color: themeSettings.labelTextColor || 'var(--el-text-color-secondary)' }">已下载:</span>
+              <span class="total-value" :style="{ color: themeSettings.globalDownloadedTextColor || themeSettings.valueTextColor }">
+                {{ formatSize(previewData.globalDownloaded) }}
+              </span>
             </div>
-            <div v-if="shouldShow('globalUploaded')" class="tr-total-item">
-              <span class="total-label">总上传:</span>
-              <span class="total-value">{{ formatSize(previewData.globalUploaded) }}</span>
+            <div v-if="shouldShow('globalUploaded')" class="tr-total-item" :style="getItemStyle('globalUploaded')">
+              <span class="total-label" :style="{ color: themeSettings.labelTextColor || 'var(--el-text-color-secondary)' }">已上传:</span>
+              <span class="total-value" :style="{ color: themeSettings.globalUploadedTextColor || themeSettings.valueTextColor }">
+                {{ formatSize(previewData.globalUploaded) }}
+              </span>
             </div>
           </div>
         </template>
@@ -105,6 +69,7 @@
 
 <script setup lang="ts">
 import { Download, Upload, WarningFilled } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
 
 // 预览数据类型
 interface PreviewData {
@@ -127,6 +92,7 @@ interface PreviewData {
   errorTorrents: number
   uploadLimit: number
   downloadLimit: number
+  [key: string]: any
 }
 
 // 显示项目类型
@@ -148,53 +114,249 @@ interface DisplayItems {
   errorTorrents: boolean
   uploadLimit: boolean
   downloadLimit: boolean
+  [key: string]: boolean
+}
+
+// 主题设置接口
+interface ThemeSettings {
+  backgroundColor: string
+  backgroundOpacity: number
+  headerBackgroundColor: string
+  headerTextColor: string
+  onlineStatusColor: string
+  offlineStatusColor: string
+  
+  // 下载速度
+  downloadSpeedBgColor: string
+  downloadSpeedTextColor: string
+  
+  // 上传速度
+  uploadSpeedBgColor: string  
+  uploadSpeedTextColor: string
+  
+  // 活跃下载
+  activeDownloadsBgColor: string
+  activeDownloadsTextColor: string
+  
+  // 活跃任务
+  activeTorrentsBgColor: string
+  activeTorrentsTextColor: string
+  
+  // 暂停任务
+  pausedTorrentsBgColor: string
+  pausedTorrentsTextColor: string
+  
+  // 完成任务
+  completedTorrentsBgColor: string
+  completedTorrentsTextColor: string
+  
+  // 总任务数
+  totalTorrentsBgColor: string
+  totalTorrentsTextColor: string
+  
+  // 错误任务
+  errorTorrentsBgColor: string
+  errorTorrentsTextColor: string
+  
+  // 做种数
+  seedingTorrentsBgColor: string
+  seedingTorrentsTextColor: string
+  
+  // 分享率
+  globalRatioBgColor: string
+  globalRatioTextColor: string
+  
+  // 平均分享率
+  averageRatioBgColor: string
+  averageRatioTextColor: string
+  
+  // 已下载
+  globalDownloadedBgColor: string
+  globalDownloadedTextColor: string
+  
+  // 已上传
+  globalUploadedBgColor: string
+  globalUploadedTextColor: string
+  
+  // 上传限制
+  uploadLimitBgColor: string
+  uploadLimitTextColor: string
+  
+  // 下载限制
+  downloadLimitBgColor: string
+  downloadLimitTextColor: string
+  
+  // 可用空间
+  freeSpaceBgColor: string
+  freeSpaceTextColor: string
+  
+  // 总体积
+  totalSizeBgColor: string
+  totalSizeTextColor: string
+  
+  // 标签和值通用设置
+  labelTextColor: string
+  valueTextColor: string
+  
+  borderRadius: string
+  wallpaper: {
+    style: string
+    backgroundColor?: string
+    backgroundColor2?: string
+    gradientDirection?: string
+    animation?: boolean
+  }
+  [key: string]: any
 }
 
 const props = defineProps<{
   previewData: PreviewData
   displayItems: DisplayItems
+  themeSettings: ThemeSettings
 }>()
 
-// 检查是否应该显示特定项目
-const shouldShow = (item: keyof DisplayItems) => {
-  return props.displayItems[item]
+// 显示项目标签映射
+const displayItemLabels = {
+  downloadSpeed: '下载速度',
+  uploadSpeed: '上传速度',
+  activeDownloads: '下载中',
+  activeTorrents: '活跃',
+  pausedTorrents: '暂停',
+  completedTorrents: '完成',
+  totalTorrents: '总数',
+  globalRatio: '分享率',
+  globalDownloaded: '已下载',
+  globalUploaded: '已上传',
+  freeSpace: '可用空间',
+  seedingTorrents: '做种数',
+  totalSize: '总体积',
+  averageRatio: '平均分享率',
+  errorTorrents: '错误任务',
+  uploadLimit: '上传限制',
+  downloadLimit: '下载限制'
+}
+
+// 计算样式
+const previewStyle = computed(() => {
+  // 如果是渐变壁纸，返回透明背景
+  if (props.themeSettings.wallpaper && props.themeSettings.wallpaper.style === 'gradient') {
+    return {
+      backgroundColor: 'transparent', // 使用透明背景，让渐变层显示
+      opacity: props.themeSettings.backgroundOpacity || 1,
+      borderRadius: props.themeSettings.borderRadius || '8px',
+      position: 'relative' as const,
+      overflow: 'hidden' as const
+    };
+  }
+  
+  return {
+    backgroundColor: props.themeSettings.backgroundColor || '#2d3436',
+    opacity: props.themeSettings.backgroundOpacity || 1,
+    borderRadius: props.themeSettings.borderRadius || '8px'
+  };
+})
+
+const headerStyle = computed(() => ({
+  backgroundColor: props.themeSettings.headerBackgroundColor || '#2980b9'
+}))
+
+const contentStyle = computed(() => ({
+  backgroundColor: 'transparent'
+}))
+
+const statusStyle = computed(() => {
+  if (props.previewData.isOnline) {
+    return {
+      backgroundColor: props.themeSettings.onlineStatusColor || 'rgba(46, 204, 113, 0.8)'
+    }
+  } else {
+    return {
+      backgroundColor: props.themeSettings.offlineStatusColor || 'rgba(231, 76, 60, 0.8)'
+    }
+  }
+})
+
+// 添加渐变背景样式计算
+const gradientBgStyle = computed(() => {
+  if (!props.themeSettings.wallpaper || props.themeSettings.wallpaper.style !== 'gradient') {
+    return null;
+  }
+  
+  const wallpaper = props.themeSettings.wallpaper;
+  const direction = wallpaper.gradientDirection || '45deg';
+  const color1 = wallpaper.backgroundColor || '#2d3436';
+  const color2 = wallpaper.backgroundColor2 || '#34495e';
+  const animation = wallpaper.animation ? 'gradient-move 8s ease infinite' : 'none';
+  
+  return {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: `linear-gradient(${direction}, ${color1}, ${color2})`,
+    animation: animation,
+    zIndex: -1
+  };
+});
+
+// 是否有渐变背景
+const hasGradientBg = computed(() => {
+  return props.themeSettings.wallpaper && props.themeSettings.wallpaper.style === 'gradient';
+});
+
+// 检查是否应该显示某个项目
+const shouldShow = (key: string) => {
+  return props.displayItems[key] === true
+}
+
+// 获取项目样式
+const getItemStyle = (key: string) => {
+  const bgColorKey = `${key}BgColor`
+  return {
+    backgroundColor: props.themeSettings[bgColorKey] || 'rgba(0, 0, 0, 0.1)'
+  }
 }
 
 // 格式化速度
-const formatSpeed = (bytes: number) => {
-  if (bytes === 0) return '0 B/s'
+const formatSpeed = (speed: number) => {
+  if (typeof speed !== 'number') return '0 KB/s'
   
-  // 如果是限速且为0，表示无限制
-  if (bytes === 0 && (props.displayItems.uploadLimit || props.displayItems.downloadLimit)) {
-    return '无限制'
+  if (speed < 1024) {
+    return `${speed.toFixed(1)} KB/s`
+  } else if (speed < 1024 * 1024) {
+    return `${(speed / 1024).toFixed(1)} MB/s`
+  } else {
+    return `${(speed / (1024 * 1024)).toFixed(1)} GB/s`
   }
-  
-  const k = 1024
-  const sizes = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 // 格式化大小
-const formatSize = (bytes: number): string => {
-  if (!bytes) return '0 KB'
+const formatSize = (size: number) => {
+  if (typeof size !== 'number') return '0 KB'
   
-  const units = ['B', 'KB', 'MB', 'GB', 'TB']
-  let value = bytes
-  let unitIndex = 0
-  
-  while (value >= 1024 && unitIndex < units.length - 1) {
-    value /= 1024
-    unitIndex++
+  if (size < 1024) {
+    return `${size.toFixed(1)} KB`
+  } else if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} MB`
+  } else if (size < 1024 * 1024 * 1024) {
+    return `${(size / (1024 * 1024)).toFixed(1)} GB`
+  } else {
+    return `${(size / (1024 * 1024 * 1024)).toFixed(1)} TB`
   }
-  
-  return `${value.toFixed(2)} ${units[unitIndex]}`
 }
 
-// 格式化分享率
-const formatRatio = (ratio: number): string => {
-  if (!ratio) return '0'
-  return ratio.toFixed(2)
+// 格式化项目值
+const formatItemValue = (key: string, value: any) => {
+  if (key === 'globalRatio' || key === 'averageRatio') {
+    return typeof value === 'number' ? value.toFixed(2) : '0.00'
+  } else if (key === 'freeSpace' || key === 'totalSize') {
+    return formatSize(value)
+  } else if (key === 'uploadLimit' || key === 'downloadLimit') {
+    return value > 0 ? formatSpeed(value) : '无限制'
+  } else {
+    return value
+  }
 }
 </script>
 
@@ -204,6 +366,33 @@ const formatRatio = (ratio: number): string => {
   justify-content: center;
   align-items: center;
   padding: 16px;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  
+  /* 添加渐变背景样式 */
+  .gradient-bg {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: -1;
+    pointer-events: none;
+    background-size: 400% 400%;
+  }
+  
+  @keyframes gradient-move {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
   
   .tr-preview-card {
     width: 100%;
@@ -211,14 +400,12 @@ const formatRatio = (ratio: number): string => {
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    background-color: var(--el-bg-color);
     
     .tr-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 16px;
-      background-color: #2980b9;
       color: white;
       
       .tr-logo {
@@ -242,10 +429,6 @@ const formatRatio = (ratio: number): string => {
         border-radius: 4px;
         font-size: 12px;
         background-color: rgba(255, 255, 255, 0.2);
-        
-        &.is-online {
-          background-color: #27ae60;
-        }
       }
     }
     
@@ -262,14 +445,8 @@ const formatRatio = (ratio: number): string => {
           align-items: center;
           gap: 8px;
           font-weight: 600;
-          
-          &.download {
-            color: #2980b9;
-          }
-          
-          &.upload {
-            color: #27ae60;
-          }
+          padding: 6px 8px;
+          border-radius: 4px;
         }
       }
       
@@ -282,36 +459,38 @@ const formatRatio = (ratio: number): string => {
         .tr-stat-item {
           display: flex;
           justify-content: space-between;
+          padding: 4px 8px;
+          border-radius: 4px;
           
           .stat-label {
-            color: var(--el-text-color-secondary);
-            font-size: 14px;
+            font-size: 12px;
           }
           
           .stat-value {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 12px;
           }
         }
       }
       
       .tr-totals {
-        border-top: 1px solid var(--el-border-color-lighter);
+        border-top: 1px solid var(--el-border-color-light);
         padding-top: 12px;
         
         .tr-total-item {
           display: flex;
           justify-content: space-between;
           margin-bottom: 4px;
+          padding: 4px 8px;
+          border-radius: 4px;
           
           .total-label {
-            color: var(--el-text-color-secondary);
-            font-size: 14px;
+            font-size: 12px;
           }
           
           .total-value {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 12px;
           }
         }
       }

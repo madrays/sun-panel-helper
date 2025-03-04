@@ -53,10 +53,11 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.06),
                         0 0 10px rgba(0, 0, 0, 0.04),
                         0 0 5px rgba(0, 0, 0, 0.03);
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: visible;
             touch-action: none;
             margin: 2px;
+            background: transparent;
         }
 
         .widget {
@@ -73,12 +74,13 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 28px;
+            border-radius: 24px;
             padding: 12px;
             background: transparent;
             display: flex;
             flex-direction: column;
             overflow: visible;
+            color: var(--widget-text-color, #ffffff);
         }
 
         .front {
@@ -156,7 +158,7 @@
             font-size: 16px;
             cursor: pointer;
             z-index: 1;
-            color: white;
+            color: var(--widget-text-color, #ffffff);
             width: 36px;
             height: 36px;
             display: flex;
@@ -178,7 +180,7 @@
             align-items: center;
             padding: 4px;
             gap: 2px;
-            color: white;
+            color: var(--widget-text-color, #ffffff);
             height: 100%;
             cursor: pointer;
         }
@@ -242,7 +244,7 @@
             flex: 1;
             padding: 0 4px;
             min-width: 0;
-            color: white;
+            color: var(--widget-text-color, #ffffff);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -282,7 +284,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--widget-text-color, #ffffff);
             z-index: 100;
             font-size: 12px;
             opacity: 0.8;
@@ -328,7 +330,7 @@
             justify-content: space-between;
             gap: 12px;
             padding: 8px 4px;
-            color: white;
+            color: var(--widget-text-color, #ffffff);
             font-size: 13px;
             height: 100%;
         }
@@ -789,7 +791,7 @@
             justify-content: center;
             gap: 12px;
             padding: 8px 4px;
-            color: white;
+            color: var(--widget-text-color, #ffffff);
             font-size: 13px;
         }
 
@@ -826,6 +828,17 @@
                 font-size: 12px;
             }
         }
+
+        .front-content, .back-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 24px;
+            background: var(--widget-bg-color, rgba(0, 0, 0, 0.5));
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
@@ -833,6 +846,7 @@
         <div class="widget-wrapper">
             <div class="widget">
                 <div class="front">
+                    <div class="front-content"></div>
                     <button class="menu-btn" onclick="flipWidget()"></button>
                     
                     <div class="main-info" onmouseenter="showWeatherDetails()" onmouseleave="hideWeatherDetails()">
@@ -907,6 +921,7 @@
                 </div>
 
                 <div class="back">
+                    <div class="back-content"></div>
                     <div class="main-info">
                         <button class="menu-btn" onclick="flipWidget()"></button>
                     </div>
@@ -1111,8 +1126,25 @@
             const widget = document.querySelector('.widget');
             const isFlipped = widget.getAttribute('data-flipped') === 'true';
             const popup = document.querySelector('.weather-details-popup');
+            const frontContent = document.querySelector('.front-content');
+            const backContent = document.querySelector('.back-content');
             
             popup.classList.remove('show');
+            
+            // 先改变显示状态，再执行翻转动画
+            if (frontContent && backContent) {
+                if (isFlipped) {
+                    frontContent.style.display = 'block';
+                    setTimeout(() => {
+                        backContent.style.display = 'none';
+                    }, 300); // 等待翻转完成后再隐藏背面
+                } else {
+                    backContent.style.display = 'block';
+                    setTimeout(() => {
+                        frontContent.style.display = 'none';
+                    }, 300); // 等待翻转完成后再隐藏正面
+                }
+            }
             
             widget.setAttribute('data-flipped', (!isFlipped).toString());
             widget.style.transform = isFlipped ? 'rotateY(0deg)' : 'rotateY(180deg)';
@@ -1145,17 +1177,19 @@
         renderDailyForecast();
 
         // 添加 API 配置
-        const WEATHER_API = {
-            keys: [
-                'api-key-1',
-                'api-key-2'
-            ],
-            currentKeyIndex: 0,
-            baseUrl: 'https://devapi.qweather.com/v7',
-            location: '经度,纬度',
-            retryDelay: 60000,
-            lastFailTime: {}
-        };
+        
+    <!-- 天气组件配置 -->
+    const WEATHER_API = {
+      keys: ['efe03b7beb7b4891927f859b29403943',''],
+      currentKeyIndex: 0,
+      baseUrl: 'https://devapi.qweather.com/v7',
+      location: '113.916856401,35.296636969',
+      backgroundColor: 'rgba(255, 255, 255, 0)',
+      textColor: '#FFFFFF',
+      retryDelay: 60000,
+      lastFailTime: {}
+    };
+  
 
         const weatherCache = {
             data: null,
@@ -1426,9 +1460,23 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             const widget = document.querySelector('.widget');
+            const front = document.querySelector('.front');
+            const back = document.querySelector('.back');
+            const frontContent = document.querySelector('.front-content');
+            const backContent = document.querySelector('.back-content');
             
             widget.setAttribute('data-flipped', 'false');
             widget.style.transform = 'rotateY(0deg)';
+            
+            // 应用颜色设置
+            document.documentElement.style.setProperty('--widget-bg-color', WEATHER_API.backgroundColor || 'rgba(0, 0, 0, 0.5)');
+            document.documentElement.style.setProperty('--widget-text-color', WEATHER_API.textColor || '#ffffff');
+            
+            if (frontContent) frontContent.style.background = WEATHER_API.backgroundColor || 'rgba(0, 0, 0, 0.5)';
+            if (backContent) backContent.style.background = WEATHER_API.backgroundColor || 'rgba(0, 0, 0, 0.5)';
+            
+            // 初始状态设置
+            if (backContent) backContent.style.display = 'none';
             
             startAutoUpdate();
         });

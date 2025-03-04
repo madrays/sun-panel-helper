@@ -32,7 +32,6 @@ async function reorderCSS() {
     
     const components = new Map();
     
-    console.log('正在提取CSS组件...');
     // 提取所有组件代码
     for (const name of orderConfig.css) {
       const startMark = `/* Sun-Panel-Helper CSS Start: ${name} */`;
@@ -42,7 +41,6 @@ async function reorderCSS() {
       if (startIndex !== -1) {
         const endIndex = content.indexOf(endMark) + endMark.length;
         components.set(name, content.slice(startIndex, endIndex));
-        console.log(`- 找到组件: ${name}`);
       }
     }
 
@@ -51,7 +49,6 @@ async function reorderCSS() {
       return;
     }
 
-    console.log(`共找到 ${components.size} 个CSS组件，开始重新排序...`);
 
     // 移除所有组件代码
     let newContent = content;
@@ -60,14 +57,12 @@ async function reorderCSS() {
     }
 
     // 按顺序重新插入组件
-    console.log('按配置顺序重新插入组件:');
     let insertPoint = newContent.indexOf('*/\n\n') + 4;
     for (const name of orderConfig.css) {
       if (components.has(name)) {
         const code = components.get(name);
         newContent = newContent.slice(0, insertPoint) + '\n\n' + code + newContent.slice(insertPoint);
         insertPoint += code.length + 2;
-        console.log(`- 插入组件: ${name}`);
       }
     }
 
@@ -99,7 +94,6 @@ async function reorderJS() {
     
     const components = new Map();
     
-    console.log('正在提取JS组件...');
     // 提取所有组件代码
     for (const name of orderConfig.js) {
       const startMark = `/* Sun-Panel-Helper JS Start: ${name} */`;
@@ -109,7 +103,6 @@ async function reorderJS() {
       if (startIndex !== -1) {
         const endIndex = content.indexOf(endMark) + endMark.length;
         components.set(name, content.slice(startIndex, endIndex));
-        console.log(`- 找到组件: ${name}`);
       }
     }
 
@@ -118,7 +111,6 @@ async function reorderJS() {
       return;
     }
 
-    console.log(`共找到 ${components.size} 个JS组件，开始重新排序...`);
 
     // 移除所有组件代码
     let newContent = content;
@@ -127,14 +119,12 @@ async function reorderJS() {
     }
 
     // 按顺序重新插入组件
-    console.log('按配置顺序重新插入组件:');
     let insertPoint = newContent.indexOf('*/\n\n') + 4;
     for (const name of orderConfig.js) {
       if (components.has(name)) {
         const code = components.get(name);
         newContent = newContent.slice(0, insertPoint) + '\n\n' + code + newContent.slice(insertPoint);
         insertPoint += code.length + 2;
-        console.log(`- 插入组件: ${name}`);
       }
     }
 
@@ -167,8 +157,6 @@ function delay(ms: number) {
 
 watcher
   .on('change', async (path) => {
-    console.log(`\n检测到文件变动: ${path}`);
-    console.log('等待文件写入完成...');
     await delay(2000);
     
     if (path.endsWith('index.css')) {
@@ -177,6 +165,3 @@ watcher
       await reorderJS();
     }
   });
-
-console.log('文件顺序监控已启动，等待文件变动...'); 
-console.log('文件顺序监控已启动'); 

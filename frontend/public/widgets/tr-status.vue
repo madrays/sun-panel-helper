@@ -1,12 +1,22 @@
 <template>
   <div class="tr-widget-container">
     <div class="tr-widget-wrapper">
-      <div class="tr-widget" :class="{ 'offline': !data.isOnline }">
+      <div class="tr-widget" :class="{ 'offline': !data.isOnline }" :style="{
+        backgroundColor: currentTheme.backgroundColor || '#2d3436',
+        opacity: currentTheme.backgroundOpacity || 1,
+        borderRadius: currentTheme.borderRadius || '16px'
+      }">
         <!-- 头部区域 -->
-        <div class="tr-header">
+        <div class="tr-header" :style="{
+          backgroundColor: currentTheme.headerBackgroundColor || '#2d3436'
+        }">
           <img src="/tr.png" alt="TR" class="tr-logo">
-          <span class="tr-title">{{ data.name }}</span>
-          <span class="tr-badge" :class="{ 'online': data.isOnline, 'offline': !data.isOnline }">
+          <span class="tr-title" :style="{
+            color: currentTheme.headerTextColor || '#ffffff'
+          }">{{ data.name }}</span>
+          <span class="tr-badge" :class="{ 'online': data.isOnline, 'offline': !data.isOnline }" :style="data.isOnline ? 
+            { backgroundColor: currentTheme.onlineStatusColor || 'rgba(46, 204, 113, 0.8)' } : 
+            { backgroundColor: currentTheme.offlineStatusColor || 'rgba(231, 76, 60, 0.8)' }">
             {{ data.isOnline ? '在线' : '离线' }}
           </span>
         </div>
@@ -17,14 +27,26 @@
           <div v-if="data.isOnline" class="tr-status-section">
             <!-- 速度显示区域 - 单独一行 -->
             <div v-if="hasSpeedItems" class="tr-speed-row">
-              <div v-if="shouldDisplay('downloadSpeed')" class="tr-item download">
-                <div class="tr-label">下载速度</div>
-                <div class="tr-value">{{ formatSpeed(data.downloadSpeed) }}</div>
+              <div v-if="shouldDisplay('downloadSpeed')" class="tr-item download" :style="{
+                backgroundColor: currentTheme.downloadSpeedBgColor || 'rgba(33, 150, 243, 0.15)'
+              }">
+                <div class="tr-label" :style="{
+                  color: currentTheme.downloadSpeedLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                }">下载速度</div>
+                <div class="tr-value" :style="{
+                  color: currentTheme.downloadSpeedTextColor || '#3498db'
+                }">{{ formatSpeed(data.downloadSpeed) }}</div>
               </div>
               
-              <div v-if="shouldDisplay('uploadSpeed')" class="tr-item upload">
-                <div class="tr-label">上传速度</div>
-                <div class="tr-value">{{ formatSpeed(data.uploadSpeed) }}</div>
+              <div v-if="shouldDisplay('uploadSpeed')" class="tr-item upload" :style="{
+                backgroundColor: currentTheme.uploadSpeedBgColor || 'rgba(76, 175, 80, 0.15)'
+              }">
+                <div class="tr-label" :style="{
+                  color: currentTheme.uploadSpeedLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                }">上传速度</div>
+                <div class="tr-value" :style="{
+                  color: currentTheme.uploadSpeedTextColor || '#27ae60'
+                }">{{ formatSpeed(data.uploadSpeed) }}</div>
               </div>
             </div>
             
@@ -35,93 +57,198 @@
                 <!-- 跳过速度项，因为它们已经在上面的速度行中显示 -->
                 <template v-if="item.key !== 'downloadSpeed' && item.key !== 'uploadSpeed'">
                   <!-- 活跃下载 -->
-                  <div v-if="item.key === 'activeDownloads'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">下载中</div>
-                    <div class="tr-value">{{ data.activeDownloads }}</div>
+                  <div v-if="item.key === 'activeDownloads'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.activeDownloadsBgColor || 'rgba(33, 150, 243, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.activeDownloadsLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">活跃下载</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.activeDownloadsTextColor || '#4fc3f7'
+                    }">{{ data.activeDownloads }}</div>
                   </div>
                   
-                  <!-- 活跃任务 -->
-                  <div v-else-if="item.key === 'activeTorrents'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">活跃</div>
-                    <div class="tr-value">{{ data.activeTorrents }}</div>
+                  <!-- 活跃种子 -->
+                  <div v-else-if="item.key === 'activeTorrents'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.activeTorrentsBgColor || 'rgba(156, 39, 176, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.activeTorrentsLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">活跃任务</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.activeTorrentsTextColor || '#9c27b0'
+                    }">{{ data.activeTorrents }}</div>
                   </div>
                   
-                  <!-- 暂停任务 -->
-                  <div v-else-if="item.key === 'pausedTorrents'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">暂停</div>
-                    <div class="tr-value">{{ data.pausedTorrents }}</div>
+                  <!-- 暂停种子 -->
+                  <div v-else-if="item.key === 'pausedTorrents'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.pausedTorrentsBgColor || 'rgba(255, 152, 0, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.pausedTorrentsLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">暂停任务</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.pausedTorrentsTextColor || '#ff9800'
+                    }">{{ data.pausedTorrents }}</div>
                   </div>
                   
-                  <!-- 完成任务 -->
-                  <div v-else-if="item.key === 'completedTorrents'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">完成</div>
-                    <div class="tr-value">{{ data.completedTorrents }}</div>
+                  <!-- 完成种子 -->
+                  <div v-else-if="item.key === 'completedTorrents'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.completedTorrentsBgColor || 'rgba(76, 175, 80, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.completedTorrentsLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">完成任务</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.completedTorrentsTextColor || '#4caf50'
+                    }">{{ data.completedTorrents }}</div>
                   </div>
                   
-                  <!-- 总任务数 -->
-                  <div v-else-if="item.key === 'totalTorrents'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">总数</div>
-                    <div class="tr-value">{{ data.totalTorrents }}</div>
+                  <!-- 总种子数 -->
+                  <div v-else-if="item.key === 'totalTorrents'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.totalTorrentsBgColor || 'rgba(158, 158, 158, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.totalTorrentsLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">总任务数</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.totalTorrentsTextColor || '#9e9e9e'
+                    }">{{ data.totalTorrents }}</div>
                   </div>
                   
-                  <!-- 错误任务 -->
-                  <div v-else-if="item.key === 'errorTorrents'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">错误任务</div>
-                    <div class="tr-value">{{ data.errorTorrents }}</div>
+                  <!-- 错误种子 -->
+                  <div v-else-if="item.key === 'errorTorrents'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.errorTorrentsBgColor || 'rgba(244, 67, 54, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.errorTorrentsLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">错误任务</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.errorTorrentsTextColor || '#f44336'
+                    }">{{ data.errorTorrents }}</div>
                   </div>
                   
-                  <!-- 做种数 -->
-                  <div v-else-if="item.key === 'seedingTorrents'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">做种数</div>
-                    <div class="tr-value">{{ data.seedingTorrents }}</div>
+                  <!-- 做种数量 -->
+                  <div v-else-if="item.key === 'seedingTorrents'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.seedingTorrentsBgColor || 'rgba(0, 188, 212, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.seedingTorrentsLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">做种数量</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.seedingTorrentsTextColor || '#00bcd4'
+                    }">{{ data.seedingTorrents }}</div>
                   </div>
                   
-                  <!-- 分享率 -->
-                  <div v-else-if="item.key === 'globalRatio'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">分享率</div>
-                    <div class="tr-value">{{ formatRatio(data.globalRatio) }}</div>
+                  <!-- 全局分享率 -->
+                  <div v-else-if="item.key === 'globalRatio'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.globalRatioBgColor || 'rgba(3, 169, 244, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.globalRatioLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">分享率</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.globalRatioTextColor || '#03a9f4'
+                    }">{{ formatRatio(data.globalRatio) }}</div>
                   </div>
                   
                   <!-- 平均分享率 -->
-                  <div v-else-if="item.key === 'averageRatio'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">平均分享率</div>
-                    <div class="tr-value">{{ formatRatio(data.averageRatio) }}</div>
+                  <div v-else-if="item.key === 'averageRatio'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.averageRatioBgColor || 'rgba(63, 81, 181, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.averageRatioLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">平均分享率</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.averageRatioTextColor || '#3f51b5'
+                    }">{{ formatRatio(data.averageRatio) }}</div>
                   </div>
                   
-                  <!-- 已下载 -->
-                  <div v-else-if="item.key === 'globalDownloaded'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">已下载</div>
-                    <div class="tr-value">{{ formatSize(data.globalDownloaded) }}</div>
+                  <!-- 总下载量 -->
+                  <div v-else-if="item.key === 'globalDownloaded'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.globalDownloadedBgColor || 'rgba(0, 188, 212, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.globalDownloadedLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">总下载</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.globalDownloadedTextColor || '#00bcd4'
+                    }">{{ formatSize(data.globalDownloaded) }}</div>
                   </div>
                   
-                  <!-- 已上传 -->
-                  <div v-else-if="item.key === 'globalUploaded'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">已上传</div>
-                    <div class="tr-value">{{ formatSize(data.globalUploaded) }}</div>
+                  <!-- 总上传量 -->
+                  <div v-else-if="item.key === 'globalUploaded'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.globalUploadedBgColor || 'rgba(233, 30, 99, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.globalUploadedLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">总上传</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.globalUploadedTextColor || '#e91e63'
+                    }">{{ formatSize(data.globalUploaded) }}</div>
                   </div>
                   
-                  <!-- 上传限制 -->
-                  <div v-else-if="item.key === 'uploadLimit'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">上传限制</div>
-                    <div class="tr-value">{{ data.uploadLimit === 0 ? '无限制' : formatSpeed(data.uploadLimit) }}</div>
+                  <!-- 上传限速 -->
+                  <div v-else-if="item.key === 'uploadLimit'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.uploadLimitBgColor || 'rgba(255, 87, 34, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.uploadLimitLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">上传限速</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.uploadLimitTextColor || '#ff5722'
+                    }">{{ data.uploadLimit === 0 ? '无限制' : formatSpeed(data.uploadLimit) }}</div>
                   </div>
                   
-                  <!-- 下载限制 -->
-                  <div v-else-if="item.key === 'downloadLimit'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">下载限制</div>
-                    <div class="tr-value">{{ data.downloadLimit === 0 ? '无限制' : formatSpeed(data.downloadLimit) }}</div>
+                  <!-- 下载限速 -->
+                  <div v-else-if="item.key === 'downloadLimit'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.downloadLimitBgColor || 'rgba(121, 85, 72, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.downloadLimitLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">下载限速</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.downloadLimitTextColor || '#795548'
+                    }">{{ data.downloadLimit === 0 ? '无限制' : formatSpeed(data.downloadLimit) }}</div>
                   </div>
                   
-                  <!-- 可用空间 -->
-                  <div v-else-if="item.key === 'freeSpace'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">可用空间</div>
-                    <div class="tr-value">{{ formatSize(data.freeSpace) }}</div>
+                  <!-- 剩余空间 -->
+                  <div v-else-if="item.key === 'freeSpace'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.freeSpaceBgColor || 'rgba(96, 125, 139, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.freeSpaceLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">剩余空间</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.freeSpaceTextColor || '#607d8b'
+                    }">{{ formatSize(data.freeSpace) }}</div>
                   </div>
                   
-                  <!-- 总体积 -->
-                  <div v-else-if="item.key === 'totalSize'" class="tr-item" :style="getItemStyle()">
-                    <div class="tr-label">总体积</div>
-                    <div class="tr-value">{{ formatSize(data.totalSize) }}</div>
+                  <!-- 总大小 -->
+                  <div v-else-if="item.key === 'totalSize'" class="tr-item" :style="{
+                    backgroundColor: currentTheme.totalSizeBgColor || 'rgba(97, 97, 97, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="tr-label" :style="{
+                      color: currentTheme.totalSizeLabelColor || currentTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">总大小</div>
+                    <div class="tr-value" :style="{
+                      color: currentTheme.totalSizeTextColor || '#616161'
+                    }">{{ formatSize(data.totalSize) }}</div>
                   </div>
                 </template>
               </template>
@@ -203,30 +330,126 @@ export default {
       containerHeight: 0,
       containerWidth: 0,
       sessionId: '', // 存储Transmission会话ID
+      currentTheme: {
+          backgroundColor: '#2d3436',
+          backgroundOpacity: 1,
+        borderRadius: '16px',
+          headerBackgroundColor: '#2d3436',
+          headerTextColor: '#ffffff',
+          onlineStatusColor: 'rgba(46, 204, 113, 0.8)',
+          offlineStatusColor: 'rgba(231, 76, 60, 0.8)',
+        labelTextColor: 'rgba(255, 255, 255, 0.8)',
+        valueTextColor: '#ffffff',
+          
+          // 下载速度
+          downloadSpeedBgColor: 'rgba(33, 150, 243, 0.15)',
+          downloadSpeedTextColor: '#3498db',
+        downloadSpeedLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 上传速度
+          uploadSpeedBgColor: 'rgba(76, 175, 80, 0.15)',
+          uploadSpeedTextColor: '#27ae60',
+        uploadSpeedLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 活跃下载
+          activeDownloadsBgColor: 'rgba(33, 150, 243, 0.1)',
+          activeDownloadsTextColor: '#4fc3f7',
+        activeDownloadsLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 活跃任务
+          activeTorrentsBgColor: 'rgba(156, 39, 176, 0.1)',
+          activeTorrentsTextColor: '#9c27b0',
+        activeTorrentsLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 暂停任务
+          pausedTorrentsBgColor: 'rgba(255, 152, 0, 0.1)',
+          pausedTorrentsTextColor: '#ff9800',
+        pausedTorrentsLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 完成任务
+          completedTorrentsBgColor: 'rgba(76, 175, 80, 0.1)',
+          completedTorrentsTextColor: '#4caf50',
+        completedTorrentsLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 总任务数
+          totalTorrentsBgColor: 'rgba(158, 158, 158, 0.1)',
+          totalTorrentsTextColor: '#9e9e9e',
+        totalTorrentsLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 错误任务
+          errorTorrentsBgColor: 'rgba(244, 67, 54, 0.1)',
+          errorTorrentsTextColor: '#f44336',
+        errorTorrentsLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 做种数
+          seedingTorrentsBgColor: 'rgba(0, 188, 212, 0.1)',
+          seedingTorrentsTextColor: '#00bcd4',
+        seedingTorrentsLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 分享率
+          globalRatioBgColor: 'rgba(3, 169, 244, 0.1)',
+          globalRatioTextColor: '#03a9f4',
+        globalRatioLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 平均分享率
+          averageRatioBgColor: 'rgba(63, 81, 181, 0.1)',
+          averageRatioTextColor: '#3f51b5',
+        averageRatioLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 已下载
+          globalDownloadedBgColor: 'rgba(0, 188, 212, 0.1)',
+          globalDownloadedTextColor: '#00bcd4',
+        globalDownloadedLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 已上传
+          globalUploadedBgColor: 'rgba(233, 30, 99, 0.1)',
+          globalUploadedTextColor: '#e91e63',
+        globalUploadedLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 上传限制
+          uploadLimitBgColor: 'rgba(255, 87, 34, 0.1)',
+          uploadLimitTextColor: '#ff5722',
+        uploadLimitLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 下载限制
+          downloadLimitBgColor: 'rgba(121, 85, 72, 0.1)',
+          downloadLimitTextColor: '#795548',
+        downloadLimitLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 可用空间
+          freeSpaceBgColor: 'rgba(96, 125, 139, 0.1)',
+          freeSpaceTextColor: '#607d8b',
+        freeSpaceLabelColor: 'rgba(255, 255, 255, 0.8)',
+          
+          // 总体积
+          totalSizeBgColor: 'rgba(97, 97, 97, 0.1)',
+          totalSizeTextColor: '#616161',
+        totalSizeLabelColor: 'rgba(255, 255, 255, 0.8)'
+      }
     };
   },
   computed: {
     // 根据配置的显示顺序排序显示项
     sortedDisplayItems() {
       // 创建一个映射，用于快速查找项目标签
-      const labelMap = {
+      const displayItemLabels = {
         downloadSpeed: '下载速度',
         uploadSpeed: '上传速度',
-        activeDownloads: '下载中',
-        activeTorrents: '活跃',
-        pausedTorrents: '暂停',
-        completedTorrents: '完成',
-        totalTorrents: '总数',
-        errorTorrents: '错误任务',
-        seedingTorrents: '做种数',
+        activeDownloads: '活跃下载',
+        activeTorrents: '活跃任务',
+        pausedTorrents: '暂停任务',
+        completedTorrents: '完成任务',
+        totalTorrents: '总任务数',
         globalRatio: '分享率',
+        globalDownloaded: '总下载',
+        globalUploaded: '总上传',
+        freeSpace: '剩余空间',
+        seedingTorrents: '做种数量',
+        totalSize: '总大小',
         averageRatio: '平均分享率',
-        globalDownloaded: '已下载',
-        globalUploaded: '已上传',
-        uploadLimit: '上传限制',
-        downloadLimit: '下载限制',
-        freeSpace: '可用空间',
-        totalSize: '总体积'
+        errorTorrents: '错误任务',
+        uploadLimit: '上传限速',
+        downloadLimit: '下载限速'
       };
       
       // 如果没有配置显示顺序，或者显示顺序为空，使用默认顺序
@@ -258,7 +481,7 @@ export default {
       const result = displayOrder.map(key => {
         return {
           key: key,
-          label: labelMap[key] || key
+          label: displayItemLabels[key] || key
         };
       });
       
@@ -343,6 +566,78 @@ export default {
       };
     },
     
+    // 从配置中提取并设置主题
+    processThemeSettings() {
+      // 处理主题设置
+      if (this.config && this.config.themeSettings) {
+        const themeSettings = this.config.themeSettings;
+        
+        // 处理主题设置 - 兼容两种可能的结构
+        // 1. 如果存在theme对象，使用它
+        if (themeSettings.theme) {
+          this.applyThemeObject(themeSettings.theme);
+        } 
+        // 2. 如果没有theme对象，但直接在themeSettings中有颜色属性，则直接使用themeSettings
+        else if (
+          themeSettings.backgroundColor || 
+          themeSettings.headerBackgroundColor || 
+          themeSettings.headerTextColor
+        ) {
+          this.applyThemeObject(themeSettings);
+        }
+      }
+      
+      // 打印最终的主题设置，用于调试
+
+    },
+    
+    // 添加新方法，用于应用主题对象
+    applyThemeObject(theme) {
+      // 复制所有主题设置
+      Object.keys(theme).forEach(key => {
+        // 跳过wallpaper对象，因为它已经在上面处理过了
+        if (key === 'wallpaper') return;
+        
+        if (key in this.currentTheme) {
+          this.currentTheme[key] = theme[key];
+        }
+      });
+      
+      // 特殊处理某些项目的颜色设置 - 如果没有特定的颜色设置，则使用全局默认值
+      const items = [
+        'downloadSpeed', 'uploadSpeed', 'totalDownloaded', 'totalUploaded', 
+        'activeDownloads', 'activeTorrents', 'pausedTorrents', 'totalTorrents', 
+        'seedingTorrents', 'downloadingTorrents', 'errorTorrents', 'checkingTorrents', 
+        'ratio', 'freeSpace'
+      ];
+      
+      items.forEach(item => {
+        // 检查是否存在项目特定的背景颜色
+        const bgColorKey = `${item}BgColor`;
+        if (theme[bgColorKey] && this.currentTheme[bgColorKey] !== undefined) {
+          this.currentTheme[bgColorKey] = theme[bgColorKey];
+        }
+        
+        // 检查是否存在项目特定的文本颜色
+        const textColorKey = `${item}TextColor`;
+        if (theme[textColorKey] && this.currentTheme[textColorKey] !== undefined) {
+          this.currentTheme[textColorKey] = theme[textColorKey];
+        } else if (this.currentTheme[textColorKey] !== undefined && theme.valueTextColor) {
+          // 如果未指定特定项目的文本颜色，则使用全局值文本颜色
+          this.currentTheme[textColorKey] = theme.valueTextColor;
+        }
+        
+        // 检查是否存在项目特定的标签颜色
+        const labelColorKey = `${item}LabelColor`;
+        if (theme[labelColorKey] && this.currentTheme[labelColorKey] !== undefined) {
+          this.currentTheme[labelColorKey] = theme[labelColorKey];
+        } else if (this.currentTheme[labelColorKey] !== undefined && theme.labelTextColor) {
+          // 如果未指定特定项目的标签颜色，则使用全局标签文本颜色
+          this.currentTheme[labelColorKey] = theme.labelTextColor;
+        }
+      });
+    },
+    
     // 获取Transmission状态
     fetchData() {
       // 使用与QB组件相同的API路径格式，使用相对路径
@@ -407,6 +702,9 @@ export default {
             // 更新数据和配置
             this.data = result.data;
             this.config = config;
+            
+            // 处理主题设置
+            this.processThemeSettings();
           } else {
             console.error('API返回的数据格式不正确:', originalResult);
             this.data.isOnline = false;

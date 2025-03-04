@@ -84,6 +84,10 @@ RUN mkdir -p /app/backend/data \
     && echo '[]' > /app/backend/data/users.json \
     && chmod -R 777 /app/backend/data
 
+# 创建备份目录并设置权限
+RUN mkdir -p /app/backend/backups \
+    && chmod -R 777 /app/backend/backups
+
 # 安装 Node.js
 RUN apk add --no-cache nodejs npm
 

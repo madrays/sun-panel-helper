@@ -1,4 +1,7 @@
-/* 
+/* Sun-Panel-Helper CSS */
+/* 此文件由系统自动管理，请勿手动修改 */
+/* 警告：手动修改可能导致样式冲突或程序异常 */
+/* 上次更新：2025/3/4 22:51:01 */
 
 /* Sun-Panel-Helper CSS Start: clock-style */
 /* 引入默认字体 */
@@ -97,66 +100,6 @@ span.clock-week {
 }
 /* Sun-Panel-Helper CSS End: global-font */
 
-/* Sun-Panel-Helper CSS Start: fixed-widgets */
-/* ====================== Widget组件样式 开始 ====================== */
-/* Widget容器布局 */
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 20px;
-}
-
-/* Widget基础样式 */
-.widget {
-    box-sizing: content-box;
-    border-radius: 0px;
-    transition: transform 0.3s ease;
-    margin: 0px;
-    flex: 1 1 100px;
-}
-
-/* 换行控制器 */
-.widget-break {
-    flex-basis: 100%;
-    width: 100%;
-    height: 0;
-    margin: 0;
-    padding: 0;
-    clear: both;
-}
-
-/* 移动端布局控制 */
-@media screen and (max-width: 768px) {
-    .row {
-        gap: -8px;
-        margin-top: -10px;
-        display: flex;
-        flex-grow: 150;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    .widget {
-        display: none;
-    }
-
-    .widget.show-on-mobile {
-        display: block;
-    }
-}
-
-/* Widget hover效果 */
-@media screen and (min-width: 769px) {
-    .widget:hover {
-        transform: translateY(-5px);
-    }
-}
-/* ====================== Widget组件样式 结束 ====================== */
-/* Sun-Panel-Helper CSS End: fixed-widgets */
-
 /* Sun-Panel-Helper CSS Start: xiantiao */
 /* 背景线条样式 BY 香水 [二群大佬提供] */
 
@@ -201,7 +144,7 @@ span.clock-week {
 
 /* Sun-Panel-Helper CSS Start: mouse-cursor */
 body {
-  cursor: url(https://img.hi-linux.com/staticfile/P1i7yA-2024-04-26-hZZjUZ.png) 0 0, default !important;
+  cursor: url(/custom/helper/mouse/mouse-1737830525236-403933519.png) 0 0, default !important;
 }
 
 .cursor-pointer,
@@ -218,7 +161,7 @@ button:hover,
   width: 250px;
   height: 250px;
   margin-top: -70px;
-  content: url();
+  content: url(/custom/helper/logo/1737858327285-414092975-15-23-06-837_512.gif);
 }
 
 /* 手机端Logo样式 */
@@ -227,7 +170,7 @@ button:hover,
     width: 200px;
     height: 150px;
     margin-top: -30px;
-    content: url();
+    content: url(/custom/helper/logo/1737858327285-414092975-15-23-06-837_512.gif);
   }
 }
 
@@ -237,7 +180,7 @@ button:hover,
     width: 200px;
     height: 200px;
     margin-top: -50px;
-    content: url();
+    content: url(/custom/helper/logo/1737858327285-414092975-15-23-06-837_512.gif);
   }
 }
 /* Sun-Panel-Helper CSS End: custom-logo */
@@ -337,7 +280,4 @@ body {
 .system-monitor {
   margin-top: 0px !important;
 }
-/* Sun-Panel-Helper CSS End: layout-adjust */Sun-Panel-Helper CSS */
-/* 此文件由系统自动管理，请勿手动修改 */
-/* 警告：手动修改可能导致样式冲突或程序异常 */
-/* 上次更新：2025/2/8 13:04:15 */
+/* Sun-Panel-Helper CSS End: layout-adjust */

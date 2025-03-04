@@ -11,10 +11,7 @@ const cssTemplate = readFileSync(join(__dirname, 'template.css'), 'utf-8')
  * 生成组件代码
  */
 function generateCode(widgets: any[], customCode: string) {
-  console.log('生成代码，输入:', {
-    widgets,
-    customCode
-  })
+
   
   // 生成 widgets 数组字符串
   const widgetsCode = widgets.map(widget => {
@@ -33,7 +30,7 @@ function generateCode(widgets: any[], customCode: string) {
       if (existingFile) {
         // 使用已存在的文件
         filename = existingFile
-        console.log('使用已存在的天气组件文件:', filename)
+
       } else {
         // 生成新文件
         const timestamp = Date.now()
@@ -44,7 +41,7 @@ function generateCode(widgets: any[], customCode: string) {
         // 复制模板文件
         const template = readFileSync(templatePath, 'utf-8')
         writeFileSync(newPath, template, 'utf-8')
-        console.log('生成新的天气组件文件:', filename)
+        
       }
       
       return `    {
@@ -65,7 +62,6 @@ function generateCode(widgets: any[], customCode: string) {
     }`;
   }).join(',\n');
   
-  console.log('生成的代码:', widgetsCode)
   let js = jsTemplate
     .replace('const WIDGETS = []', `const WIDGETS = [\n${widgetsCode}\n]`)
     .replace(
@@ -82,20 +78,12 @@ function generateCode(widgets: any[], customCode: string) {
  * 部署固定组件
  */
 export async function deployFixedWidgets(widgets: any[], customCode: string): Promise<void> {
-  console.log('开始部署固定组件:', {
-    widgets,
-    customCode
-  })
+  
   
   const { js, css } = generateCode(widgets, customCode)
-  console.log('生成的代码:', {
-    js,
-    css
-  })
-  
+
   try {
     await deploy(js, css)
-    console.log('部署完成')
   } catch (error) {
     console.error('部署失败:', error)
     throw error

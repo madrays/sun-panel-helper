@@ -12,15 +12,22 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/archiver": "^6.0.3",
+    "@types/extract-zip": "^2.0.0",
+    "@types/uuid": "^10.0.0",
+    "archiver": "^7.0.1",
     "axios": "^1.8.1",
     "bcryptjs": "^2.4.3",
     "chokidar": "^3.5.3",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "extract-zip": "^2.0.1",
     "jsonwebtoken": "^9.0.0",
     "multer": "^1.4.5-lts.1",
     "qbittorrent-api-v2": "^1.2.2",
+    "uuid": "^11.1.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

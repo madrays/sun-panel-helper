@@ -31,7 +31,7 @@
         <div class="qb-list">
           <div 
             v-for="(qb, index) in qbList" 
-            :key="qb.id" 
+            :key="index" 
             class="qb-item"
             :class="{ active: currentQBIndex === index }"
             @click="selectQB(index)"
@@ -108,35 +108,242 @@
                   <p>预览区域为响应式布局，实际部署后会根据最终部署环境自动调整大小和布局</p>
                 </el-alert>
               </div>
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="refreshPreview"
-              >
-                刷新预览
-              </el-button>
+              
+              <div class="preview-actions">
+                <el-button 
+                  type="primary" 
+                  size="small" 
+                  @click="refreshPreview"
+                >
+                  刷新预览
+                </el-button>
+              </div>
             </div>
+            
             <div class="preview-content">
+              <!-- 主题设置区域 -->
+              <el-collapse>
+                <el-collapse-item name="theme">
+                  <template #title>
+                    <span class="highlight-title">
+                      <el-icon style="margin-right: 6px;"><Brush /></el-icon>
+                      主题设置
+                    </span>
+                  </template>
+                  <el-tabs type="card" style="margin-bottom: 10px;">
+                    <el-tab-pane label="基础主题">
+                      <div class="theme-grid">
+                        <!-- 基础颜色设置 -->
+                        <el-form-item label="背景颜色" class="mini-form-item">
+                          <el-color-picker v-model="themeSettings.backgroundColor" size="small" show-alpha @change="handleThemeChange" />
+                        </el-form-item>
+                        <el-form-item label="背景透明度" class="mini-form-item">
+                          <el-slider v-model="themeSettings.backgroundOpacity" :min="0" :max="1" :step="0.1" @change="handleThemeChange" />
+                        </el-form-item>
+                        <el-form-item label="边框圆角" class="mini-form-item">
+                          <el-input v-model="themeSettings.borderRadius" size="small" @change="handleThemeChange" />
+                        </el-form-item>
+                        
+                        <!-- 头部设置 -->
+                        <el-form-item label="头部背景" class="mini-form-item">
+                          <el-color-picker v-model="themeSettings.headerBackgroundColor" size="small" @change="handleThemeChange" />
+                        </el-form-item>
+                        <el-form-item label="头部文本色" class="mini-form-item">
+                          <el-color-picker v-model="themeSettings.headerTextColor" size="small" @change="handleThemeChange" />
+                        </el-form-item>
+                        
+                        <!-- 状态颜色 -->
+                        <el-form-item label="在线状态色" class="mini-form-item">
+                          <el-color-picker v-model="themeSettings.onlineStatusColor" size="small" show-alpha @change="handleThemeChange" />
+                        </el-form-item>
+                        <el-form-item label="离线状态色" class="mini-form-item">
+                          <el-color-picker v-model="themeSettings.offlineStatusColor" size="small" show-alpha @change="handleThemeChange" />
+                        </el-form-item>
+                      </div>
+                    </el-tab-pane>
+                    
+                    <el-tab-pane label="项目颜色">
+                      <el-collapse accordion style="width: 100%;">
+                        <el-collapse-item title="下载速度">
+                          <div class="theme-grid">
+                            <el-form-item label="背景颜色" class="mini-form-item">
+                              <el-color-picker v-model="themeSettings.downloadSpeedBgColor" size="small" show-alpha @change="handleThemeChange" />
+                            </el-form-item>
+                            <el-form-item label="值文本色" class="mini-form-item">
+                              <el-color-picker v-model="themeSettings.downloadSpeedTextColor" size="small" @change="handleThemeChange" />
+                            </el-form-item>
+                            <el-form-item label="标签文本色" class="mini-form-item">
+                              <el-color-picker v-model="themeSettings.downloadSpeedLabelColor" size="small" @change="handleThemeChange" />
+                            </el-form-item>
+                          </div>
+                        </el-collapse-item>
+                        
+                        <el-collapse-item title="上传速度">
+                          <div class="theme-grid">
+                            <el-form-item label="背景颜色" class="mini-form-item">
+                              <el-color-picker v-model="themeSettings.uploadSpeedBgColor" size="small" show-alpha @change="handleThemeChange" />
+                            </el-form-item>
+                            <el-form-item label="值文本色" class="mini-form-item">
+                              <el-color-picker v-model="themeSettings.uploadSpeedTextColor" size="small" @change="handleThemeChange" />
+                            </el-form-item>
+                            <el-form-item label="标签文本色" class="mini-form-item">
+                              <el-color-picker v-model="themeSettings.uploadSpeedLabelColor" size="small" @change="handleThemeChange" />
+                            </el-form-item>
+                          </div>
+                        </el-collapse-item>
+                        
+                        <!-- 动态生成其他项目的颜色设置 -->
+                        <template v-for="(label, key) in displayItemLabels" :key="key">
+                          <el-collapse-item 
+                            :title="label"
+                            v-if="key !== 'downloadSpeed' && key !== 'uploadSpeed'"
+                          >
+                            <div class="theme-grid">
+                              <el-form-item label="背景颜色" class="mini-form-item">
+                                <el-color-picker v-model="themeSettings[`${key}BgColor`]" size="small" show-alpha @change="handleThemeChange" />
+                              </el-form-item>
+                              <el-form-item label="值文本色" class="mini-form-item">
+                                <el-color-picker v-model="themeSettings[`${key}TextColor`]" size="small" @change="handleThemeChange" />
+                              </el-form-item>
+                              <el-form-item label="标签文本色" class="mini-form-item">
+                                <el-color-picker v-model="themeSettings[`${key}LabelColor`]" size="small" @change="handleThemeChange" />
+                              </el-form-item>
+                            </div>
+                          </el-collapse-item>
+                        </template>
+                      </el-collapse>
+                    </el-tab-pane>
+                    
+                    <el-tab-pane label="预设主题">
+                      <div class="preset-themes">
+                        <div class="preset-theme-grid">
+                          <div class="preset-theme-card" @click="applyPresetTheme('dark')">
+                            <div class="preset-theme-preview dark-theme"></div>
+                            <div class="preset-theme-name">暗色主题</div>
+                          </div>
+                          <div class="preset-theme-card" @click="applyPresetTheme('light')">
+                            <div class="preset-theme-preview light-theme"></div>
+                            <div class="preset-theme-name">亮色主题</div>
+                          </div>
+                          <div class="preset-theme-card" @click="applyPresetTheme('nord')">
+                            <div class="preset-theme-preview nord-theme"></div>
+                            <div class="preset-theme-name">Nord主题</div>
+                          </div>
+                          <div class="preset-theme-card" @click="applyPresetTheme('elegant')">
+                            <div class="preset-theme-preview elegant-theme"></div>
+                            <div class="preset-theme-name">优雅主题</div>
+                          </div>
+                          <div class="preset-theme-card" @click="applyPresetTheme('acrylic')">
+                            <div class="preset-theme-preview acrylic-theme"></div>
+                            <div class="preset-theme-name">亚克力主题</div>
+                          </div>
+                          <div class="preset-theme-card" @click="applyPresetTheme('minimal')">
+                            <div class="preset-theme-preview minimal-theme"></div>
+                            <div class="preset-theme-name">极简主题</div>
+                          </div>
+                          <div class="preset-theme-card" @click="applyPresetTheme('colorful')">
+                            <div class="preset-theme-preview colorful-theme"></div>
+                            <div class="preset-theme-name">多彩主题</div>
+                          </div>
+                        </div>
+                      </div>
+                    </el-tab-pane>
+                  </el-tabs>
+                  
+                  <div class="action-buttons">
+                    <el-button type="primary" size="small" @click="handleThemeUpdate(themeSettings)">应用主题</el-button>
+                    <el-button size="small" @click="resetTheme">重置</el-button>
+                  </div>
+                </el-collapse-item>
+              </el-collapse>
+              
+              <!-- 有效配置时显示iframe预览 -->
               <div v-if="currentQB && currentQB.isConfigValid" class="iframe-preview">
-                <div class="gradient-bg"></div>
+                <div class="gradient-bg" :style="gradientBgStyle"></div>
                 <iframe 
                   :src="widgetUrl" 
                   frameborder="0" 
-                  width="100%" 
-                  height="300"
-                  @load="iframeLoaded = true"
+                  :style="iframeStyle"
+                  @load="handleIframeLoaded"
                 ></iframe>
+                <div class="dimension-display">
+                  {{ componentSize.width }} × {{ componentSize.height }}
+                </div>
                 <div v-if="!iframeLoaded" class="iframe-loading">
                   <el-icon class="is-loading"><Loading /></el-icon>
                   <span>加载预览中...</span>
                 </div>
               </div>
-              <Preview 
-                v-else-if="currentQB" 
-                :preview-data="previewData" 
-                :display-items="currentQB.displayItems"
-              />
-              <div v-else class="no-preview">
+              
+              <!-- 壁纸背景和组件尺寸设置区域 -->
+              <el-card v-if="currentQB && currentQB.isConfigValid" class="preview-settings-card">
+                <template #header>
+                  <div class="section-title">
+                    <span>预览区域设置</span>
+                  </div>
+                </template>
+                
+                <el-tabs type="border-card">
+                  <el-tab-pane label="壁纸背景设置">
+                    <div class="theme-grid responsive-grid">
+                      <el-form-item label="壁纸背景色" class="mini-form-item">
+                        <el-color-picker v-model="wallpaperSettings.backgroundColor" size="small" show-alpha @change="handleWallpaperChange" />
+                      </el-form-item>
+                      <el-form-item label="壁纸样式" class="mini-form-item">
+                        <el-select v-model="wallpaperSettings.style" size="small" @change="handleWallpaperChange">
+                          <el-option label="渐变色" value="gradient" />
+                          <el-option label="纯色" value="solid" />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item v-if="wallpaperSettings.style === 'gradient'" label="渐变方向" class="mini-form-item">
+                        <el-select v-model="wallpaperSettings.direction" size="small" @change="handleWallpaperChange">
+                          <el-option label="左上到右下" value="135deg" />
+                          <el-option label="左到右" value="90deg" />
+                          <el-option label="上到下" value="180deg" />
+                          <el-option label="右上到左下" value="225deg" />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item v-if="wallpaperSettings.style === 'gradient'" label="第二背景色" class="mini-form-item">
+                        <el-color-picker v-model="wallpaperSettings.backgroundColor2" size="small" show-alpha @change="handleWallpaperChange" />
+                      </el-form-item>
+                      <el-form-item v-if="wallpaperSettings.style === 'gradient'" label="动画效果" class="mini-form-item">
+                        <el-switch v-model="wallpaperSettings.animation" @change="handleWallpaperChange" />
+                      </el-form-item>
+                    </div>
+                    
+                    <div class="preset-themes responsive-buttons">
+                      <el-button type="primary" size="small" @click="applyWallpaperPreset('dark')">深色壁纸</el-button>
+                      <el-button type="success" size="small" @click="applyWallpaperPreset('light')">亮色壁纸</el-button>
+                      <el-button type="info" size="small" @click="applyWallpaperPreset('elegant')">优雅壁纸</el-button>
+                      <el-button type="warning" size="small" @click="applyWallpaperPreset('modern')">现代壁纸</el-button>
+                      <el-button type="danger" size="small" @click="applyWallpaperPreset('vibrant')">鲜艳壁纸</el-button>
+                    </div>
+                  </el-tab-pane>
+                  
+                  <el-tab-pane label="组件尺寸设置">
+                    <div class="theme-grid responsive-grid">
+                      <el-form-item label="宽度" class="mini-form-item">
+                        <el-slider v-model="componentSize.width" :min="200" :max="800" style="width: 100%" @change="handleSizeChange" />
+                        <span class="size-value">{{componentSize.width}}px</span>
+                      </el-form-item>
+                      <el-form-item label="高度" class="mini-form-item">
+                        <el-slider v-model="componentSize.height" :min="200" :max="800" style="width: 100%" @change="handleSizeChange" />
+                        <span class="size-value">{{componentSize.height}}px</span>
+                      </el-form-item>
+                    </div>
+                    
+                    <div class="preset-themes responsive-buttons">
+                      <el-button type="primary" size="small" @click="applyComponentSize('small')">小尺寸</el-button>
+                      <el-button type="success" size="small" @click="applyComponentSize('medium')">中尺寸</el-button>
+                      <el-button type="warning" size="small" @click="applyComponentSize('large')">大尺寸</el-button>
+                      <el-button type="danger" size="small" @click="applyComponentSize('mobile')">手机尺寸</el-button>
+                      <el-button type="info" size="small" @click="applyComponentSize('reset')">重置尺寸</el-button>
+                    </div>
+                  </el-tab-pane>
+                </el-tabs>
+              </el-card>
+              
+              <div v-if="!currentQB" class="no-preview">
                 <el-empty description="请先配置QB下载器" />
               </div>
             </div>
@@ -151,9 +358,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, DocumentCopy, Loading } from '@element-plus/icons-vue'
+import { Delete, DocumentCopy, Loading, Brush } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import Params from './params.vue'
 import Preview from './preview.vue'
@@ -187,6 +394,124 @@ interface ApiResponse<T> {
 interface PoolData {
   widgets: ComponentPoolItem[]
   [key: string]: any
+}
+
+// 定义主题设置接口
+interface ThemeSettings {
+  backgroundColor: string
+  backgroundOpacity: number
+  headerBackgroundColor: string
+  headerTextColor: string
+  onlineStatusColor: string
+  offlineStatusColor: string
+  
+  // 下载速度
+  downloadSpeedBgColor: string
+  downloadSpeedTextColor: string
+  downloadSpeedLabelColor: string
+  
+  // 上传速度
+  uploadSpeedBgColor: string  
+  uploadSpeedTextColor: string
+  uploadSpeedLabelColor: string
+  
+  // 活跃下载
+  activeDownloadsBgColor: string
+  activeDownloadsTextColor: string
+  activeDownloadsLabelColor: string
+  
+  // 活跃任务
+  activeTorrentsBgColor: string
+  activeTorrentsTextColor: string
+  activeTorrentsLabelColor: string
+  
+  // 暂停任务
+  pausedTorrentsBgColor: string
+  pausedTorrentsTextColor: string
+  pausedTorrentsLabelColor: string
+  
+  // 完成任务
+  completedTorrentsBgColor: string
+  completedTorrentsTextColor: string
+  completedTorrentsLabelColor: string
+  
+  // 总任务数
+  totalTorrentsBgColor: string
+  totalTorrentsTextColor: string
+  totalTorrentsLabelColor: string
+  
+  // 错误任务
+  errorTorrentsBgColor: string
+  errorTorrentsTextColor: string
+  errorTorrentsLabelColor: string
+  
+  // 做种数
+  seedingTorrentsBgColor: string
+  seedingTorrentsTextColor: string
+  seedingTorrentsLabelColor: string
+  
+  // I/O任务
+  ioTasksBgColor: string
+  ioTasksTextColor: string
+  ioTasksLabelColor: string
+  
+  // 分享率
+  globalRatioBgColor: string
+  globalRatioTextColor: string
+  globalRatioLabelColor: string
+  
+  // 平均分享率
+  averageRatioBgColor: string
+  averageRatioTextColor: string
+  averageRatioLabelColor: string
+  
+  // 已下载
+  globalDownloadedBgColor: string
+  globalDownloadedTextColor: string
+  globalDownloadedLabelColor: string
+  
+  // 已上传
+  globalUploadedBgColor: string
+  globalUploadedTextColor: string
+  globalUploadedLabelColor: string
+  
+  // 上传限制
+  uploadLimitBgColor: string
+  uploadLimitTextColor: string
+  uploadLimitLabelColor: string
+  
+  // 下载限制
+  downloadLimitBgColor: string
+  downloadLimitTextColor: string
+  downloadLimitLabelColor: string
+  
+  // 可用空间
+  freeSpaceBgColor: string
+  freeSpaceTextColor: string
+  freeSpaceLabelColor: string
+  
+  // 总体积
+  totalSizeBgColor: string
+  totalSizeTextColor: string
+  totalSizeLabelColor: string
+  
+  borderRadius: string
+  [key: string]: any
+}
+
+// 定义壁纸设置接口
+interface WallpaperSettings {
+  backgroundColor: string
+  backgroundColor2: string
+  style: 'gradient' | 'solid'
+  direction: string
+  animation: boolean
+}
+
+// 定义组件尺寸接口
+interface ComponentSize {
+  width: number
+  height: number
 }
 
 // 域名前缀
@@ -410,7 +735,7 @@ const saveConfig = async () => {
     
     // 确保displayOrder字段存在且只包含用户选择的项目
     if (!config.displayOrder || !Array.isArray(config.displayOrder)) {
-      console.log('创建默认的displayOrder字段');
+
       // 只包含已勾选的项目
       config.displayOrder = Object.keys(config.displayItems)
         .filter(key => config.displayItems[key] === true);
@@ -421,7 +746,6 @@ const saveConfig = async () => {
       );
     }
     
-    console.log('保存前的最终配置:', JSON.stringify(config));
     
     // 使用QBService保存配置
     const qbService = new QBService(config)
@@ -525,7 +849,7 @@ const loadQBList = async () => {
         addNewQB()
       }
       
-      console.log('从后端API加载了QB配置列表:', qbList.value)
+
       return
     }
   } catch (error) {
@@ -651,7 +975,6 @@ const applyToFixed = async () => {
       method: 'GET'
     })
     
-    console.log('获取到的固定组件池:', response)
     
     const poolData = response.data || {}
     const poolWidgets = poolData.widgets || []
@@ -704,7 +1027,6 @@ const applyToFixed = async () => {
           }
         })
         
-        console.log('更新组件响应:', updateResponse)
         ElMessage.success('已更新固定组件')
       } else {
         // 如果不存在，则添加新组件
@@ -719,7 +1041,6 @@ const applyToFixed = async () => {
           mobileShow: true
         }
         
-        console.log('添加新组件:', newWidget)
         
         const addResponse = await request({
           url: '/api/fixed/pool',
@@ -730,7 +1051,6 @@ const applyToFixed = async () => {
           }
         })
         
-        console.log('添加组件响应:', addResponse)
         ElMessage.success('已添加到固定组件')
       }
       
@@ -778,7 +1098,6 @@ const applyToFree = async () => {
       method: 'GET'
     })
     
-    console.log('获取到的自由组件池:', response)
     
     const poolData = response.data || {}
     const poolWidgets = poolData.widgets || []
@@ -809,7 +1128,6 @@ const applyToFree = async () => {
       }
       
       if (existingWidget) {
-        console.log('更新已存在的组件:', existingWidget)
         
         // 如果存在，则更新该组件的配置
         const updateResponse = await request({
@@ -827,7 +1145,6 @@ const applyToFree = async () => {
           }
         })
         
-        console.log('更新组件响应:', updateResponse)
         ElMessage.success('已更新自由组件')
       } else {
         // 如果不存在，则添加新组件
@@ -838,7 +1155,6 @@ const applyToFree = async () => {
           source: 'market'
         }
         
-        console.log('添加新组件:', newWidget)
         
         const addResponse = await request({
           url: '/api/free/pool',
@@ -849,7 +1165,6 @@ const applyToFree = async () => {
           }
         })
         
-        console.log('添加组件响应:', addResponse)
         ElMessage.success('已添加到自由组件')
       }
       
@@ -880,6 +1195,130 @@ const applyToFree = async () => {
 onMounted(() => {
   loadQBList()
   fetchPoolData() // 获取组件池数据
+  
+  // 加载已保存的尺寸设置
+  const savedComponentSize = localStorage.getItem('qb-status-component-size');
+  if (savedComponentSize) {
+    try {
+      componentSize.value = JSON.parse(savedComponentSize);
+    } catch (e) {
+      console.error('Error parsing saved component size', e);
+    }
+  }
+  
+  // 设置默认为极简主题
+  nextTick(() => {
+    // 等待组件加载完成后应用默认主题
+    setTimeout(() => {
+      if (currentQB.value && (!currentQB.value.theme || Object.keys(currentQB.value.theme).length === 0)) {
+        applyPresetTheme('minimal');
+      }
+      
+      // 确保iframe能够立即应用响应式布局
+      forceApplySize();
+      
+      // 模拟尺寸调整以确保响应式布局生效
+      setTimeout(() => {
+        const originalWidth = componentSize.value.width;
+        const originalHeight = componentSize.value.height;
+        
+        // 稍微改变尺寸触发更新
+        componentSize.value.width = originalWidth + 1;
+        componentSize.value.height = originalHeight + 1;
+        forceApplySize();
+        
+        // 恢复原来的尺寸
+        setTimeout(() => {
+          componentSize.value.width = originalWidth;
+          componentSize.value.height = originalHeight;
+          forceApplySize();
+        }, 100);
+      }, 200);
+    }, 300);
+  });
+  
+  // 加载已保存的壁纸设置
+  const savedWallpaperSettings = localStorage.getItem('qb-status-wallpaper-settings');
+  if (savedWallpaperSettings) {
+    try {
+      wallpaperSettings.value = JSON.parse(savedWallpaperSettings);
+    } catch (e) {
+      console.error('Error parsing saved wallpaper settings', e);
+    }
+  }
+  
+  // 加载已保存的主题设置
+  if (currentQB.value && currentQB.value.theme) {
+    // 从配置加载主题设置
+    try {
+      // 这里我们载入保存的主题
+      const savedTheme = currentQB.value.theme;
+      
+      // 应用默认的预设主题作为起点
+      applyPresetTheme('colorful');
+      
+      // 如果存在已保存的主题，则覆盖默认设置
+      if (savedTheme) {
+        Object.keys(savedTheme).forEach(key => {
+          if (key in themeSettings.value) {
+            themeSettings.value[key] = savedTheme[key];
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Error loading theme settings', e);
+    }
+  } else {
+    // 如果没有保存的主题，使用"colorful"作为默认主题
+    applyPresetTheme('colorful');
+  }
+  
+  // 我们不再在onMounted中自动调用handleSizeChange，
+  // 而是依赖iframe的onload事件通过handleIframeLoaded来处理
+  
+  // 尝试立即应用一次尺寸，不等待iframe.onload事件
+  setTimeout(() => {
+    const iframe = document.querySelector('.iframe-preview iframe') as HTMLIFrameElement | null;
+    if (iframe) {
+      iframe.style.width = `${componentSize.value.width}px`;
+      iframe.style.height = `${componentSize.value.height}px`;
+      // 尝试通过修改src来强制iframe刷新以应用尺寸
+      if (iframe.src) {
+        const currentSrc = iframe.src;
+        if (!currentSrc.includes('w=') && !currentSrc.includes('h=')) {
+          const separator = currentSrc.includes('?') ? '&' : '?';
+          iframe.src = `${currentSrc}${separator}w=${componentSize.value.width}&h=${componentSize.value.height}`;
+        }
+      }
+    }
+  }, 100);
+  
+  // 创建一个监听iframe创建和替换的MutationObserver
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'childList') {
+        const iframe = document.querySelector('.iframe-preview iframe') as HTMLIFrameElement | null;
+        if (iframe && !iframe.style.width) {
+          // 发现新的iframe元素，立即应用尺寸
+
+          setTimeout(() => {
+            forceApplySize();
+          }, 50);
+        }
+      }
+    });
+  });
+  
+  // 监听iframe容器的变化
+  const iframeContainer = document.querySelector('.iframe-preview');
+  if (iframeContainer) {
+    observer.observe(iframeContainer, { childList: true, subtree: true });
+  }
+  
+  // 在组件卸载时停止监听
+  onUnmounted(() => {
+    observer.disconnect();
+  });
 })
 
 // 监听当前QB变化，更新预览数据和域名前缀
@@ -949,16 +1388,780 @@ const showHelpDialog = () => {
 watch(() => currentQB.value?.displayItems, (newDisplayItems) => {
   if (!currentQB.value || !newDisplayItems) return;
   
-  console.log('显示项配置已更新:', newDisplayItems);
+
   
   // 更新displayOrder，只保留用户选择的项目
   if (currentQB.value.displayOrder) {
     currentQB.value.displayOrder = currentQB.value.displayOrder.filter(key => 
-      newDisplayItems[key] === true
+      newDisplayItems[key as keyof typeof newDisplayItems] === true
     );
-    console.log('更新后的显示顺序:', currentQB.value.displayOrder);
   }
 }, { deep: true })
+
+// 添加主题设置
+const themeSettings = ref<ThemeSettings>({
+  backgroundColor: '#2d3436',
+  backgroundOpacity: 1,
+  headerBackgroundColor: 'rgba(45, 45, 50, 0.8)',
+  headerTextColor: '#ffffff',
+  onlineStatusColor: 'rgba(46, 204, 113, 0.8)',
+  offlineStatusColor: 'rgba(231, 76, 60, 0.8)',
+  
+  // 下载速度
+  downloadSpeedBgColor: 'rgba(33, 150, 243, 0.15)',
+  downloadSpeedTextColor: '#3498db',
+  downloadSpeedLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 上传速度
+  uploadSpeedBgColor: 'rgba(76, 175, 80, 0.15)',  
+  uploadSpeedTextColor: '#27ae60',
+  uploadSpeedLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 活跃下载
+  activeDownloadsBgColor: 'rgba(33, 150, 243, 0.1)',
+  activeDownloadsTextColor: '#4fc3f7',
+  activeDownloadsLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 活跃任务
+  activeTorrentsBgColor: 'rgba(156, 39, 176, 0.1)',
+  activeTorrentsTextColor: '#9c27b0',
+  activeTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 暂停任务
+  pausedTorrentsBgColor: 'rgba(255, 152, 0, 0.1)',
+  pausedTorrentsTextColor: '#ff9800',
+  pausedTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 完成任务
+  completedTorrentsBgColor: 'rgba(76, 175, 80, 0.1)',
+  completedTorrentsTextColor: '#4caf50',
+  completedTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 总任务数
+  totalTorrentsBgColor: 'rgba(158, 158, 158, 0.1)',
+  totalTorrentsTextColor: '#9e9e9e',
+  totalTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 错误任务
+  errorTorrentsBgColor: 'rgba(244, 67, 54, 0.1)',
+  errorTorrentsTextColor: '#f44336',
+  errorTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 做种数
+  seedingTorrentsBgColor: 'rgba(0, 188, 212, 0.1)',
+  seedingTorrentsTextColor: '#00bcd4',
+  seedingTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // I/O任务
+  ioTasksBgColor: 'rgba(0, 150, 136, 0.1)',
+  ioTasksTextColor: '#009688',
+  ioTasksLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 分享率
+  globalRatioBgColor: 'rgba(3, 169, 244, 0.1)',
+  globalRatioTextColor: '#03a9f4',
+  globalRatioLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 平均分享率
+  averageRatioBgColor: 'rgba(63, 81, 181, 0.1)',
+  averageRatioTextColor: '#3f51b5',
+  averageRatioLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 已下载
+  globalDownloadedBgColor: 'rgba(0, 188, 212, 0.1)',
+  globalDownloadedTextColor: '#00bcd4',
+  globalDownloadedLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 已上传
+  globalUploadedBgColor: 'rgba(233, 30, 99, 0.1)',
+  globalUploadedTextColor: '#e91e63',
+  globalUploadedLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 上传限制
+  uploadLimitBgColor: 'rgba(255, 87, 34, 0.1)',
+  uploadLimitTextColor: '#ff5722',
+  uploadLimitLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 下载限制
+  downloadLimitBgColor: 'rgba(121, 85, 72, 0.1)',
+  downloadLimitTextColor: '#795548',
+  downloadLimitLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 可用空间
+  freeSpaceBgColor: 'rgba(96, 125, 139, 0.1)',
+  freeSpaceTextColor: '#607d8b',
+  freeSpaceLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  // 总体积
+  totalSizeBgColor: 'rgba(97, 97, 97, 0.1)',
+  totalSizeTextColor: '#616161',
+  totalSizeLabelColor: 'rgba(255, 255, 255, 0.7)',
+  
+  borderRadius: '8px'
+})
+
+// 实时处理主题变化
+const handleThemeChange = () => {
+  // 更新iframe预览的背景
+  if (!currentQB.value) return;
+  
+  // 确保theme对象存在
+  if (!currentQB.value.theme) {
+    currentQB.value.theme = {} as any;
+  }
+  
+  // 将当前主题设置应用到currentQB.theme
+  Object.keys(themeSettings.value).forEach(key => {
+    currentQB.value!.theme![key] = themeSettings.value[key];
+  });
+  
+  // 保存设置
+  saveQBList();
+  
+  // 如果iframe已加载，则刷新iframe以应用最新主题
+  if (iframeLoaded.value && currentQB.value.isConfigValid) {
+    // 短暂延迟后刷新iframe，确保主题设置已保存
+    setTimeout(() => {
+      const iframe = document.querySelector('.iframe-preview iframe') as HTMLIFrameElement;
+      if (iframe) {
+        iframeLoaded.value = false;
+        iframe.src = iframe.src;
+      }
+    }, 300);
+  }
+};
+
+// 应用预设主题
+const applyPresetTheme = (theme: string) => {
+  if (!currentQB.value) return;
+
+  // 设置基础主题
+  themeSettings.value = {
+    ...themeSettings.value,
+    backgroundColor: theme === 'dark' ? 'rgba(30, 30, 30, 0.95)' : 
+                    theme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 
+                    theme === 'nord' ? 'rgba(46, 52, 64, 0.95)' :
+                    theme === 'elegant' ? 'rgba(25, 25, 35, 0.98)' :
+                    theme === 'acrylic' ? 'rgba(245, 245, 247, 0.85)' :
+                    theme === 'minimal' ? 'rgba(35, 35, 40, 0.92)' :
+                    theme === 'colorful' ? 'rgba(14, 22, 40, 0.95)' :
+                    'rgba(35, 35, 40, 0.92)',
+    headerBackgroundColor: theme === 'dark' ? 'rgba(40, 40, 40, 0.8)' : 
+                          theme === 'light' ? 'rgba(240, 240, 240, 0.8)' : 
+                          theme === 'nord' ? 'rgba(59, 66, 82, 0.8)' :
+                          theme === 'elegant' ? 'rgba(35, 35, 50, 0.8)' :
+                          theme === 'acrylic' ? 'rgba(235, 235, 240, 0.8)' :
+                          theme === 'minimal' ? 'rgba(45, 45, 50, 0.8)' : // 修正为默认蓝色
+                          theme === 'colorful' ? 'rgba(20, 30, 50, 0.8)' :
+                          'rgba(45, 45, 50, 0.8)', // 默认蓝色
+    headerTextColor: theme === 'dark' ? '#ffffff' : 
+                     theme === 'light' ? '#000000' : // 变更为纯黑色
+                     theme === 'nord' ? '#eceff4' :
+                     theme === 'elegant' ? '#ffffff' :
+                     theme === 'acrylic' ? '#000000' : // 变更为纯黑色
+                     theme === 'minimal' ? '#ffffff' :
+                     theme === 'colorful' ? '#ffffff' :
+                     '#ffffff',
+    borderRadius: theme === 'minimal' ? '0px' : '8px',
+    borderColor: theme === 'dark' ? 'rgba(60, 60, 60, 0.5)' : 
+                theme === 'light' ? 'rgba(210, 210, 210, 0.5)' : 
+                theme === 'nord' ? 'rgba(76, 86, 106, 0.5)' :
+                theme === 'elegant' ? 'rgba(60, 60, 80, 0.5)' :
+                theme === 'acrylic' ? 'rgba(210, 210, 220, 0.5)' :
+                theme === 'minimal' ? 'transparent' :
+                theme === 'colorful' ? 'rgba(30, 40, 70, 0.5)' :
+                'transparent',
+    borderWidth: theme === 'minimal' ? '0px' : '1px',
+    itemSpacing: theme === 'minimal' ? '0px' : '8px',
+  };
+
+  // 设置不同状态的颜色
+  themeSettings.value.onlineColor = theme === 'dark' ? '#10b981' : 
+                                    theme === 'light' ? '#047857' : 
+                                    theme === 'nord' ? '#a3be8c' :
+                                    theme === 'elegant' ? '#10b981' :
+                                    theme === 'acrylic' ? '#047857' :
+                                    theme === 'minimal' ? '#10b981' :
+                                    theme === 'colorful' ? '#00cc66' :
+                                    '#10b981';
+  
+  themeSettings.value.offlineColor = theme === 'dark' ? '#ef4444' : 
+                                    theme === 'light' ? '#b91c1c' : 
+                                    theme === 'nord' ? '#bf616a' :
+                                    theme === 'elegant' ? '#ef4444' :
+                                    theme === 'acrylic' ? '#b91c1c' :
+                                    theme === 'minimal' ? '#ef4444' :
+                                    theme === 'colorful' ? '#ff5555' :
+                                    '#ef4444';
+  
+  themeSettings.value.warningColor = theme === 'dark' ? '#f59e0b' : 
+                                    theme === 'light' ? '#b45309' : 
+                                    theme === 'nord' ? '#ebcb8b' :
+                                    theme === 'elegant' ? '#f59e0b' :
+                                    theme === 'acrylic' ? '#b45309' :
+                                    theme === 'minimal' ? '#f59e0b' :
+                                    theme === 'colorful' ? '#ffaa33' :
+                                    '#f59e0b';
+
+  // 为每个显示项设置颜色
+  const displayItems = ['cpu', 'memory', 'disk', 'network', 'time', 'version', 'license'];
+  
+  displayItems.forEach(item => {
+    // 设置项目背景颜色
+    themeSettings.value[`${item}BgColor`] = theme === 'dark' ? 'rgba(50, 50, 50, 0.7)' : 
+                                          theme === 'light' ? 'rgba(240, 240, 240, 0.7)' : 
+                                          theme === 'nord' ? 'rgba(67, 76, 94, 0.7)' :
+                                          theme === 'elegant' ? 'rgba(45, 45, 60, 0.7)' :
+                                          theme === 'acrylic' ? 'rgba(230, 230, 235, 0.7)' :
+                                          theme === 'minimal' ? 'rgba(50, 50, 55, 0.7)' :
+                                          theme === 'colorful' ? getUniqueColor(item, 0.7) :
+                                          'rgba(50, 50, 55, 0.7)';
+    
+    // 设置文本颜色 - 提高对比度
+    themeSettings.value[`${item}TextColor`] = theme === 'dark' ? '#ffffff' : 
+                                            theme === 'light' ? '#000000' : // 变更为纯黑色
+                                            theme === 'nord' ? '#eceff4' :
+                                            theme === 'elegant' ? '#ffffff' :
+                                            theme === 'acrylic' ? '#000000' : // 变更为纯黑色
+                                            theme === 'minimal' ? '#ffffff' :
+                                            theme === 'colorful' ? '#ffffff' :
+                                            '#ffffff';
+    
+    // 设置标签颜色 - 提高对比度
+    themeSettings.value[`${item}LabelColor`] = theme === 'dark' ? '#9ca3af' : 
+                                             theme === 'light' ? '#000000' : // 变更为纯黑色 
+                                             theme === 'nord' ? '#d8dee9' :
+                                             theme === 'elegant' ? '#9ca3af' :
+                                             theme === 'acrylic' ? '#000000' : // 变更为纯黑色
+                                             theme === 'minimal' ? '#e5e7eb' : // 提高对比度
+                                             theme === 'colorful' ? '#a5b4fc' :
+                                             '#e5e7eb';
+  });
+
+  // 保存主题设置
+  handleThemeChange();
+};
+
+// 重置主题
+const resetTheme = () => {
+  // 重置为默认主题
+  themeSettings.value = {
+    backgroundColor: '#2d3436',
+    backgroundOpacity: 1,
+    headerBackgroundColor: 'rgba(45, 45, 50, 0.8)',
+    headerTextColor: '#ffffff',
+    onlineStatusColor: 'rgba(46, 204, 113, 0.8)',
+    offlineStatusColor: 'rgba(231, 76, 60, 0.8)',
+    
+    // 下载速度
+    downloadSpeedBgColor: 'rgba(33, 150, 243, 0.15)',
+    downloadSpeedTextColor: '#3498db',
+    downloadSpeedLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 上传速度
+    uploadSpeedBgColor: 'rgba(76, 175, 80, 0.15)',  
+    uploadSpeedTextColor: '#27ae60',
+    uploadSpeedLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 活跃下载
+    activeDownloadsBgColor: 'rgba(33, 150, 243, 0.1)',
+    activeDownloadsTextColor: '#4fc3f7',
+    activeDownloadsLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 活跃任务
+    activeTorrentsBgColor: 'rgba(156, 39, 176, 0.1)',
+    activeTorrentsTextColor: '#9c27b0',
+    activeTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 暂停任务
+    pausedTorrentsBgColor: 'rgba(255, 152, 0, 0.1)',
+    pausedTorrentsTextColor: '#ff9800',
+    pausedTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 完成任务
+    completedTorrentsBgColor: 'rgba(76, 175, 80, 0.1)',
+    completedTorrentsTextColor: '#4caf50',
+    completedTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 总任务数
+    totalTorrentsBgColor: 'rgba(158, 158, 158, 0.1)',
+    totalTorrentsTextColor: '#9e9e9e',
+    totalTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 错误任务
+    errorTorrentsBgColor: 'rgba(244, 67, 54, 0.1)',
+    errorTorrentsTextColor: '#f44336',
+    errorTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 做种数
+    seedingTorrentsBgColor: 'rgba(0, 188, 212, 0.1)',
+    seedingTorrentsTextColor: '#00bcd4',
+    seedingTorrentsLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // I/O任务
+    ioTasksBgColor: 'rgba(0, 150, 136, 0.1)',
+    ioTasksTextColor: '#009688',
+    ioTasksLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 分享率
+    globalRatioBgColor: 'rgba(3, 169, 244, 0.1)',
+    globalRatioTextColor: '#03a9f4',
+    globalRatioLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 平均分享率
+    averageRatioBgColor: 'rgba(63, 81, 181, 0.1)',
+    averageRatioTextColor: '#3f51b5',
+    averageRatioLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 已下载
+    globalDownloadedBgColor: 'rgba(0, 188, 212, 0.1)',
+    globalDownloadedTextColor: '#00bcd4',
+    globalDownloadedLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 已上传
+    globalUploadedBgColor: 'rgba(233, 30, 99, 0.1)',
+    globalUploadedTextColor: '#e91e63',
+    globalUploadedLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 上传限制
+    uploadLimitBgColor: 'rgba(255, 87, 34, 0.1)',
+    uploadLimitTextColor: '#ff5722',
+    uploadLimitLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 下载限制
+    downloadLimitBgColor: 'rgba(121, 85, 72, 0.1)',
+    downloadLimitTextColor: '#795548',
+    downloadLimitLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 可用空间
+    freeSpaceBgColor: 'rgba(96, 125, 139, 0.1)',
+    freeSpaceTextColor: '#607d8b',
+    freeSpaceLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    // 总体积
+    totalSizeBgColor: 'rgba(97, 97, 97, 0.1)',
+    totalSizeTextColor: '#616161',
+    totalSizeLabelColor: 'rgba(255, 255, 255, 0.7)',
+    
+    borderRadius: '8px'
+  };
+  handleThemeChange();
+};
+
+// 计算渐变背景样式
+const gradientBgStyle = computed(() => {
+  if (wallpaperSettings.value.style === 'gradient') {
+    let style = {
+      background: `linear-gradient(${wallpaperSettings.value.direction}, ${wallpaperSettings.value.backgroundColor}, ${wallpaperSettings.value.backgroundColor2})`,
+      backgroundSize: wallpaperSettings.value.animation ? '400% 400%' : '100% 100%'
+    };
+    
+    return style;
+  } else {
+    // 纯色背景
+    return {
+      background: wallpaperSettings.value.backgroundColor,
+      backgroundSize: '100% 100%'
+    };
+  }
+});
+
+// 处理主题更新
+const handleThemeUpdate = (updatedTheme: ThemeSettings) => {
+  themeSettings.value = { ...updatedTheme }
+  
+  // 确保currentQB不为null
+  if (!currentQB.value) return
+  
+  // 更新配置对象中的主题设置
+  if (!currentQB.value.theme) {
+    currentQB.value.theme = {} as any
+  }
+  
+  try {
+    // 创建包含所有必要属性的主题对象
+    const newTheme = {
+      backgroundColor: updatedTheme.backgroundColor || '#2d3436',
+      backgroundOpacity: updatedTheme.backgroundOpacity || 1,
+      headerBackgroundColor: updatedTheme.headerBackgroundColor || 'rgba(45, 45, 50, 0.8)',
+      headerTextColor: updatedTheme.headerTextColor || '#ffffff',
+      onlineStatusColor: updatedTheme.onlineStatusColor || 'rgba(46, 204, 113, 0.8)',
+      offlineStatusColor: updatedTheme.offlineStatusColor || 'rgba(231, 76, 60, 0.8)',
+      downloadSpeedBgColor: updatedTheme.downloadSpeedBgColor || 'rgba(33, 150, 243, 0.15)',
+      downloadSpeedTextColor: updatedTheme.downloadSpeedTextColor || '#3498db',
+      uploadSpeedBgColor: updatedTheme.uploadSpeedBgColor || 'rgba(76, 175, 80, 0.15)',
+      uploadSpeedTextColor: updatedTheme.uploadSpeedTextColor || '#27ae60',
+      labelTextColor: updatedTheme.labelTextColor || 'rgba(255, 255, 255, 0.7)',
+      valueTextColor: updatedTheme.valueTextColor || '#ffffff',
+      borderRadius: updatedTheme.borderRadius || '8px',
+    } as any // 使用类型断言避免严格的类型检查
+    
+    // 添加各个项目的颜色设置
+    Object.keys(displayItemLabels).forEach(key => {
+      const bgColorKey = `${key}BgColor`;
+      const textColorKey = `${key}TextColor`;
+      
+      if (updatedTheme[bgColorKey]) {
+        newTheme[bgColorKey] = updatedTheme[bgColorKey];
+      }
+      
+      if (updatedTheme[textColorKey]) {
+        newTheme[textColorKey] = updatedTheme[textColorKey];
+      }
+    })
+    
+    // 使用断言将新主题分配给配置
+    if (currentQB.value) {
+      currentQB.value.theme = newTheme;
+      
+      // 标记配置已更改
+      saveQBList()
+    }
+  } catch (error) {
+    console.error('更新主题设置时发生错误:', error);
+  }
+}
+
+// 显示项目标签映射
+const displayItemLabels: Record<string, string> = {
+  downloadSpeed: '下载速度',
+  uploadSpeed: '上传速度',
+  activeDownloads: '下载中',
+  activeTorrents: '活跃',
+  pausedTorrents: '暂停',
+  completedTorrents: '完成',
+  totalTorrents: '总数',
+  globalRatio: '分享率',
+  globalDownloaded: '已下载',
+  globalUploaded: '已上传',
+  freeSpace: '可用空间',
+  seedingTorrents: '做种数',
+  totalSize: '总体积',
+  averageRatio: '平均分享率',
+  ioTasks: 'I/O任务',
+  errorTorrents: '错误任务',
+  uploadLimit: '上传限制',
+  downloadLimit: '下载限制'
+}
+
+// 在加载配置时初始化主题设置
+onMounted(() => {
+  // 加载QB配置
+  loadQBList()
+  fetchPoolData() // 获取组件池数据
+  
+  // 加载壁纸设置
+  const savedWallpaper = localStorage.getItem('qb-status-wallpaper')
+  if (savedWallpaper) {
+    try {
+      const parsed = JSON.parse(savedWallpaper)
+      wallpaperSettings.value = parsed
+    } catch (e) {
+      console.error('加载壁纸设置失败:', e)
+    }
+  }
+  
+  // 加载组件尺寸设置
+  const savedComponentSize = localStorage.getItem('qb-status-component-size')
+  if (savedComponentSize) {
+    try {
+      const parsed = JSON.parse(savedComponentSize)
+      componentSize.value = parsed
+    } catch (e) {
+      console.error('加载组件尺寸设置失败:', e)
+    }
+  }
+  
+  // 如果配置中有主题设置，则加载它
+  if (currentQB.value && currentQB.value.theme) {
+    themeSettings.value = {
+      ...themeSettings.value,
+      ...currentQB.value.theme
+    }
+  }
+})
+
+// 添加壁纸背景设置
+const wallpaperSettings = ref<WallpaperSettings>({
+  backgroundColor: '#1a1a2e',
+  backgroundColor2: '#0f3460',
+  style: 'gradient',
+  direction: '135deg',
+  animation: true
+})
+
+// 添加组件尺寸设置
+const componentSize = ref<ComponentSize>({
+  width: 500,
+  height: 300
+})
+
+// 计算iframe样式，确保实时响应
+const iframeStyle = computed(() => {
+  return {
+    width: `${componentSize.value.width}px`,
+    height: `${componentSize.value.height}px`,
+    maxWidth: '100%',
+    transition: 'width 0.3s ease, height 0.3s ease'
+  }
+})
+
+// 处理壁纸背景变化
+const handleWallpaperChange = () => {
+  // 保存设置到localStorage
+  localStorage.setItem('qb-status-wallpaper', JSON.stringify(wallpaperSettings.value))
+}
+
+// 应用壁纸预设
+const applyWallpaperPreset = (preset: string) => {
+  switch(preset) {
+    case 'dark':
+      wallpaperSettings.value = {
+        backgroundColor: '#1a1a2e',
+        backgroundColor2: '#0f3460',
+        style: 'gradient',
+        direction: '135deg',
+        animation: true
+      }
+      break;
+    case 'light':
+      wallpaperSettings.value = {
+        backgroundColor: '#f5f5f5',
+        backgroundColor2: '#e0e0e0',
+        style: 'gradient',
+        direction: '135deg',
+        animation: true
+      }
+      break;
+    case 'red':
+      wallpaperSettings.value = {
+        backgroundColor: '#8B0000',
+        backgroundColor2: '#480000',
+        style: 'gradient',
+        direction: '135deg',
+        animation: true
+      }
+      break;
+    case 'blue':
+      wallpaperSettings.value = {
+        backgroundColor: '#0a2463',
+        backgroundColor2: '#001845',
+        style: 'gradient',
+        direction: '135deg',
+        animation: true
+      }
+      break;
+  }
+  handleWallpaperChange()
+}
+
+// 处理组件尺寸变化
+const handleSizeChange = (shouldRefresh = true) => {
+  if (isResizing.value) return;
+  
+  // 设置标记，表示正在进行尺寸调整
+  isResizing.value = true;
+  
+  // 保存当前尺寸到localStorage
+  localStorage.setItem('qb-status-component-size', JSON.stringify(componentSize.value));
+  
+  // 为iframe应用新尺寸
+  const iframe = document.querySelector('.iframe-preview iframe') as HTMLIFrameElement | null;
+  if (iframe) {
+    iframe.style.width = `${componentSize.value.width}px`;
+    iframe.style.height = `${componentSize.value.height}px`;
+    
+    // 只有在需要刷新时才刷新iframe
+    if (shouldRefresh && iframeLoaded.value) {
+      refreshIframePreview();
+    }
+  }
+  
+  // 重置标记
+  setTimeout(() => {
+    isResizing.value = false;
+  }, 300);
+}
+
+// 添加新函数用于刷新iframe预览
+const refreshIframePreview = () => {
+  if (isResizing.value) return;
+  
+  // 设置iframe加载状态为false
+  iframeLoaded.value = false;
+  
+  // 保存现有尺寸以便应用
+  const currentWidth = componentSize.value.width;
+  const currentHeight = componentSize.value.height;
+  
+  // 重新加载iframe
+  const iframe = document.querySelector('.iframe-preview iframe') as HTMLIFrameElement | null;
+  if (iframe && iframe.contentWindow) {
+    try {
+      // 先直接设置尺寸
+      iframe.style.width = `${currentWidth}px`;
+      iframe.style.height = `${currentHeight}px`;
+
+      // 获取当前src
+      const currentSrc = iframe.src;
+      // 添加尺寸参数和时间戳强制刷新
+      let newSrc = currentSrc;
+      newSrc = newSrc.replace(/[?&]w=\d+/g, '').replace(/[?&]h=\d+/g, '');
+      newSrc = newSrc.includes('?') 
+        ? newSrc.replace(/(\?|&)t=\d+/, '') + `&t=${Date.now()}&w=${currentWidth}&h=${currentHeight}` 
+        : newSrc + `?t=${Date.now()}&w=${currentWidth}&h=${currentHeight}`;
+      iframe.src = newSrc;
+      
+      // 在iframe重新加载后再次强制应用尺寸
+      iframe.onload = () => {
+        setTimeout(() => {
+          forceApplySize();
+        }, 100);
+      };
+    } catch (e) {
+      console.error('无法刷新iframe', e);
+    }
+  }
+}
+
+// 添加监听器确保组件尺寸变化时更新预览
+watch([() => componentSize.value.width, () => componentSize.value.height], () => {
+  // 延迟执行以避免频繁刷新
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    refreshIframePreview()
+  }, 300) as unknown as number
+}, { immediate: false })
+
+// 防抖定时器
+let debounceTimer: number | null = null
+
+// 应用组件尺寸预设
+const applyComponentSize = (preset: string) => {
+  switch(preset) {
+    case 'small':
+      componentSize.value = {
+        width: 300,
+        height: 200
+      }
+      break;
+    case 'medium':
+      componentSize.value = {
+        width: 500,
+        height: 300
+      }
+      break;
+    case 'large':
+      componentSize.value = {
+        width: 800,
+        height: 400
+      }
+      break;
+    case 'mobile':
+      componentSize.value = {
+        width: 320,
+        height: 480
+      }
+      break;
+    case 'reset':
+      componentSize.value = {
+        width: 500,
+        height: 300
+      }
+      break;
+  }
+  handleSizeChange()
+}
+
+// 监听iframe加载状态
+const handleIframeLoaded = () => {
+  iframeLoaded.value = true;
+  
+  // 强制应用尺寸设置，不管是否首次加载
+  forceApplySize();
+  
+  // 额外逻辑：应用尺寸后短暂延迟再次应用，以确保响应式生效
+  if (isInitialLoad.value) {
+    isInitialLoad.value = false;
+    setTimeout(() => {
+      forceApplySize();
+      // 发送强制布局更新的消息
+      const iframe = document.querySelector('.iframe-preview iframe') as HTMLIFrameElement | null;
+      if (iframe && iframe.contentWindow) {
+        try {
+          iframe.contentWindow.postMessage({
+            type: 'forceLayout',
+            width: componentSize.value.width,
+            height: componentSize.value.height
+          }, '*');
+        } catch (e) {
+          console.error('无法向iframe发送强制布局消息', e);
+        }
+      }
+    }, 500);
+  }
+}
+
+// 新增函数：强制应用尺寸
+const forceApplySize = () => {
+  if (isResizing.value) return;
+  
+  // 直接设置iframe尺寸
+  const iframe = document.querySelector('.iframe-preview iframe') as HTMLIFrameElement | null;
+  if (iframe) {
+    iframe.style.width = `${componentSize.value.width}px`;
+    iframe.style.height = `${componentSize.value.height}px`;
+    
+    // 发送消息到iframe通知尺寸变化
+    if (iframe.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage({
+          type: 'resize',
+          width: componentSize.value.width,
+          height: componentSize.value.height
+        }, '*');
+      } catch (e) {
+        console.error('无法向iframe发送消息', e);
+      }
+    }
+  }
+}
+
+// 添加标志变量，防止无限刷新
+const isInitialLoad = ref(true);
+const isResizing = ref(false);
+
+// 根据项目名生成唯一的颜色
+const getUniqueColor = (itemName: string, alpha: number = 1) => {
+  // 基础颜色映射
+  const colorMap: Record<string, string> = {
+    cpu: 'rgba(59, 130, 246, ' + alpha + ')', // 蓝色
+    memory: 'rgba(139, 92, 246, ' + alpha + ')', // 紫色
+    disk: 'rgba(16, 185, 129, ' + alpha + ')', // 绿色
+    network: 'rgba(245, 158, 11, ' + alpha + ')', // 黄色
+    time: 'rgba(236, 72, 153, ' + alpha + ')', // 粉色
+    version: 'rgba(99, 102, 241, ' + alpha + ')', // 靛蓝色
+    license: 'rgba(249, 115, 22, ' + alpha + ')' // 橙色
+  };
+  
+  // 如果有特定映射则使用映射的颜色，否则生成随机颜色
+  if (itemName in colorMap) {
+    return colorMap[itemName];
+  }
+  
+  // 为未知项目生成一个基于名称hash的颜色
+  let hash = 0;
+  for (let i = 0; i < itemName.length; i++) {
+    hash = itemName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  // 转换为RGB颜色
+  const r = Math.abs(hash & 0xFF);
+  const g = Math.abs((hash >> 8) & 0xFF);
+  const b = Math.abs((hash >> 16) & 0xFF);
+  
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 </script>
 
 <style lang="scss" scoped>
@@ -1131,14 +2334,46 @@ watch(() => currentQB.value?.displayItems, (newDisplayItems) => {
       }
     }
     
-    .el-button {
-      align-self: flex-end;
+    .preview-actions {
+      display: flex;
+      justify-content: flex-end;
     }
   }
 }
 
 .params-content, .preview-content {
   min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  .theme-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    
+    .mini-form-item {
+      margin-bottom: 0;
+      
+      :deep(.el-form-item__label) {
+        font-size: 13px;
+      }
+    }
+  }
+  
+  .preset-themes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+  }
   
   .no-qb-selected, .no-preview {
     height: 200px;
@@ -1181,11 +2416,28 @@ watch(() => currentQB.value?.displayItems, (newDisplayItems) => {
   position: relative;
   width: 100%;
   max-width: 100%;
-  height: 300px;
+  height: auto;
+  min-height: 300px;
   border: 1px solid var(--el-border-color-light);
   border-radius: 8px;
   overflow: hidden;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  .dimension-display {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 2;
+    pointer-events: none;
+  }
   
   .gradient-bg {
     position: absolute;
@@ -1204,9 +2456,10 @@ watch(() => currentQB.value?.displayItems, (newDisplayItems) => {
     position: relative;
     z-index: 1;
     background: transparent !important; /* 强制透明背景 */
-    width: 100%;
-    height: 100%;
     border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    max-width: 100%; // 确保不超出容器
   }
   
   .iframe-loading {
@@ -1333,6 +2586,412 @@ watch(() => currentQB.value?.displayItems, (newDisplayItems) => {
       color: #E6A23C;
       font-weight: 500;
       margin-left: 4px;
+    }
+  }
+}
+
+// 预览设置卡片样式
+.preview-settings-card {
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  :deep(.el-card__header) {
+    padding: 12px 16px;
+    background-color: #f5f7fa;
+  }
+  
+  :deep(.el-tabs__header) {
+    margin-bottom: 10px;
+  }
+  
+  :deep(.el-tabs__content) {
+    padding: 10px;
+  }
+  
+  .size-settings {
+    .size-item {
+      margin-bottom: 20px;
+      
+      .size-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      
+      :deep(.el-slider) {
+        width: 100%;
+      }
+    }
+    
+    .size-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  }
+}
+
+// 添加响应式辅助类
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.responsive-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+  
+  .el-button {
+    margin: 0; // 覆盖Element UI默认外边距
+    flex-grow: 1;
+    min-width: 120px;
+    
+    @media (max-width: 768px) {
+      flex-basis: calc(50% - 5px);
+      max-width: calc(50% - 5px);
+    }
+    
+    @media (max-width: 480px) {
+      flex-basis: 100%;
+      max-width: 100%;
+    }
+  }
+}
+
+// 改进组件尺寸设置响应式
+.size-settings {
+  .size-item {
+    margin-bottom: 20px;
+    
+    .size-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    :deep(.el-slider) {
+      width: 100%;
+      
+      @media (max-width: 480px) {
+        .el-slider__runway {
+          margin: 10px 0;
+        }
+        
+        .el-slider__input {
+          width: 60px;
+        }
+      }
+    }
+  }
+}
+
+// 改进iframe预览区域在不同屏幕尺寸下的显示
+.iframe-preview {
+  iframe {
+    @media (max-width: 768px) {
+      max-width: calc(100% - 20px); // 给两侧留一点间距
+      transform: scale(0.95); // 稍微缩小一点，避免溢出
+      transform-origin: center top;
+    }
+    
+    @media (max-width: 480px) {
+      transform: scale(0.9);
+      height: auto !important; // 确保在小屏幕上高度能自适应
+    }
+  }
+}
+
+// 改进主题设置区域响应式
+.theme-settings-section {
+  :deep(.el-tabs--card > .el-tabs__header .el-tabs__item) {
+    @media (max-width: 768px) {
+      padding: 0 10px;
+      font-size: 13px;
+    }
+    
+    @media (max-width: 480px) {
+      padding: 0 5px;
+      font-size: 12px;
+    }
+  }
+}
+
+// 改进预览设置卡片响应式
+.preview-settings-card {
+  :deep(.el-tabs__item) {
+    @media (max-width: 768px) {
+      padding: 0 10px;
+      font-size: 13px;
+    }
+    
+    @media (max-width: 480px) {
+      padding: 0 5px;
+      font-size: 12px;
+    }
+  }
+  
+  :deep(.el-tabs__content) {
+    @media (max-width: 480px) {
+      padding: 5px;
+    }
+  }
+}
+
+// 添加预设主题卡片样式
+.preset-themes {
+  padding: 16px 0;
+}
+
+.preset-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.preset-theme-card {
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+  border: 1px solid #eee;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.preset-theme-preview {
+  height: 80px;
+  
+  &.dark-theme {
+    background-color: #1e1e2e;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background-color: #1e1e2e;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background-color: rgba(137, 180, 250, 0.15);
+      border-radius: 4px;
+    }
+  }
+  
+  &.light-theme {
+    background-color: #f9fafb;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background-color: #f9fafb;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background-color: rgba(59, 130, 246, 0.1);
+      border-radius: 4px;
+    }
+  }
+  
+  &.nord-theme {
+    background-color: #2e3440;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background-color: #2e3440;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background-color: rgba(129, 161, 193, 0.15);
+      border-radius: 4px;
+    }
+  }
+  
+  &.elegant-theme {
+    background-color: #353535;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background-color: #353535;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background-color: rgba(66, 165, 245, 0.15);
+      border-radius: 4px;
+    }
+  }
+  
+  &.acrylic-theme {
+    background-color: rgba(28, 28, 30, 0.7);
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background-color: rgba(28, 28, 30, 0.7);
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background-color: rgba(10, 132, 255, 0.25);
+      border-radius: 6px;
+    }
+  }
+  
+  &.minimal-theme {
+    background-color: #ffffff;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background-color: #ffffff;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background-color: rgba(41, 128, 185, 0.05);
+      border-radius: 4px;
+    }
+  }
+  
+  &.colorful-theme {
+    background-color: #0f172a;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background-color: #0f172a;
+    }
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 10px;
+      right: 10px;
+      height: 20px;
+      background-color: rgba(6, 182, 212, 0.2);
+      border-radius: 4px;
+    }
+  }
+}
+
+.preset-theme-name {
+  padding: 8px;
+  text-align: center;
+  font-size: 14px;
+  background-color: #f5f5f5;
+}
+
+.highlight-title {
+  color: #E6A23C;
+  font-weight: 600;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background-color: rgba(230, 162, 60, 0.1);
+  box-shadow: 0 2px 8px rgba(230, 162, 60, 0.2);
+}
+
+/* 修改折叠面板样式，使主题设置更突出 */
+.preview-content {
+  .el-collapse {
+    border: 2px solid rgba(230, 162, 60, 0.2);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(230, 162, 60, 0.15);
+    
+    :deep(.el-collapse-item__header) {
+      background-color: rgba(230, 162, 60, 0.05);
+      padding: 8px 12px;
+      height: auto;
+      line-height: 1.5;
+    }
+    
+    :deep(.el-collapse-item__content) {
+      padding: 16px;
     }
   }
 }

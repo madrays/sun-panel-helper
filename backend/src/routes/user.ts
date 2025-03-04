@@ -9,11 +9,11 @@ const router = Router()
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body
-    console.log('Login attempt:', { username, password }) // 添加日志
+
     
     const user = UserModel.findByUsername(username)
     if (!user) {
-      console.log('User not found:', username) // 添加日志
+
       return res.status(401).json({
         code: 1,
         message: '用户名或密码错误'
@@ -22,7 +22,7 @@ router.post('/login', async (req: Request, res: Response) => {
     
     const isValid = await UserModel.validatePassword(user, password)
     if (!isValid) {
-      console.log('Invalid password for user:', username) // 添加日志
+
       return res.status(401).json({
         code: 1,
         message: '用户名或密码错误'
@@ -36,7 +36,7 @@ router.post('/login', async (req: Request, res: Response) => {
     )
     
     const userInfo = UserModel.getUserInfo(username)
-    console.log('Login successful:', { username, userInfo }) // 添加日志
+
     
     res.json({
       code: 0,

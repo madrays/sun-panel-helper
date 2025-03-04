@@ -176,7 +176,7 @@ const props = defineProps({
   isCollapse: Boolean
 })
 
-const currentVersion = '2.0.4'
+const currentVersion = '2.0.5'
 const latestVersion = ref('')
 const hasNewVersion = ref(false)
 const updateDesc = ref('')

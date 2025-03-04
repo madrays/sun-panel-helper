@@ -1,12 +1,22 @@
 <template>
   <div class="qb-widget-container">
     <div class="qb-widget-wrapper">
-      <div class="qb-widget" :class="{ 'offline': !data.isOnline }">
+      <div class="qb-widget" :class="{ 'offline': !data.isOnline }" :style="{
+        backgroundColor: config.theme?.backgroundColor || '#2d3436',
+        opacity: config.theme?.backgroundOpacity || 1,
+        borderRadius: config.theme?.borderRadius || '16px'
+      }">
         <!-- 头部区域 -->
-        <div class="qb-header">
+        <div class="qb-header" :style="{
+          backgroundColor: config.theme?.headerBackgroundColor || '#2d3436'
+        }">
           <img src="/qb.png" alt="QB" class="qb-logo">
-          <span class="qb-title">{{ data.name }}</span>
-          <span class="qb-badge" :class="{ 'online': data.isOnline, 'offline': !data.isOnline }">
+          <span class="qb-title" :style="{
+            color: config.theme?.headerTextColor || '#ffffff'
+          }">{{ data.name }}</span>
+          <span class="qb-badge" :class="{ 'online': data.isOnline, 'offline': !data.isOnline }" :style="data.isOnline ? 
+            { backgroundColor: config.theme?.onlineStatusColor || 'rgba(46, 204, 113, 0.8)' } : 
+            { backgroundColor: config.theme?.offlineStatusColor || 'rgba(231, 76, 60, 0.8)' }">
             {{ data.isOnline ? '在线' : '离线' }}
           </span>
         </div>
@@ -17,14 +27,26 @@
           <div v-if="data.isOnline" class="qb-status-section">
             <!-- 速度显示区域 - 单独一行 -->
             <div v-if="hasSpeedItems" class="qb-speed-row">
-              <div v-if="config.displayItems.downloadSpeed" class="qb-item download">
-                <div class="qb-label">下载速度</div>
-                <div class="qb-value">{{ formatSpeed(data.downloadSpeed) }}</div>
+              <div v-if="config.displayItems.downloadSpeed" class="qb-item download" :style="{
+                backgroundColor: config.theme?.downloadSpeedBgColor || 'rgba(33, 150, 243, 0.15)'
+              }">
+                <div class="qb-label" :style="{
+                  color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                }">下载速度</div>
+                <div class="qb-value" :style="{
+                  color: config.theme?.downloadSpeedTextColor || '#3498db'
+                }">{{ formatSpeed(data.downloadSpeed) }}</div>
               </div>
               
-              <div v-if="config.displayItems.uploadSpeed" class="qb-item upload">
-                <div class="qb-label">上传速度</div>
-                <div class="qb-value">{{ formatSpeed(data.uploadSpeed) }}</div>
+              <div v-if="config.displayItems.uploadSpeed" class="qb-item upload" :style="{
+                backgroundColor: config.theme?.uploadSpeedBgColor || 'rgba(76, 175, 80, 0.15)'
+              }">
+                <div class="qb-label" :style="{
+                  color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                }">上传速度</div>
+                <div class="qb-value" :style="{
+                  color: config.theme?.uploadSpeedTextColor || '#27ae60'
+                }">{{ formatSpeed(data.uploadSpeed) }}</div>
               </div>
             </div>
             
@@ -35,99 +57,211 @@
                 <!-- 跳过速度项，因为它们已经在上面的速度行中显示 -->
                 <template v-if="item.key !== 'downloadSpeed' && item.key !== 'uploadSpeed'">
                   <!-- 活跃下载 -->
-                  <div v-if="item.key === 'activeDownloads'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">下载中</div>
-                    <div class="qb-value">{{ data.activeDownloads }}</div>
+                  <div v-if="item.key === 'activeDownloads'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.activeDownloadsBgColor || 'rgba(33, 150, 243, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">下载中</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.activeDownloadsTextColor || '#4fc3f7'
+                    }">{{ data.activeDownloads }}</div>
                   </div>
                   
                   <!-- 活跃任务 -->
-                  <div v-else-if="item.key === 'activeTorrents'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">活跃</div>
-                    <div class="qb-value">{{ data.activeTorrents }}</div>
+                  <div v-else-if="item.key === 'activeTorrents'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.activeTorrentsBgColor || 'rgba(156, 39, 176, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">活跃</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.activeTorrentsTextColor || '#9c27b0'
+                    }">{{ data.activeTorrents }}</div>
                   </div>
                   
                   <!-- 暂停任务 -->
-                  <div v-else-if="item.key === 'pausedTorrents'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">暂停</div>
-                    <div class="qb-value">{{ data.pausedTorrents }}</div>
+                  <div v-else-if="item.key === 'pausedTorrents'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.pausedTorrentsBgColor || 'rgba(255, 152, 0, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">暂停</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.pausedTorrentsTextColor || '#ff9800'
+                    }">{{ data.pausedTorrents }}</div>
                   </div>
                   
                   <!-- 完成任务 -->
-                  <div v-else-if="item.key === 'completedTorrents'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">完成</div>
-                    <div class="qb-value">{{ data.completedTorrents }}</div>
+                  <div v-else-if="item.key === 'completedTorrents'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.completedTorrentsBgColor || 'rgba(76, 175, 80, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">完成</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.completedTorrentsTextColor || '#4caf50'
+                    }">{{ data.completedTorrents }}</div>
                   </div>
                   
                   <!-- 总任务数 -->
-                  <div v-else-if="item.key === 'totalTorrents'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">总数</div>
-                    <div class="qb-value">{{ data.totalTorrents }}</div>
+                  <div v-else-if="item.key === 'totalTorrents'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.totalTorrentsBgColor || 'rgba(158, 158, 158, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">总数</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.totalTorrentsTextColor || '#9e9e9e'
+                    }">{{ data.totalTorrents }}</div>
                   </div>
                   
                   <!-- 错误任务 -->
-                  <div v-else-if="item.key === 'errorTorrents'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">错误任务</div>
-                    <div class="qb-value">{{ data.errorTorrents }}</div>
+                  <div v-else-if="item.key === 'errorTorrents'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.errorTorrentsBgColor || 'rgba(244, 67, 54, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">错误任务</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.errorTorrentsTextColor || '#f44336'
+                    }">{{ data.errorTorrents }}</div>
                   </div>
                   
                   <!-- 做种数 -->
-                  <div v-else-if="item.key === 'seedingTorrents'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">做种数</div>
-                    <div class="qb-value">{{ data.seedingTorrents }}</div>
+                  <div v-else-if="item.key === 'seedingTorrents'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.seedingTorrentsBgColor || 'rgba(0, 188, 212, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">做种数</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.seedingTorrentsTextColor || '#00bcd4'
+                    }">{{ data.seedingTorrents }}</div>
                   </div>
                   
                   <!-- I/O任务 -->
-                  <div v-else-if="item.key === 'ioTasks'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">I/O任务</div>
-                    <div class="qb-value">{{ data.ioTasks }}</div>
+                  <div v-else-if="item.key === 'ioTasks'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.ioTasksBgColor || 'rgba(0, 150, 136, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">I/O任务</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.ioTasksTextColor || '#009688'
+                    }">{{ data.ioTasks }}</div>
                   </div>
                   
                   <!-- 分享率 -->
-                  <div v-else-if="item.key === 'globalRatio'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">分享率</div>
-                    <div class="qb-value">{{ formatRatio(data.globalRatio) }}</div>
+                  <div v-else-if="item.key === 'globalRatio'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.globalRatioBgColor || 'rgba(3, 169, 244, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">分享率</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.globalRatioTextColor || '#03a9f4'
+                    }">{{ formatRatio(data.globalRatio) }}</div>
                   </div>
                   
                   <!-- 平均分享率 -->
-                  <div v-else-if="item.key === 'averageRatio'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">平均分享率</div>
-                    <div class="qb-value">{{ formatRatio(data.averageRatio) }}</div>
+                  <div v-else-if="item.key === 'averageRatio'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.averageRatioBgColor || 'rgba(63, 81, 181, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">平均分享率</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.averageRatioTextColor || '#3f51b5'
+                    }">{{ formatRatio(data.averageRatio) }}</div>
                   </div>
                   
                   <!-- 已下载 -->
-                  <div v-else-if="item.key === 'globalDownloaded'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">已下载</div>
-                    <div class="qb-value">{{ formatSize(data.globalDownloaded) }}</div>
+                  <div v-else-if="item.key === 'globalDownloaded'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.globalDownloadedBgColor || 'rgba(0, 188, 212, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">已下载</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.globalDownloadedTextColor || '#00bcd4'
+                    }">{{ formatSize(data.globalDownloaded) }}</div>
                   </div>
                   
                   <!-- 已上传 -->
-                  <div v-else-if="item.key === 'globalUploaded'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">已上传</div>
-                    <div class="qb-value">{{ formatSize(data.globalUploaded) }}</div>
+                  <div v-else-if="item.key === 'globalUploaded'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.globalUploadedBgColor || 'rgba(233, 30, 99, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">已上传</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.globalUploadedTextColor || '#e91e63'
+                    }">{{ formatSize(data.globalUploaded) }}</div>
                   </div>
                   
                   <!-- 上传限制 -->
-                  <div v-else-if="item.key === 'uploadLimit'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">上传限制</div>
-                    <div class="qb-value">{{ data.uploadLimit === 0 ? '无限制' : formatSpeed(data.uploadLimit) }}</div>
+                  <div v-else-if="item.key === 'uploadLimit'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.uploadLimitBgColor || 'rgba(255, 87, 34, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">上传限制</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.uploadLimitTextColor || '#ff5722'
+                    }">{{ data.uploadLimit === 0 ? '无限制' : formatSpeed(data.uploadLimit) }}</div>
                   </div>
                   
                   <!-- 下载限制 -->
-                  <div v-else-if="item.key === 'downloadLimit'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">下载限制</div>
-                    <div class="qb-value">{{ data.downloadLimit === 0 ? '无限制' : formatSpeed(data.downloadLimit) }}</div>
+                  <div v-else-if="item.key === 'downloadLimit'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.downloadLimitBgColor || 'rgba(121, 85, 72, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">下载限制</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.downloadLimitTextColor || '#795548'
+                    }">{{ data.downloadLimit === 0 ? '无限制' : formatSpeed(data.downloadLimit) }}</div>
                   </div>
                   
                   <!-- 可用空间 -->
-                  <div v-else-if="item.key === 'freeSpace'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">可用空间</div>
-                    <div class="qb-value">{{ formatSize(data.freeSpace) }}</div>
+                  <div v-else-if="item.key === 'freeSpace'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.freeSpaceBgColor || 'rgba(96, 125, 139, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">可用空间</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.freeSpaceTextColor || '#607d8b'
+                    }">{{ formatSize(data.freeSpace) }}</div>
                   </div>
                   
                   <!-- 总体积 -->
-                  <div v-else-if="item.key === 'totalSize'" class="qb-item" :style="getItemStyle()">
-                    <div class="qb-label">总体积</div>
-                    <div class="qb-value">{{ formatSize(data.totalSize) }}</div>
+                  <div v-else-if="item.key === 'totalSize'" class="qb-item" :style="{
+                    backgroundColor: config.theme?.totalSizeBgColor || 'rgba(97, 97, 97, 0.1)',
+                    ...getItemStyle()
+                  }">
+                    <div class="qb-label" :style="{
+                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                    }">总体积</div>
+                    <div class="qb-value" :style="{
+                      color: config.theme?.totalSizeTextColor || '#616161'
+                    }">{{ formatSize(data.totalSize) }}</div>
                   </div>
                 </template>
               </template>

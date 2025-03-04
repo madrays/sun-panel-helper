@@ -47,7 +47,7 @@ onMounted(async () => {
   }
 })
 
-const previewUrl = computed(() => '/custom/helper/weather-widget/weather-widget.html')
+const previewUrl = computed(() => props.widget.url)
 </script>
 
 <style scoped>
@@ -64,7 +64,7 @@ const previewUrl = computed(() => '/custom/helper/weather-widget/weather-widget.
 
 .preview-iframe {
   width: 100%;
-  height: 100%;
+  height: 260px;
   border: none;
 }
 </style> 
