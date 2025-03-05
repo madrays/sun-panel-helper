@@ -71,4 +71,32 @@ backend/data/*.json
 # Frontend
 frontend/node_modules
 frontend/dist
-frontend/.env 
+frontend/.env
+
+# 忽略备份文件目录
+backend/backups/
+backend/backups/*
+
+# 忽略环境文件
+.env
+
+# 忽略Node依赖
+node_modules/
+
+# 忽略构建输出
+dist/
+build/
+
+# 忽略IDE和编辑器文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 忽略操作系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略临时文件
+tmp/
+temp/ 
