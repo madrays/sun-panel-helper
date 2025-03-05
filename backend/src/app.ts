@@ -208,7 +208,7 @@ function startAutoBackup() {
       const cleanupBackups = (type: string, keepCount: number) => {
         try {
           const files = fs.readdirSync(backupDir)
-            .filter(file => file.startsWith(type) && file.endsWith('.zip'));
+            .filter(file => file.startsWith(type) && file.endsWith('.zip') && file.includes('-auto-'));
           
           // 按修改时间排序，最旧的优先
           files.sort((a, b) => {
@@ -222,7 +222,7 @@ function startAutoBackup() {
             const toDelete = files.slice(0, files.length - keepCount);
             toDelete.forEach(file => {
               fs.unlinkSync(join(backupDir, file));
-              console.log(`删除旧备份: ${file}`);
+              console.log(`删除旧自动备份: ${file}`);
             });
           }
         } catch (error) {

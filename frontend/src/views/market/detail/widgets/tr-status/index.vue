@@ -2094,6 +2094,14 @@ const applyPresetTheme = (theme: string) => {
   // 同时应用壁纸预设
   applyWallpaperPreset(theme);
 }
+
+// 监听域名前缀变化，更新当前TR配置
+watch(domainPrefix, (newPrefix) => {
+  if (currentTR.value) {
+    currentTR.value.domainPrefix = newPrefix
+    saveTRList()
+  }
+})
 </script>
 
 <style scoped lang="scss">

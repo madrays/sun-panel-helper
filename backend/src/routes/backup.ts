@@ -366,7 +366,7 @@ router.post('/auto-backup/start', (req, res) => {
 function cleanupBackups(type: string, keepCount: number) {
   try {
     const files = fs.readdirSync(backupDir)
-      .filter(file => file.startsWith(type) && file.endsWith('.zip'))
+      .filter(file => file.startsWith(type) && file.endsWith('.zip') && file.includes('-auto-'))
     
     // 按修改时间排序，最旧的优先
     files.sort((a, b) => {
@@ -380,7 +380,7 @@ function cleanupBackups(type: string, keepCount: number) {
       const toDelete = files.slice(0, files.length - keepCount)
       toDelete.forEach(file => {
         fs.unlinkSync(path.join(backupDir, file))
-        console.log(`Deleted old backup: ${file}`)
+        console.log(`Deleted old auto backup: ${file}`)
       })
     }
   } catch (error) {

@@ -42,6 +42,68 @@
 
 > 💡 提示：你可以在 Helper Demo 中编辑样式，然后在演示站中查看效果，体验完整的美化流程！
 
+## 🎉 更新内容 (v2.0.6)
+
+### 📢 致歉信息
+- 非常抱歉在v2.0.5版本中引入的数据目录变更给大家带来的不便
+- 由于没有充分说明数据迁移方法，导致部分用户数据丢失
+- 我们已在v2.0.6版本中修复相关问题并提供完整的数据迁移指南
+
+### 🔧 重要修复
+- 🐞 **修复TR组件域名前缀问题**
+  - 修复了Transmission组件域名前缀无法保存的问题
+  - 添加了域名前缀变更监听器，与QB组件保持一致
+  - 确保设置的前缀能正确应用和保存
+
+- 💾 **备份系统优化**
+  - 修复了备份清理逻辑，现在手动创建的备份将永久保留
+  - 只有自动备份会受到100个数量限制的清理
+  - 即使创建大量手动备份，也不会影响自动备份功能
+
+### ⚠️ 重要注意提醒
+- 请确保正确挂载三个必要目录，尤其是从旧版本升级的用户
+- 如未正确挂载，可能导致数据丢失或功能异常
+- 使用`docker cp`命令可从旧容器导出现有数据再重新部署
+
+### 📋 数据导出教程
+如果您从旧版本升级且之前未挂载数据目录，请按以下步骤操作：
+
+1. **创建必要的挂载目录**
+```bash
+# 创建数据目录
+mkdir -p /your/path/to/helper/data
+mkdir -p /your/path/to/helper/backups
+```
+
+2. **从旧容器导出数据**
+```bash
+# 导出用户数据
+docker cp sun-panel-helper:/app/backend/data/. /your/path/to/helper/data/
+
+# 导出现有备份文件（仅适用于v2.0.5及更高版本，v2.0.5之前的版本没有备份功能）
+docker cp sun-panel-helper:/app/backend/backups/. /your/path/to/helper/backups/
+```
+
+3. **停止并删除旧容器**
+```bash
+docker stop sun-panel-helper
+docker rm sun-panel-helper
+```
+
+4. **使用正确的挂载目录重新部署**
+```bash
+docker run -d \
+  --name sun-panel-helper \
+  -p 33002:80 \
+  -e BACKEND_PORT=3001 \
+  -v /path/to/sunpanel/conf/custom:/app/backend/custom \
+  -v /your/path/to/helper/data:/app/backend/data \
+  -v /your/path/to/helper/backups:/app/backend/backups \
+  madrays/sun-panel-helper:latest
+```
+
+> ⚠️ **重要提示**：务必在更新前备份您的数据，确保安全迁移！对于v2.0.5之前的版本，只需导出data目录即可，因为旧版本没有备份功能。
+
 ## 🎉 更新内容 (v2.0.5)
 
 ### ✨ 功能增强
