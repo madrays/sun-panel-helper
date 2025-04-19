@@ -896,7 +896,7 @@
                                 </div>
                                 <div class="popup-item">
                                     <i class="fas fa-sun"></i>
-                                    <span>紫外线: <span id="popup-uv">中等</span></span>
+                                    <span>紫外线: <span id="popup-uv">暂无</span></span>
                                 </div>
                                 <div class="popup-item">
                                     <i class="fas fa-leaf"></i>
@@ -1180,134 +1180,295 @@
         
     <!-- 天气组件配置 -->
     const WEATHER_API = {
-      keys: ['efe03b7beb7b4891927f859b29403943',''],
+      keys: ['','57f03737624649849fa3ac73dcde280f'],
+      hosts: ['', 'nv6r6vgntc.re.qweatherapi.com'],
       currentKeyIndex: 0,
       baseUrl: 'https://devapi.qweather.com/v7',
-      location: '113.916856401,35.296636969',
-      backgroundColor: 'rgba(255, 255, 255, 0)',
-      textColor: '#FFFFFF',
+      location: '116.41,39.92',
+      backgroundColor: 'rgba(162, 157, 157, 0.02)',
+      textColor: '#ffffff',
+      maxWidth: '1200px',
       retryDelay: 60000,
       lastFailTime: {}
     };
   
 
+        // 缓存对象
         const weatherCache = {
             data: null,
             lastUpdate: null,
-            cacheTime: 15 * 60 * 1000
+            cacheTime: 15 * 60 * 1000 // 15分钟缓存
         };
 
-        async function fetchWeatherData(forceUpdate = false) {
+        // 获取当前有效的API Key，处理冷却时间
+        // 重写 getKey 逻辑，确保检查 Key 和 Host 的有效性，并返回第一个可用的组合
+        function getKey() {
+            const now = Date.now();
+            const keys = WEATHER_API.keys;
+            const hosts = WEATHER_API.hosts;
+            const lastFailTime = WEATHER_API.lastFailTime;
+            const retryDelay = WEATHER_API.retryDelay;
+
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                const host = hosts[i];
+
+                // 检查 Key 和 Host 是否都有效 (非 null/undefined/空字符串)
+                if (key && typeof key === 'string' && key.trim() !== '' && 
+                    host && typeof host === 'string' && host.trim() !== '') {
+                    
+                    const failTime = lastFailTime[key];
+                    // 检查 Key 是否不在冷却期
+                    if (!failTime || (now - failTime >= retryDelay)) {
+                        console.log(`getKey: Selecting valid key/host pair at index ${i}`);
+                        WEATHER_API.currentKeyIndex = i; // 设置当前使用的索引
+                        return key; // 返回可用的 key
+                    } else {
+                        console.log(`getKey: Key at index ${i} is in cooldown.`);
+                    }
+                } else {
+                    console.log(`getKey: Key or Host at index ${i} is invalid or empty.`);
+                }
+            }
+
+            // 如果循环完成，没有找到有效的、未冷却的 Key/Host 对
+            console.warn('getKey: No valid and non-cooldown API key/host pair found.');
+            return null;
+        }
+
+        // 处理API错误，记录失败时间
+        // 修改 handleApiError 以接受失败的索引
+        function handleApiError(failedIndex) {
+            if (failedIndex >= 0 && failedIndex < WEATHER_API.keys.length) {
+                const failedKey = WEATHER_API.keys[failedIndex];
+                if (failedKey && typeof failedKey === 'string' && failedKey.trim() !== '') {
+                    WEATHER_API.lastFailTime[failedKey] = Date.now();
+                    console.error(`API key ${failedKey} (index ${failedIndex}) marked as failed at ${new Date()}.`);
+                } else {
+                    console.warn(`handleApiError: Attempted to mark an invalid key at index ${failedIndex}.`);
+                }
+            } else {
+                 console.warn(`handleApiError: Invalid index ${failedIndex} provided.`);
+            }
+        }
+
+        // 统一的 fetch 函数，包含 host 和 header 处理, 并增加重试逻辑
+        async function fetchApiData(endpoint) {
+            let attempts = 0;
+            // Use length of keys array for max attempts, assuming key/host pairs correspond
+            const maxAttempts = WEATHER_API.keys.length; 
+            let lastError = null; // Store the last error encountered
+
+            while (attempts < maxAttempts) {
+                // getKey now finds the first available key/host pair and sets currentKeyIndex
+                const key = getKey(); 
+                
+                // If getKey returns null, it means no valid, non-cooldown pairs are available *at this moment*
+                if (!key) {
+                    // Throw immediately if no key is available on the first try or if loop already ran
+                    const errorMsg = 'No valid, non-cooldown API key/host pair available.';
+                    console.error(errorMsg);
+                    throw lastError || new Error(errorMsg); // Throw last specific error if available
+                }
+
+                // getKey has set currentKeyIndex to the index of the key it returned
+                const currentIndex = WEATHER_API.currentKeyIndex; 
+                const host = WEATHER_API.hosts[currentIndex]; // Get the corresponding host
+
+                // Double check host validity (though getKey should ensure this)
+                if (!host || host.trim() === '') {
+                    console.warn(`fetchApiData: Host for key index ${currentIndex} is unexpectedly empty after getKey. Skipping attempt.`);
+                    // Optionally mark this key as failed since its host is bad
+                    handleApiError(currentIndex); 
+                    attempts++;
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+                    continue;
+                }
+
+                const url = `https://${host}/v7${endpoint}?location=${WEATHER_API.location}`;
+                console.log(`Attempt ${attempts + 1}/${maxAttempts}: Fetching ${endpoint} from ${host} with key index ${currentIndex}`);
+
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-QW-Api-Key': key
+                        },
+                        signal: AbortSignal.timeout(10000) // 10s timeout
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        // Handle specific HTTP errors that indicate key/quota issues
+                        if (response.status === 401 || response.status === 403 || response.status === 402) {
+                            console.error(`API key ${key} (index ${currentIndex}) failed with status ${response.status}. Marking key and trying next.`);
+                            handleApiError(currentIndex); // Mark failed key using its index
+                            attempts++;
+                            if (attempts >= maxAttempts) throw lastError; // Throw if last attempt
+                            await new Promise(resolve => setTimeout(resolve, 100)); // Small delay before next attempt
+                            continue; // Try next available key/host pair
+                        } else {
+                            // Other HTTP errors might be temporary, don't mark the key, just retry with next key
+                            console.error(`HTTP error ${response.status} for key index ${currentIndex}. Trying next key if available.`);
+                            attempts++;
+                            if (attempts >= maxAttempts) throw lastError;
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            continue;
+                        }
+                    }
+
+                    const json = await response.json();
+
+                    // Handle business logic errors from API response
+                    if (json.code !== '200') {
+                        lastError = new Error(`API Error: ${json.code}`);
+                        if (json.code === '402') { // Quota exceeded
+                            console.error(`API key ${key} (index ${currentIndex}) quota exceeded (Code: ${json.code}). Marking key and trying next.`);
+                            handleApiError(currentIndex); // Mark failed key
+                            attempts++;
+                            if (attempts >= maxAttempts) throw lastError;
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            continue; // Try next available key/host pair
+                        } else {
+                            // Other API business errors, might not be key-related
+                            console.error(`API business error for key index ${currentIndex}: ${json.code}. Trying next key if available.`);
+                             attempts++;
+                             if (attempts >= maxAttempts) throw lastError;
+                             await new Promise(resolve => setTimeout(resolve, 100));
+                             continue;
+                        }
+                    }
+                    
+                    // Success! Return data.
+                    console.log(`Successfully fetched ${endpoint} with key index ${currentIndex}`);
+                    return json; 
+
+                } catch (error) {
+                    lastError = error; // Store the error
+                    console.error(`Fetch attempt ${attempts + 1} failed for key index ${currentIndex}:`, error.message);
+                    
+                    // If it's a timeout or a non-key-related error, don't necessarily mark the key, just try the next one
+                    // Note: 401/402/403 errors are handled above and *do* mark the key
+                    if (error.name === 'TimeoutError' || error.message.startsWith('HTTP error!') || error.message.startsWith('API Error:')) {
+                       attempts++;
+                       if (attempts >= maxAttempts) throw lastError; // Throw if last attempt
+                       await new Promise(resolve => setTimeout(resolve, 100));
+                       continue;
+                    } else {
+                        // For other unexpected errors, rethrow immediately
+                        throw error;
+                    }
+                }
+            }
+            // If loop finishes without success after trying all keys
+            console.error('Failed to fetch data after trying all available API key/host pairs.');
+            throw lastError || new Error('Failed to fetch data after exhausting all options.');
+        }
+
+        // 获取所有天气数据
+        async function fetchAllWeatherData(forceUpdate = false) {
             const now = Date.now();
             if (!forceUpdate && 
                 weatherCache.data && 
                 weatherCache.lastUpdate && 
                 (now - weatherCache.lastUpdate < weatherCache.cacheTime)) {
-                console.log('使用缓存的天气数据');
+                console.log('Using cached weather data');
                 return weatherCache.data;
             }
+            
+            // 定义需要获取的端点
+            const endpoints = [
+                { name: 'now', path: '/weather/now' },
+                { name: 'air', path: '/air/now' },
+                { name: 'hourly', path: '/weather/24h' },
+                { name: 'daily', path: '/weather/7d' }
+                // 如需生活指数，可添加: { name: 'indices', path: '/indices/1d', params: '&type=1,3' }
+            ];
+            
+            const results = {};
+            let success = true;
 
-            async function tryFetch(keyIndex) {
-                const key = WEATHER_API.keys[keyIndex];
+            // 尝试使用当前最佳 Key 获取所有数据
+            try {
+                for (const ep of endpoints) {
+                    // 注意：这里简化了逻辑，假设一次尝试获取所有数据。
+                    // 更复杂的重试可以针对单个 endpoint 失败进行。
+                    const data = await fetchApiData(ep.path + (ep.params || ''));
+                    results[ep.name] = data; // 直接存储完整响应，以便后续访问 now, hourly, daily 等属性
+                }
                 
-                if (WEATHER_API.lastFailTime[key] && 
-                    (now - WEATHER_API.lastFailTime[key] < WEATHER_API.retryDelay)) {
-                    throw new Error('API key 正在冷却中');
-                }
-
-                try {
-                    const nowResponse = await fetch(
-                        `${WEATHER_API.baseUrl}/weather/now?location=${WEATHER_API.location}&key=${key}`
-                    );
-                    const nowData = await nowResponse.json();
-
-                    const airResponse = await fetch(
-                        `${WEATHER_API.baseUrl}/air/now?location=${WEATHER_API.location}&key=${key}`
-                    );
-                    const airData = await airResponse.json();
-
-                    const hourlyResponse = await fetch(
-                        `${WEATHER_API.baseUrl}/weather/24h?location=${WEATHER_API.location}&key=${key}`
-                    );
-                    const hourlyData = await hourlyResponse.json();
-
-                    const dailyResponse = await fetch(
-                        `${WEATHER_API.baseUrl}/weather/7d?location=${WEATHER_API.location}&key=${key}`
-                    );
-                    const dailyData = await dailyResponse.json();
-
-                    if (nowData.code === '402' || airData.code === '402' || hourlyData.code === '402' || dailyData.code === '402') {
-                        WEATHER_API.lastFailTime[key] = now;
-                        throw new Error('API配额超限');
-                    }
-
-                    if (nowData.code !== '200' || airData.code !== '200' || hourlyData.code !== '200' || dailyData.code !== '200') {
-                        throw new Error('API请求失败');
-                    }
-
-                    return {
-                        now: nowData.now,
-                        air: airData.now,
-                        hourly: hourlyData.hourly,
-                        daily: dailyData.daily
-                    };
-                } catch (error) {
-                    console.error(`API key ${key} 失败:`, error.message);
-                    throw error;
-                }
+                weatherCache.data = results;
+                weatherCache.lastUpdate = now;
+                console.log(`Successfully fetched all data with API key index ${WEATHER_API.currentKeyIndex}`);
+                return results;
+                
+            } catch (error) {
+                console.error('Failed to fetch all weather data:', error.message);
+                success = false;
+                // 此处错误已在 fetchApiData 内部处理（可能调用了 handleApiError）
+                // 这里不再重复调用 handleApiError
             }
 
-            for (let i = 0; i < WEATHER_API.keys.length; i++) {
-                try {
-                    const data = await tryFetch(i);
-                    WEATHER_API.currentKeyIndex = i;
-                    weatherCache.data = data;
-                    weatherCache.lastUpdate = now;
-                    console.log(`成功使用 API key ${i}`);
-                    return data;
-                } catch (error) {
-                    if (i === WEATHER_API.keys.length - 1) {
-                        if (weatherCache.data) {
-                            console.log('所有key都失败，使用缓存数据');
-                            return weatherCache.data;
-                        }
-                        throw error;
-                    }
-                    console.log(`切换到下一个 API key...`);
+            // 如果初次尝试失败 (可能是 key 冷却或临时网络问题)，尝试下一次更新时自动切换 key
+            if (!success) {
+                // 如果有缓存，返回旧缓存
+                if (weatherCache.data) {
+                    console.warn('Fetching failed, using stale cache data.');
+                    return weatherCache.data;
                 }
+                // 如果没有缓存，抛出错误，UI 会显示错误
+                throw new Error('Failed to fetch weather data and no cache available.');
             }
         }
 
-        function startAutoUpdate() {
-            updateWeatherUI();
-            updateInterval = setInterval(() => {
-                const now = Date.now();
-                if (!weatherCache.lastUpdate || 
-                    (now - weatherCache.lastUpdate >= weatherCache.cacheTime)) {
-                    updateWeatherUI();
-                } else {
-                    console.log('使用缓存数据，无需更新');
-                }
-            }, 60000);
-        }
-
+        // 更新UI的函数
         async function updateWeatherUI(forceUpdate = false) {
             try {
-                const weatherData = await fetchWeatherData(forceUpdate);
+                const weatherData = await fetchAllWeatherData(forceUpdate);
                 
-                if (weatherData.now) {
-                    document.querySelector('.current-temp').textContent = `${weatherData.now.temp}°`;
-                    document.querySelector('.weather-icon').textContent = getWeatherIcon(weatherData.now.icon);
-                    document.querySelector('.weather-desc').textContent = weatherData.now.text;
-                    
-                    const detailsItems = document.querySelectorAll('.weather-details-item .weather-details-value');
-                    detailsItems[0].textContent = `${weatherData.now.windSpeed}km/h`;
-                    detailsItems[1].textContent = `${weatherData.now.humidity}%`;
-                    detailsItems[2].textContent = getAirQuality(weatherData.air);
+                if (!weatherData) {
+                    throw new Error('fetchAllWeatherData returned null');
                 }
 
-                if (weatherData.hourly) {
-                    hoursData = weatherData.hourly.map(hour => {
+                // 更新实时天气
+                if (weatherData.now && weatherData.now.now) {
+                    const now = weatherData.now.now;
+                    document.querySelector('.current-temp').textContent = `${now.temp}°`;
+                    document.querySelector('.weather-icon').textContent = getWeatherIcon(now.icon);
+                    document.querySelector('.weather-desc').textContent = now.text;
+                    
+                    const detailsItems = document.querySelectorAll('.weather-details-item .weather-details-value');
+                    detailsItems[0].textContent = `${now.windSpeed}km/h`;
+                    detailsItems[1].textContent = `${now.humidity}%`;
+                    // detailsItems[2] 用于空气质量
+
+                    // 更新 popup
+                    document.getElementById('popup-feels-like').textContent = `${now.feelsLike}°`;
+                    document.getElementById('popup-wind-dir').textContent = now.windDir;
+                    document.getElementById('popup-wind-scale').textContent = `${now.windScale}级`;
+                    document.getElementById('popup-pressure').textContent = `${now.pressure}hPa`;
+                    document.getElementById('popup-cloud').textContent = `${now.cloud || 0}%`;
+                    document.getElementById('popup-visibility').textContent = `${now.vis}km`;
+                    // UV 指数可能在 indices API 中，这里暂时留空或使用 now.uvIndex (如果新版 API 有)
+                    // 恢复原始逻辑：直接显示数值或 '暂无'
+                    document.getElementById('popup-uv').textContent = now.uvIndex !== undefined ? now.uvIndex : '暂无';
+                } else {
+                    console.warn('Missing now data in response');
+                }
+
+                // 更新空气质量
+                if (weatherData.air && weatherData.air.now) {
+                    const air = weatherData.air.now;
+                    document.querySelectorAll('.weather-details-item .weather-details-value')[2].textContent = `${air.category} ${air.aqi}`;
+                    document.getElementById('popup-aqi').textContent = `${air.category} (${air.aqi})`;
+                } else {
+                    document.querySelectorAll('.weather-details-item .weather-details-value')[2].textContent = '-';
+                    document.getElementById('popup-aqi').textContent = '-';
+                    console.warn('Missing air data in response');
+                }
+
+                // 更新小时预报
+                if (weatherData.hourly && weatherData.hourly.hourly) {
+                    hoursData = weatherData.hourly.hourly.map(hour => {
                         const hour24 = hour.fxTime.split('T')[1].substring(0, 2);
                         return {
                             time: `${hour24}:00`,
@@ -1318,11 +1479,14 @@
                     });
                     currentHourIndex = 0;
                     renderHourlyForecast();
+                } else {
+                    console.warn('Missing hourly data in response');
                 }
 
-                if (weatherData.daily) {
-                    daysData = weatherData.daily.map((day, index) => {
-                        const [year, month, date] = day.fxDate.split('-');
+                // 更新每日预报
+                if (weatherData.daily && weatherData.daily.daily) {
+                    daysData = weatherData.daily.daily.map((day, index) => {
+                        const [, month, date] = day.fxDate.split('-');
                         return {
                             date: index === 0 ? '今天' : 
                                   index === 1 ? '明天' : 
@@ -1335,26 +1499,18 @@
                     });
                     currentDayIndex = 0;
                     renderDailyForecast();
+                } else {
+                    console.warn('Missing daily data in response');
                 }
 
-                console.log('数据更新成功:', {
-                    now: weatherData.now,
-                    hourly: hoursData,
-                    daily: daysData
-                });
-
-                document.getElementById('popup-feels-like').textContent = `${weatherData.now.feelsLike}°`;
-                document.getElementById('popup-wind-dir').textContent = weatherData.now.windDir;
-                document.getElementById('popup-wind-scale').textContent = `${weatherData.now.windScale}级`;
-                document.getElementById('popup-pressure').textContent = `${weatherData.now.pressure}hPa`;
-                document.getElementById('popup-cloud').textContent = `${weatherData.now.cloud || 0}%`;
-                document.getElementById('popup-visibility').textContent = `${weatherData.now.vis}km`;
-                document.getElementById('popup-uv').textContent = weatherData.now.uvIndex || '暂无';
-                document.getElementById('popup-aqi').textContent = getAirQuality(weatherData.air);
+                console.log('Weather UI updated successfully.');
+                // 清除可能存在的旧错误提示
+                const existingError = document.querySelector('.error-toast');
+                if (existingError) existingError.remove();
 
             } catch (error) {
-                console.error('更新天气数据失败:', error);
-                showError('获取天气数据失败，请稍后重试');
+                console.error('Failed to update weather UI:', error);
+                showError('获取天气数据失败');
             }
         }
 
@@ -1475,6 +1631,25 @@
             if (frontContent) frontContent.style.background = WEATHER_API.backgroundColor || 'rgba(0, 0, 0, 0.5)';
             if (backContent) backContent.style.background = WEATHER_API.backgroundColor || 'rgba(0, 0, 0, 0.5)';
             
+            // Apply maxWidth to container
+            const container = document.querySelector('.widget-container');
+            if (container) {
+                if (WEATHER_API.maxWidth && WEATHER_API.maxWidth !== 'DEFAULT_MAX_WIDTH') {
+                     // Simple validation: allow px, %, or auto
+                     if (typeof WEATHER_API.maxWidth === 'string' && WEATHER_API.maxWidth.match(/^(\d+(\.\d+)?(px|%)|auto)$/i)) {
+                         container.style.maxWidth = WEATHER_API.maxWidth;
+                         console.log('Applied maxWidth:', WEATHER_API.maxWidth);
+                     } else {
+                         console.warn('Invalid maxWidth value provided:', WEATHER_API.maxWidth, 'Using default 600px.');
+                         container.style.maxWidth = '600px'; 
+                     }
+                } else {
+                    // Apply default if not provided or still the placeholder
+                    container.style.maxWidth = '600px';
+                    console.log('Applied default maxWidth: 600px');
+                }
+            }
+            
             // 初始状态设置
             if (backContent) backContent.style.display = 'none';
             
@@ -1554,12 +1729,13 @@
             }
             
             // 桌面设备的原有逻辑
+            if (!popup || !mainInfo || !container) return;
             const containerRect = container.getBoundingClientRect();
             const mainInfoRect = mainInfo.getBoundingClientRect();
             
             // 计算最佳位置
-            const popupWidth = 200;
-            const popupHeight = 180;
+            const popupWidth = popup.offsetWidth > 0 ? popup.offsetWidth : 220; // 使用实际或默认宽度
+            const popupHeight = popup.offsetHeight > 0 ? popup.offsetHeight : 180; // 使用实际或默认高度
             const padding = 8;
 
             let left, top;
@@ -1605,7 +1781,7 @@
             const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
             
             // 在移动设备上，让点击外部关闭的逻辑处理隐藏
-            if (!isMobile) {
+            if (!isMobile && popup) {
                 popup.classList.remove('show');
             }
         }

@@ -6,6 +6,7 @@ import fixedRoutes from './modules/fixed'
 import freeRoutes from './modules/free'
 import profileRoutes from './modules/profile'
 import backupRoutes from './modules/backup'
+import toolboxRoutes from './modules/toolbox'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -37,6 +38,7 @@ const routes: RouteRecordRaw[] = [
           icon: 'home'
         }
       },
+      ...toolboxRoutes,
       ...cssRoutes,
       ...jsRoutes,
       ...marketRoutes,
@@ -44,6 +46,14 @@ const routes: RouteRecordRaw[] = [
       ...freeRoutes,
       ...profileRoutes,
       ...backupRoutes,
+      {
+        path: '/dashboard/thanks',
+        component: () => import('@/views/thanks/index.vue'),
+        meta: {
+          title: '项目鸣谢',
+          requiresAuth: true
+        }
+      },
       {
         path: '/dashboard/support',
         component: () => import('@/views/support/index.vue'),

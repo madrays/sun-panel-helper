@@ -31,7 +31,7 @@
                 backgroundColor: config.theme?.downloadSpeedBgColor || 'rgba(33, 150, 243, 0.15)'
               }">
                 <div class="qb-label" :style="{
-                  color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                  color: config.theme?.downloadSpeedLabelColor || 'rgba(255, 255, 255, 0.7)'
                 }">下载速度</div>
                 <div class="qb-value" :style="{
                   color: config.theme?.downloadSpeedTextColor || '#3498db'
@@ -42,7 +42,7 @@
                 backgroundColor: config.theme?.uploadSpeedBgColor || 'rgba(76, 175, 80, 0.15)'
               }">
                 <div class="qb-label" :style="{
-                  color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                  color: config.theme?.uploadSpeedLabelColor || 'rgba(255, 255, 255, 0.7)'
                 }">上传速度</div>
                 <div class="qb-value" :style="{
                   color: config.theme?.uploadSpeedTextColor || '#27ae60'
@@ -62,7 +62,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.activeDownloadsLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">下载中</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.activeDownloadsTextColor || '#4fc3f7'
@@ -75,7 +75,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.activeTorrentsLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">活跃</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.activeTorrentsTextColor || '#9c27b0'
@@ -88,7 +88,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.pausedTorrentsLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">暂停</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.pausedTorrentsTextColor || '#ff9800'
@@ -101,7 +101,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.completedTorrentsLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">完成</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.completedTorrentsTextColor || '#4caf50'
@@ -114,7 +114,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.totalTorrentsLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">总数</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.totalTorrentsTextColor || '#9e9e9e'
@@ -127,7 +127,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.errorTorrentsLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">错误任务</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.errorTorrentsTextColor || '#f44336'
@@ -140,7 +140,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.seedingTorrentsLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">做种数</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.seedingTorrentsTextColor || '#00bcd4'
@@ -153,7 +153,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.ioTasksLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">I/O任务</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.ioTasksTextColor || '#009688'
@@ -166,7 +166,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.globalRatioLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">分享率</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.globalRatioTextColor || '#03a9f4'
@@ -179,7 +179,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.averageRatioLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">平均分享率</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.averageRatioTextColor || '#3f51b5'
@@ -192,7 +192,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.globalDownloadedLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">已下载</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.globalDownloadedTextColor || '#00bcd4'
@@ -205,7 +205,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.globalUploadedLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">已上传</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.globalUploadedTextColor || '#e91e63'
@@ -218,7 +218,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.uploadLimitLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">上传限制</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.uploadLimitTextColor || '#ff5722'
@@ -231,7 +231,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.downloadLimitLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">下载限制</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.downloadLimitTextColor || '#795548'
@@ -244,7 +244,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.freeSpaceLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">可用空间</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.freeSpaceTextColor || '#607d8b'
@@ -257,7 +257,7 @@
                     ...getItemStyle()
                   }">
                     <div class="qb-label" :style="{
-                      color: config.theme?.labelTextColor || 'rgba(255, 255, 255, 0.7)'
+                      color: config.theme?.totalSizeLabelColor || 'rgba(255, 255, 255, 0.7)'
                     }">总体积</div>
                     <div class="qb-value" :style="{
                       color: config.theme?.totalSizeTextColor || '#616161'

@@ -54,6 +54,17 @@
 
           <!-- 分割线 -->
           <div class="menu-divider">
+            <span class="divider-text" v-show="!isCollapse">百宝箱</span>
+          </div>
+          
+          <!-- 百宝箱区 -->
+          <el-menu-item index="/dashboard/toolbox">
+            <el-icon><Star /></el-icon>
+            <span>百宝箱</span>
+          </el-menu-item>
+
+          <!-- 分割线 -->
+          <div class="menu-divider">
             <span class="divider-text" v-show="!isCollapse">系统工具</span>
           </div>
 
@@ -73,6 +84,11 @@
             <div class="divider-line"></div>
           </div>
           
+          <el-menu-item index="/dashboard/thanks" class="thanks-item">
+            <el-icon><Medal /></el-icon>
+            <span>项目鸣谢</span>
+          </el-menu-item>
+          
           <el-menu-item index="/dashboard/support" class="support-item">
             <el-icon><Coffee /></el-icon>
             <span>支持作者</span>
@@ -88,7 +104,7 @@
         <el-header height="64px" class="header">
           <div class="header-left">
             <div class="collapse-btn" @click="toggleSidebar">
-              <el-icon><Fold /></el-icon>
+              <el-icon><fold /></el-icon>
             </div>
             <el-breadcrumb separator="/">
               <el-breadcrumb-item :to="{ path: '/dashboard' }">首页</el-breadcrumb-item>
@@ -97,6 +113,22 @@
             </el-breadcrumb>
           </div>
           <div class="header-right">
+            <!-- 官方文档链接 - 移到用户头像左侧 -->
+            <a href="https://helper.cocoyoo.cn" target="_blank" class="doc-link" title="官方文档">
+              <div class="bg-pattern"></div>
+              <div class="shine-line"></div>
+              <div class="particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+              </div>
+              <div class="doc-icon-wrapper">
+                <el-icon><document /></el-icon>
+              </div>
+              <span class="doc-text">官方文档</span>
+            </a>
+            
             <el-dropdown @command="handleCommand">
               <div class="user-info">
                 <el-avatar :size="32" :src="userInfo.avatar" />
@@ -105,11 +137,11 @@
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="changePassword">
-                    <el-icon><Setting /></el-icon>
+                    <el-icon><setting /></el-icon>
                     修改密码
                   </el-dropdown-item>
                   <el-dropdown-item command="logout">
-                    <el-icon><CircleClose /></el-icon>
+                    <el-icon><circle-close /></el-icon>
                     退出登录
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -134,16 +166,21 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
+  House,
+  Fold,
+  ArrowRight,
   MagicStick,
   Monitor,
-  Location,
   Shop,
-  Fold,
-  House,
-  Setting,
-  CircleClose,
+  Location,
   Coffee,
-  CopyDocument
+  User,
+  Key,
+  Refresh,
+  CopyDocument,
+  Document,
+  Medal,
+  Star
 } from '@element-plus/icons-vue'
 import VersionCheck from '@/components/VersionCheck.vue'
 
@@ -358,6 +395,10 @@ const handleLogout = () => {
   }
 
   .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
     .el-dropdown {
       outline: none !important;
     }
@@ -391,6 +432,197 @@ const handleLogout = () => {
         color: var(--text-primary);
       }
     }
+    
+    /* 文档链接样式 */
+    .doc-link {
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      height: 40px;
+      border-radius: var(--border-radius-base);
+      background: linear-gradient(145deg, #409eff, #1b56e0);
+      background-size: 200% 200%;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(23, 92, 230, 0.25);
+      margin-right: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+      animation: float 3s ease-in-out infinite, 
+                 pulse 2s infinite alternate, 
+                 borderGlow 4s infinite alternate,
+                 gradientShift 8s linear infinite;
+      transform-style: preserve-3d;
+      perspective: 500px;
+      
+      /* 发光边框 */
+      &::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        background: linear-gradient(90deg, #4dabff, #2160f0, #4dabff);
+        border-radius: inherit;
+        animation: rotateBorder 3s linear infinite, borderPulse 2s infinite alternate;
+        z-index: -1;
+        filter: blur(2px);
+      }
+      
+      /* 扫光效果 */
+      &::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+        opacity: 0;
+        transform: scale(0.5);
+        animation: scanLight 5s infinite;
+        z-index: 1;
+        transform-origin: center;
+      }
+      
+      /* 内容背景图案 */
+      .bg-pattern {
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1.5'/%3E%3Ccircle cx='13' cy='13' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+        z-index: 0;
+        animation: patternMove 20s linear infinite;
+      }
+      
+      /* 扫光线 */
+      .shine-line {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+          rgba(255,255,255,0) 0%, 
+          rgba(255,255,255,0.4) 50%, 
+          rgba(255,255,255,0) 100%);
+        transform: skewX(-20deg);
+        animation: shineLine 5s infinite;
+        z-index: 2;
+      }
+      
+      /* 粒子效果 */
+      .particles {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        overflow: hidden;
+        
+        .particle {
+          position: absolute;
+          width: 3px;
+          height: 3px;
+          background: white;
+          border-radius: 50%;
+          opacity: 0;
+          
+          &:nth-child(1) {
+            top: 20%;
+            left: 20%;
+            animation: particleAnimation 3s ease-in-out infinite;
+          }
+          
+          &:nth-child(2) {
+            top: 70%;
+            left: 40%;
+            animation: particleAnimation 2.5s 0.3s ease-in-out infinite;
+          }
+          
+          &:nth-child(3) {
+            top: 30%;
+            left: 60%;
+            animation: particleAnimation 3.5s 0.7s ease-in-out infinite;
+          }
+          
+          &:nth-child(4) {
+            top: 60%;
+            left: 80%;
+            animation: particleAnimation 4s 1s ease-in-out infinite;
+          }
+        }
+      }
+      
+      &:hover {
+        transform: translateY(-3px) scale(1.05) rotateX(5deg);
+        box-shadow: 0 10px 25px rgba(23, 92, 230, 0.6);
+        background: linear-gradient(145deg, #4dabff, #2160f0);
+        animation-play-state: paused;
+        
+        .doc-icon-wrapper {
+          transform: rotateY(180deg);
+          animation-play-state: paused;
+        }
+        
+        .shine-line {
+          animation-duration: 1.5s;
+        }
+        
+        /* 霓虹脉冲效果 */
+        &::after {
+          animation: scanLight 2.5s infinite;
+        }
+      }
+      
+      .doc-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        position: relative;
+        transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        transform-style: preserve-3d;
+        z-index: 3;
+        animation: iconPulse 1.5s infinite alternate, iconFloat 3s ease-in-out infinite;
+        
+        &:before {
+          content: '';
+          position: absolute;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.15);
+          animation: ripple 2s infinite ease-in-out;
+        }
+
+        &:after {
+          content: '';
+          position: absolute;
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          animation: ripple 2.5s 0.5s infinite ease-in-out;
+        }
+      }
+      
+      .el-icon {
+        font-size: 20px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+        z-index: 3;
+        animation: iconRotate 6s linear infinite;
+      }
+      
+      .doc-text {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        position: relative;
+        z-index: 3;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        animation: textGlow 2s ease-in-out infinite alternate, textFloat 2s ease-in-out infinite;
+      }
+    }
   }
 }
 
@@ -422,6 +654,20 @@ const handleLogout = () => {
           display: none;
         }
       }
+    }
+  }
+
+  .doc-link {
+    padding: 0;
+    width: 40px;
+    justify-content: center;
+    
+    .doc-text {
+      display: none;
+    }
+    
+    .doc-icon-wrapper {
+      margin-right: 0;
     }
   }
 }
@@ -474,7 +720,7 @@ const handleLogout = () => {
 }
 
 /* 支持作者菜单项样式 */
-.support-item {
+.support-item, .thanks-item {
   position: relative;
   margin: 4px 6px;
   border-radius: 6px;
@@ -505,6 +751,20 @@ const handleLogout = () => {
   }
 }
 
+/* 鸣谢菜单项特殊样式 */
+.thanks-item {
+  .el-icon {
+    color: #724bc0;
+  }
+  
+  &::before {
+    background: linear-gradient(135deg, 
+      #a26bfa,
+      transparent 50%
+    );
+  }
+}
+
 /* 折叠状态下的样式调整 */
 .el-menu--collapse {
   .support-divider {
@@ -513,7 +773,7 @@ const handleLogout = () => {
     }
   }
   
-  .support-item {
+  .support-item, .thanks-item {
     width: 40px;
     margin: 4px auto;
   }
@@ -533,6 +793,113 @@ const handleLogout = () => {
   
   &:hover .el-icon {
     transform: scale(1.2);
+  }
+}
+
+/* 侧边栏折叠按钮 */
+.collapse-btn {
+  font-size: 20px;
+  margin-right: 15px;
+  cursor: pointer;
+  color: var(--el-color-info);
+  transition: all 0.3s;
+}
+
+.collapse-btn:hover {
+  color: var(--el-color-primary);
+  transform: scale(1.1);
+}
+
+/* 动画定义 */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes textFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(5deg); }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 4px 15px rgba(23, 92, 230, 0.25); }
+  100% { box-shadow: 0 8px 25px rgba(23, 92, 230, 0.6); }
+}
+
+@keyframes shineLine {
+  0% { left: -100%; }
+  20%, 100% { left: 100%; }
+}
+
+@keyframes scanLight {
+  0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+  50% { opacity: 0.5; transform: scale(1) rotate(180deg); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.6; }
+  100% { transform: scale(0.8); opacity: 1; }
+}
+
+@keyframes patternMove {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+@keyframes iconPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+@keyframes iconRotate {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+@keyframes textGlow {
+  0% { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+  100% { text-shadow: 0 1px 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(23, 92, 230, 0.3); }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.3); }
+  50% { border-color: rgba(255, 255, 255, 0.8); }
+}
+
+@keyframes borderPulse {
+  0% { opacity: 0.4; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes rotateBorder {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 400% 0%; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes particleAnimation {
+  0% { 
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: translateY(-10px) scale(1.2);
+  }
+  100% { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0);
   }
 }
 </style> 

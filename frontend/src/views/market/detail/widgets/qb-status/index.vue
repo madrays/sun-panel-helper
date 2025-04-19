@@ -65,15 +65,31 @@
           <template #header>
             <div class="section-title">
               <span>全局设置</span>
+              <el-tag type="warning" effect="dark" size="small" class="important-tag">重要配置</el-tag>
             </div>
           </template>
           <div class="domain-prefix-content">
-            <el-form-item label="域名前缀 (全局设置)">
+            <el-alert
+              type="warning"
+              :closable="false"
+              show-icon
+            >
+              <div class="alert-title">此配置影响组件是否能正常访问，请务必正确填写</div>
+            </el-alert>
+            <el-form-item label="域名前缀 (全局设置)" class="important-form-item">
               <el-input 
                 v-model="domainPrefix" 
-                placeholder="例如: https://your-domain.com" 
+                placeholder="例如: https://your-domain.com 或 http://192.168.1.100:33002" 
               />
-              <div class="form-tip">此为全局设置，所有组件共享同一域名前缀，仅需设置一次</div>
+              <div class="form-tip">
+                <strong>此为全局设置，所有组件共享同一域名前缀，仅需设置一次</strong>
+                <ul class="form-tip-list">
+                  <li><strong>填写内容：</strong>此处需填写您访问 Sun-Panel-Helper 的完整地址（包含协议和端口）</li>
+                  <li><strong>局域网环境：</strong>填写局域网IP+端口，如 <code>http://192.168.1.100:33002</code></li>
+                  <li><strong>公网环境：</strong>填写反向代理后的访问地址，如 <code>https://your-domain.com</code>或<code>https://your-domain.com:33002</code></li>
+                  <li><strong>错误示例：</strong>不要填写 <code>your-domain.com</code>（缺少协议）或 <code>https://your-domain.com/path</code>（多余的路径）</li>
+                </ul>
+              </div>
             </el-form-item>
           </div>
         </el-card>
@@ -146,7 +162,7 @@
                         
                         <!-- 头部设置 -->
                         <el-form-item label="头部背景" class="mini-form-item">
-                          <el-color-picker v-model="themeSettings.headerBackgroundColor" size="small" @change="handleThemeChange" />
+                          <el-color-picker v-model="themeSettings.headerBackgroundColor" size="small" show-alpha @change="handleThemeChange" />
                         </el-form-item>
                         <el-form-item label="头部文本色" class="mini-form-item">
                           <el-color-picker v-model="themeSettings.headerTextColor" size="small" @change="handleThemeChange" />
@@ -2384,30 +2400,53 @@ const getUniqueColor = (itemName: string, alpha: number = 1) => {
 }
 
 .domain-prefix-section {
-  border-radius: 8px;
-  overflow: hidden;
+  margin-bottom: 20px;
+  border: 2px solid #e6a23c;
   
-  :deep(.el-card__header) {
-    padding: 12px 16px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-  }
-  
-  :deep(.el-card__body) {
-    padding: 16px;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+  .section-title {
+    display: flex;
+    align-items: center;
+    
+    .important-tag {
+      margin-left: 10px;
+    }
   }
   
   .domain-prefix-content {
-    .el-form-item {
-      margin-bottom: 0;
+    .alert-title {
+      font-weight: bold;
+    }
+    
+    .important-form-item {
+      margin-top: 15px;
     }
     
     .form-tip {
-      font-size: 12px;
-      color: var(--el-text-color-secondary);
-      margin-top: 4px;
+      margin-top: 10px;
+      color: #606266;
+      font-size: 13px;
+      line-height: 1.5;
+      
+      strong {
+        color: #e6a23c;
+      }
+      
+      .form-tip-list {
+        margin-top: 5px;
+        padding-left: 20px;
+        
+        li {
+          margin-bottom: 5px;
+        }
+        
+        code {
+          background-color: #f8f8f8;
+          padding: 2px 4px;
+          border-radius: 3px;
+          color: #e6a23c;
+          font-family: monospace;
+        }
+      }
     }
   }
 }
