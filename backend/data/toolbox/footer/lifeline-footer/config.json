@@ -1,0 +1,42 @@
+{
+  "siteLaunchDate": "2025-04-06T16:00:00.000Z",
+  "enableUptime": true,
+  "enableSocialLinks": true,
+  "enableCustomContent": false,
+  "enableHelperAd": false,
+  "enableTime": true,
+  "uptimePrefix": "本站已苟活",
+  "moduleOrder": [
+    "helper",
+    "social",
+    "uptime",
+    "time",
+    "customContent"
+  ],
+  "customContent": {
+    "text": "在这里添加您想展示的文<i class=\"fab fa-bitbucket\"></i>😎😎😎😎😎字和表情",
+    "enabled": true
+  },
+  "socialLinks": [
+    {
+      "title": "GitHub",
+      "url": "https://github.com",
+      "icon": "fab fa-github",
+      "enabled": false
+    },
+    {
+      "title": "博客",
+      "url": "https://example.com",
+      "icon": "fas fa-blog",
+      "enabled": true
+    },
+    {
+      "title": "111",
+      "url": "1111",
+      "icon": "fab fa-link",
+      "enabled": true
+    }
+  ],
+  "textColor": "rgba(102, 230, 16, 1)",
+  "accentColor": "rgba(17, 158, 245, 1)"
+}

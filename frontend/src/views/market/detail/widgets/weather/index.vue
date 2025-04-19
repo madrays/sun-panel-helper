@@ -57,6 +57,7 @@
         <p>2. 注册账号并实名认证</p>
         <p>3. 创建应用，选择免费版本即可</p>
         <p>4. 获取API密钥（建议申请两个作为备用）</p>
+        <p>5. 为了提高API的安全等级，和风天气为每个开发者提供了独立的、数据隔离的API Host（即API地址/域名）。请在和风天气控制台的"设置"页面中找到并复制你的专属 API Host 地址。它看起来像是 `abc.xyz.qweatherapi.com` 这样的格式。请注意主密钥和备用密钥可能对应不同的 Host，需要分别获取并填写。</p>
       </el-alert>
       
       <el-alert
@@ -85,6 +86,15 @@ import WeatherParams from './params.vue'
 import WeatherPreview from './preview.vue'
 import type { Widget } from '@/types/market'
 
+// 新增: 定义 Config 接口
+interface Config {
+  keys: string[]
+  hosts: string[]
+  location: string
+  backgroundColor?: string
+  textColor?: string
+}
+
 // 默认配置
 const defaultWidget: Widget = {
   id: 'weather',
@@ -96,9 +106,12 @@ const defaultWidget: Widget = {
 }
 
 // 参数配置
-const config = ref({
+const config = ref<Config>({
   keys: ['', ''],
-  location: '116.41,39.92'
+  hosts: ['', ''],
+  location: '116.41,39.92',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  textColor: '#ffffff'
 })
 
 const widget = ref<Widget>({ ...defaultWidget })
@@ -110,7 +123,10 @@ const handleReset = () => {
   widget.value = { ...defaultWidget }
   config.value = {
     keys: ['', ''],
-    location: '116.41,39.92'
+    hosts: ['', ''],
+    location: '116.41,39.92',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    textColor: '#ffffff'
   }
 }
 

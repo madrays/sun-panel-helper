@@ -23,6 +23,9 @@ import musicPlayerRoutes from './routes/js/music-player'
 import hideLoginRoutes from './routes/js/hide-login'
 import widgetsRouter from './routes/widgets'
 import backupRouter from './routes/backup'
+// import toolboxRouter from './routes/toolbox'
+// 使用require导入解决TypeScript编译错误
+const toolboxRouter = require('./routes/toolbox').default;
 import { mkdirSync, copyFileSync, PathLike, WriteStream, createWriteStream } from 'fs'
 import '../components/services/file-order'
 import fs from 'fs'
@@ -139,6 +142,7 @@ app.use('/api/js/music-player', musicPlayerRoutes)
 app.use('/api/js/hide-login', hideLoginRoutes)
 app.use('/api/widgets', widgetsRouter)
 app.use('/api/backup', backupRouter)
+app.use('/api/toolbox', toolboxRouter)
 
 // 添加 markdown-editor 的路由
 app.use('/custom/helper/md', express.static(join(__dirname, '../custom/helper/md')));

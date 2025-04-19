@@ -19,10 +19,26 @@
         />
       </el-form-item>
 
+      <el-form-item label="API Host">
+        <el-input 
+          v-model="config.hosts[0]"
+          placeholder="请输入主 Key 对应的 API Host (控制台查看)"
+          @input="updatePreview"
+        />
+      </el-form-item>
+
       <el-form-item label="备用API密钥">
         <el-input 
           v-model="config.keys[1]"
           placeholder="请输入备用API密钥"
+          @input="updatePreview"
+        />
+      </el-form-item>
+
+      <el-form-item label="备用 API Host">
+        <el-input 
+          v-model="config.hosts[1]"
+          placeholder="请输入备用 Key 对应的 API Host (控制台查看)"
           @input="updatePreview"
         />
       </el-form-item>
@@ -35,18 +51,33 @@
         />
       </el-form-item>
 
-      <el-form-item label="背景颜色">
-        <el-color-picker 
-          v-model="config.backgroundColor" 
-          show-alpha
-          @change="updatePreview"
-        />
-      </el-form-item>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="背景颜色">
+            <el-color-picker 
+              v-model="config.backgroundColor" 
+              show-alpha
+              @change="updatePreview"
+              style="width: 100%;" 
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="文字颜色">
+            <el-color-picker 
+              v-model="config.textColor" 
+              @change="updatePreview"
+              style="width: 100%;"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
 
-      <el-form-item label="文字颜色">
-        <el-color-picker 
-          v-model="config.textColor" 
-          @change="updatePreview"
+      <el-form-item label="最大宽度">
+        <el-input 
+          v-model="config.maxWidth"
+          placeholder="例如: 600px, 80%, auto"
+          @input="updatePreview"
         />
       </el-form-item>
     </el-form>
@@ -71,9 +102,11 @@ import { ElMessage } from 'element-plus'
 
 interface Config {
   keys: string[]
+  hosts: string[]
   location: string
   backgroundColor?: string
   textColor?: string
+  maxWidth?: string
 }
 
 // 定义响应数据接口
@@ -109,16 +142,20 @@ onMounted(async () => {
     
     // 提取配置
     const keysMatch = html.match(/keys:\s*\[\s*'([^']*)',\s*'([^']*)'\s*\]/)
+    const hostsMatch = html.match(/hosts:\s*\[\s*'([^']*)',\s*'([^']*)'\s*\]/)
     const locationMatch = html.match(/location:\s*'([^']*)'/)
     const backgroundColorMatch = html.match(/backgroundColor:\s*'([^']*)'/)
     const textColorMatch = html.match(/textColor:\s*'([^']*)'/)
+    const maxWidthMatch = html.match(/maxWidth:\s*'([^']*)'/)
     
     if (keysMatch && locationMatch) {
       emit('update:modelValue', {
         keys: [keysMatch[1], keysMatch[2]],
+        hosts: hostsMatch ? [hostsMatch[1], hostsMatch[2]] : ['', ''],
         location: locationMatch[1],
         backgroundColor: backgroundColorMatch ? backgroundColorMatch[1] : 'rgba(0, 0, 0, 0.5)',
-        textColor: textColorMatch ? textColorMatch[1] : '#ffffff'
+        textColor: textColorMatch ? textColorMatch[1] : '#ffffff',
+        maxWidth: maxWidthMatch ? maxWidthMatch[1] : '600px'
       })
     }
   } catch (error) {
@@ -175,11 +212,13 @@ const generateHtml = (config: Config) => {
     <!-- 天气组件配置 -->
     const WEATHER_API = {
       keys: ['${config.keys[0]}','${config.keys[1]}'],
+      hosts: ['${config.hosts[0]}', '${config.hosts[1]}'],
       currentKeyIndex: 0,
       baseUrl: 'https://devapi.qweather.com/v7',
       location: '${config.location}',
       backgroundColor: '${config.backgroundColor || 'rgba(0, 0, 0, 0.5)'}',
       textColor: '${config.textColor || '#ffffff'}',
+      maxWidth: '${config.maxWidth || '600px'}',
       retryDelay: 60000,
       lastFailTime: {}
     };
@@ -205,7 +244,7 @@ const generateHtml = (config: Config) => {
 }
 
 :deep(.el-form-item) {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 :deep(.el-form-item__label) {
