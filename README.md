@@ -17,7 +17,7 @@
   一款为 Sun-Panel 设计的可视化美化工具，让你的 Sun-Panel 锦上添花~
 </div>
 <div align="center">
-  <h2><a href="https://helper.cocoyoo.cn" target="_blank">📚 官方文档 | Official Documentation</a></h2>
+  <h2><a href="https://helper.madrays.de" target="_blank">📚 官方文档 | Official Documentation</a></h2>
   <p>详细的安装指南、使用教程和最佳实践，尽在官方文档！<br>Visit our official documentation for detailed installation guides, tutorials, and best practices!</p>
 </div>
 
@@ -26,14 +26,14 @@
 
 我们提供了完整的演示环境，让你在部署前可以充分体验：
 
-### 🎨 Sun-Panel-Helper Demo
+### 🎨 Sun-Panel-Helper Demo(暂停)
 - 地址：[demo.cocoyoo.cn](http://demo.cocoyoo.cn)
 - 功能：
   - 体验完整的样式编辑功能
   - 预览各种美化效果
   - 测试部署流程
 
-### 🎯 Sun-Panel 演示站
+### 🎯 Sun-Panel 演示站(暂停)
 - 地址：[home.cocoyoo.cn](http://home.cocoyoo.cn)
 - 特点：
   - 展示实际应用效果
