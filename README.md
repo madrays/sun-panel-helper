@@ -26,15 +26,15 @@
 
 我们提供了完整的演示环境，让你在部署前可以充分体验：
 
-### 🎨 Sun-Panel-Helper Demo(暂停)
-- 地址：[demo.cocoyoo.cn](http://demo.cocoyoo.cn)
+### 🎨 Sun-Panel-Helper Demo
+- 地址：[demo.madrays.de](http://demo.madrays.de)
 - 功能：
   - 体验完整的样式编辑功能
   - 预览各种美化效果
   - 测试部署流程
 
-### 🎯 Sun-Panel 演示站(暂停)
-- 地址：[home.cocoyoo.cn](http://home.cocoyoo.cn)
+### 🎯 Sun-Panel 演示站
+- 地址：[home.madrays.de](http://home.madrays.de)
 - 特点：
   - 展示实际应用效果
   - 体验优化后的界面
