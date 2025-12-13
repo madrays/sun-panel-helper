@@ -34,7 +34,7 @@ function updateHeaderTime(content: string): string {
   const now = new Date();
   const timeStr = now.toLocaleString('zh-CN');
   return content.replace(
-    /\/\* 上次更新：.*?\*\//, 
+    /\/\* 上次更新：.*?\*\//,
     `/* 上次更新：${timeStr} */`
   );
 }
@@ -45,7 +45,7 @@ function updateHeaderTime(content: string): string {
 export async function deploy(js: string): Promise<void> {
   try {
     console.log('部署路径:', outputPath);
-    
+
     // 1. 确保部署目录存在
     await mkdir(dirname(outputPath), { recursive: true });
 
@@ -98,7 +98,15 @@ export async function deploy(js: string): Promise<void> {
     }
 
     // 在正确的位置插入组件代码
-    const newCode = `${startMark}\n${js.trim()}\n${endMark}`;
+    const wrappedJs = `;/* Safety */
+(function() {
+    try {
+        ${js.trim()}
+    } catch(e) {
+        console.error('[Sun-Panel-Helper] Error in markdown-editor:', e);
+    }
+})();`;
+    const newCode = `${startMark}\n${wrappedJs}\n${endMark}`;
     content = content.slice(0, insertIndex) + newCode + '\n\n' + content.slice(insertIndex);
 
     // 写入文件
@@ -116,7 +124,7 @@ export async function deploy(js: string): Promise<void> {
 export async function undeploy(): Promise<void> {
   try {
     console.log('准备取消部署，路径:', outputPath);
-    
+
     // 1. 读取现有文件
     let content = '';
     try {

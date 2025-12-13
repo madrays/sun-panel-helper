@@ -13,7 +13,7 @@
     <el-form label-position="top">
       <el-form-item label="API密钥">
         <el-input 
-          v-model="config.keys[0]"
+          v-model="config.key"
           placeholder="请输入和风天气API密钥"
           @input="updatePreview"
         />
@@ -21,24 +21,8 @@
 
       <el-form-item label="API Host">
         <el-input 
-          v-model="config.hosts[0]"
-          placeholder="请输入主 Key 对应的 API Host (控制台查看)"
-          @input="updatePreview"
-        />
-      </el-form-item>
-
-      <el-form-item label="备用API密钥">
-        <el-input 
-          v-model="config.keys[1]"
-          placeholder="请输入备用API密钥"
-          @input="updatePreview"
-        />
-      </el-form-item>
-
-      <el-form-item label="备用 API Host">
-        <el-input 
-          v-model="config.hosts[1]"
-          placeholder="请输入备用 Key 对应的 API Host (控制台查看)"
+          v-model="config.host"
+          placeholder="请输入对应的 API Host (控制台查看)"
           @input="updatePreview"
         />
       </el-form-item>
@@ -101,8 +85,8 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
 interface Config {
-  keys: string[]
-  hosts: string[]
+  key: string
+  host: string
   location: string
   backgroundColor?: string
   textColor?: string
@@ -141,17 +125,39 @@ onMounted(async () => {
     const html = await response.text()
     
     // 提取配置
-    const keysMatch = html.match(/keys:\s*\[\s*'([^']*)',\s*'([^']*)'\s*\]/)
-    const hostsMatch = html.match(/hosts:\s*\[\s*'([^']*)',\s*'([^']*)'\s*\]/)
+    // 提取配置 - 使用更严格的正则
+    const keyMatch = html.match(/key:\s*'([^']*)'/)
+    const hostMatch = html.match(/host:\s*'([^']*)'/)
     const locationMatch = html.match(/location:\s*'([^']*)'/)
     const backgroundColorMatch = html.match(/backgroundColor:\s*'([^']*)'/)
     const textColorMatch = html.match(/textColor:\s*'([^']*)'/)
     const maxWidthMatch = html.match(/maxWidth:\s*'([^']*)'/)
     
-    if (keysMatch && locationMatch) {
+    // 初始化变量
+    let key = '';
+    let host = '';
+
+    // 优先匹配新版配置
+    if (keyMatch) {
+       key = keyMatch[1];
+    } else {
+       // 兼容旧版：尝试匹配 keys 数组
+       const keysMatch = html.match(/keys:\s*\[\s*'([^']*)'/);
+       if (keysMatch) key = keysMatch[1];
+    }
+
+    if (hostMatch) {
+        host = hostMatch[1];
+    } else {
+        // 兼容旧版：尝试匹配 hosts 数组
+        const hostsMatch = html.match(/hosts:\s*\[\s*'([^']*)'/);
+        if (hostsMatch) host = hostsMatch[1];
+    }
+
+    if (locationMatch) {
       emit('update:modelValue', {
-        keys: [keysMatch[1], keysMatch[2]],
-        hosts: hostsMatch ? [hostsMatch[1], hostsMatch[2]] : ['', ''],
+        key: key,
+        host: host,
         location: locationMatch[1],
         backgroundColor: backgroundColorMatch ? backgroundColorMatch[1] : 'rgba(0, 0, 0, 0.5)',
         textColor: textColorMatch ? textColorMatch[1] : '#ffffff',
@@ -211,10 +217,8 @@ const generateHtml = (config: Config) => {
   return `
     <!-- 天气组件配置 -->
     const WEATHER_API = {
-      keys: ['${config.keys[0]}','${config.keys[1]}'],
-      hosts: ['${config.hosts[0]}', '${config.hosts[1]}'],
-      currentKeyIndex: 0,
-      baseUrl: 'https://devapi.qweather.com/v7',
+      key: '${config.key}',
+      host: '${config.host}',
       location: '${config.location}',
       backgroundColor: '${config.backgroundColor || 'rgba(0, 0, 0, 0.5)'}',
       textColor: '${config.textColor || '#ffffff'}',

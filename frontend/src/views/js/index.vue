@@ -51,6 +51,11 @@
           :is-deployed="deployedComponents.includes(id)"
           @click="handleCardClick(id)"
         />
+        <WeatherCard
+          v-if="id === 'weather'"
+          :is-deployed="deployedComponents.includes(id)"
+          @click="handleCardClick(id)"
+        />
       </div>
     </div>
   </div>
@@ -66,6 +71,7 @@ import MarkdownEditorCard from './preview/MarkdownEditorCard.vue'
 import TocNavCard from './preview/TocNavCard.vue'
 import MusicPlayerCard from './preview/MusicPlayerCard.vue'
 import HideLoginCard from './preview/HideLoginCard.vue'
+import WeatherCard from './preview/WeatherCard.vue'
 
 const router = useRouter()
 const cardOrder = ref([
@@ -75,7 +81,8 @@ const cardOrder = ref([
   'markdown-editor', 
   'toc-nav', 
   'music-player',
-  'hide-login'
+  'hide-login',
+  'weather'
 ])
 const deployedComponents = ref<string[]>([])
 

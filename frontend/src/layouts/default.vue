@@ -114,7 +114,7 @@
           </div>
           <div class="header-right">
             <!-- 官方文档链接 - 移到用户头像左侧 -->
-            <a href="https://helper.cocoyoo.cn" target="_blank" class="doc-link" title="官方文档">
+            <a href="https://helper.madrays.de" target="_blank" class="doc-link" title="官方文档">
               <div class="bg-pattern"></div>
               <div class="shine-line"></div>
               <div class="particles">

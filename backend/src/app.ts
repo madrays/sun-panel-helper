@@ -16,6 +16,7 @@ import searchQuoteRoutes from './routes/js/search-quote'
 import fishAnimationRoutes from './routes/js/fish-animation'
 import markdownEditorRoutes from './routes/js/markdown-editor'
 import tocNavRoutes from './routes/js/toc-nav'
+import weatherRoutes from './routes/js/weather'
 import fixedRoutes from './routes/fixed'
 import freeRouter from './routes/free'
 import previewRouter from './routes/preview'
@@ -39,7 +40,7 @@ process.umask(0)
 
 // 设置全局 multer 默认配置
 const originalMulter = multer
-const patchedMulter = function(options: any) {
+const patchedMulter = function (options: any) {
   // 强制所有上传的文件权限为 777
   process.umask(0)
   return originalMulter(options)
@@ -78,7 +79,7 @@ try {
   // 创建MaxKB图标目录并复制默认图标
   const maxkbDir = join(__dirname, '../custom/helper/maxkb')
   mkdirSync(maxkbDir, { recursive: true })
-  
+
   // 复制默认图标
   const defaultLogoSrc = join(__dirname, '../../frontend/src/assets/logo.gif')
   const defaultLogoDest = join(maxkbDir, 'logo.gif')
@@ -135,6 +136,7 @@ app.use('/api/js/search-quote', searchQuoteRoutes)
 app.use('/api/js/fish-animation', fishAnimationRoutes)
 app.use('/api/js/markdown-editor', markdownEditorRoutes)
 app.use('/api/js/toc-nav', tocNavRoutes)
+app.use('/api/js/weather', weatherRoutes)
 app.use('/api/fixed', fixedRoutes)
 app.use('/api/free', freeRouter)
 app.use('/api/preview', previewRouter)
@@ -157,7 +159,7 @@ function startAutoBackup() {
   if (autoBackupInterval) {
     clearInterval(autoBackupInterval);
   }
-  
+
   // 创建自动备份函数
   const performAutoBackup = async () => {
     try {
@@ -165,62 +167,62 @@ function startAutoBackup() {
       const dataDir = join(__dirname, '../data');
       const customDir = join(__dirname, '../custom');
       const backupDir = join(__dirname, '../backups');
-      
+
       // 确保备份目录存在
       if (!fs.existsSync(backupDir)) {
         fs.mkdirSync(backupDir, { recursive: true });
       }
-      
+
       const timestamp = new Date().toISOString().replace(/[:\.]/g, '-');
-      
+
       // 配置文件备份
       if (fs.existsSync(dataDir)) {
         const configBackupFileName = `configs-auto-${timestamp}.zip`;
         const configBackupPath = join(backupDir, configBackupFileName);
-        
+
         // 使用archiver创建zip
         const { default: archiver } = await import('archiver');
         const configOutput = fs.createWriteStream(configBackupPath);
         const configArchive = archiver('zip', { zlib: { level: 9 } });
-        
+
         configArchive.pipe(configOutput);
         configArchive.directory(dataDir, 'data');
         await configArchive.finalize();
-        
+
         console.log(`自动备份配置文件成功: ${configBackupFileName}`);
       }
-      
+
       // 部署文件备份
       if (fs.existsSync(join(customDir, 'index.css')) && fs.existsSync(join(customDir, 'index.js'))) {
         const deployBackupFileName = `deployment-auto-${timestamp}.zip`;
         const deployBackupPath = join(backupDir, deployBackupFileName);
-        
+
         // 使用archiver创建zip
         const { default: archiver } = await import('archiver');
         const deployOutput = fs.createWriteStream(deployBackupPath);
         const deployArchive = archiver('zip', { zlib: { level: 9 } });
-        
+
         deployArchive.pipe(deployOutput);
         deployArchive.file(join(customDir, 'index.css'), { name: 'index.css' });
         deployArchive.file(join(customDir, 'index.js'), { name: 'index.js' });
         await deployArchive.finalize();
-        
+
         console.log(`自动备份部署文件成功: ${deployBackupFileName}`);
       }
-      
+
       // 清理旧备份，保留最新的100个
       const cleanupBackups = (type: string, keepCount: number) => {
         try {
           const files = fs.readdirSync(backupDir)
             .filter(file => file.startsWith(type) && file.endsWith('.zip') && file.includes('-auto-'));
-          
+
           // 按修改时间排序，最旧的优先
           files.sort((a, b) => {
             const timeA = fs.statSync(join(backupDir, a)).mtime.getTime();
             const timeB = fs.statSync(join(backupDir, b)).mtime.getTime();
             return timeA - timeB;
           });
-          
+
           // 删除超出保留数量的文件
           if (files.length > keepCount) {
             const toDelete = files.slice(0, files.length - keepCount);
@@ -233,18 +235,18 @@ function startAutoBackup() {
           console.error('清理旧备份时出错:', error);
         }
       };
-      
+
       cleanupBackups('configs', 100);
       cleanupBackups('deployment', 100);
-      
+
     } catch (error) {
       console.error('自动备份失败:', error);
     }
   };
-  
+
   // 立即执行一次
   performAutoBackup();
-  
+
   // 每小时执行一次
   autoBackupInterval = setInterval(performAutoBackup, 60 * 60 * 1000);
   console.log('自动备份已启动，每小时执行一次');
@@ -257,15 +259,15 @@ startAutoBackup();
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error handling request:', req.method, req.url)
   console.error('Error details:', err)
-  
+
   if (err.stack) {
     console.error(err.stack)
   }
-  
-  res.status(500).json({ 
+
+  res.status(500).json({
     success: false,
     message: '服务器错误',
-    error: err.message 
+    error: err.message
   })
 })
 

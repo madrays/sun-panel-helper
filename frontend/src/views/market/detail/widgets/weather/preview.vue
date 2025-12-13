@@ -15,8 +15,11 @@ import axios from 'axios'
 import type { Widget } from '@/types/market'
 
 interface Config {
-  keys: string[]
+  key: string
+  host: string
   location: string
+  backgroundColor?: string
+  textColor?: string
 }
 
 const props = defineProps<{
@@ -31,18 +34,41 @@ onMounted(async () => {
   const response = await fetch(props.widget.url)
   const html = await response.text()
   
-  // 从 HTML 中提取配置
-  const keysMatch = html.match(/keys:\s*\[\s*'([^']*)',\s*'([^']*)'\s*\]/s)
-  const locationMatch = html.match(/location:\s*'([^']*)'/s)
+  // 从 HTML 中提取配置 - 使用更严格的正则
+  const keyMatch = html.match(/key:\s*'([^']*)'/)
+  const hostMatch = html.match(/host:\s*'([^']*)'/)
+  const locationMatch = html.match(/location:\s*'([^']*)'/)
+  const backgroundColorMatch = html.match(/backgroundColor:\s*'([^']*)'/)
+  const textColorMatch = html.match(/textColor:\s*'([^']*)'/)
   
-  if (keysMatch && locationMatch) {
-    const keys = [keysMatch[1], keysMatch[2]]
-    const location = locationMatch[1]
-    
+  if (locationMatch) {
+    let key = '';
+    let host = '';
+
+    // 优先匹配新版配置
+    if (keyMatch) {
+       key = keyMatch[1];
+    } else {
+       // 兼容旧版：尝试匹配 keys 数组
+       const keysMatch = html.match(/keys:\s*\[\s*'([^']*)'/);
+       if (keysMatch) key = keysMatch[1];
+    }
+
+    if (hostMatch) {
+        host = hostMatch[1];
+    } else {
+        // 兼容旧版：尝试匹配 hosts 数组
+        const hostsMatch = html.match(/hosts:\s*\[\s*'([^']*)'/);
+        if (hostsMatch) host = hostsMatch[1];
+    }
+
     // 更新父组件的配置
     emit('update:modelValue', {
-      keys,
-      location
+      key,
+      host,
+      location: locationMatch[1],
+      backgroundColor: backgroundColorMatch ? backgroundColorMatch[1] : 'rgba(0, 0, 0, 0.5)',
+      textColor: textColorMatch ? textColorMatch[1] : '#ffffff'
     })
   }
 })

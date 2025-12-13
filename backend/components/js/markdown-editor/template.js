@@ -1,16 +1,16 @@
 // Sun-Panel-Helper Markdown Editor
 // Author: Madrays
-// Website: https://cocohe.cn
+// Website: https://madrays.de
 // GitHub: https://github.com/madrays
 
 // 在文件顶部声明全局变量
 let md;
 
-(function() {
+(function () {
     // 检测是否为移动设备
     function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-               window.innerWidth <= 768;
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+            window.innerWidth <= 768;
     }
 
     // 如果是移动设备,直接返回不加载
@@ -71,15 +71,15 @@ let md;
                     return loadStyle(dep.url);
                 }
             }))
-            .then(resolve)
-            .catch(reject);
+                .then(resolve)
+                .catch(reject);
         });
     }
 
     // 用户配置
-    const users = {USERS_CONFIG};
+    const users = { USERS_CONFIG };
     const API_PREFIX = '{API_PREFIX}';  // 从配置中读取
-    
+
     // 本地存储键名
     const STORAGE_KEYS = {
         NOTES: 'sun-panel-markdown-notes',
@@ -94,8 +94,8 @@ let md;
         titleInput.readOnly = !enable;
         markdownInput.readOnly = !enable;
         saveButton.style.display = enable ? 'flex' : 'none';
-        editButton.innerHTML = enable ? 
-            '<span class="mdi mdi-eye"></span>预览' : 
+        editButton.innerHTML = enable ?
+            '<span class="mdi mdi-eye"></span>预览' :
             '<span class="mdi mdi-pencil"></span>编辑';
     }
 
@@ -111,22 +111,22 @@ let md;
                 if (lang && hljs.getLanguage(lang)) {
                     try {
                         return hljs.highlight(str, { language: lang }).value;
-                    } catch (__) {}
+                    } catch (__) { }
                 }
-                
+
                 // 自动检测语言
                 try {
                     const detectedLang = detectLanguage(str);
                     return hljs.highlight(str, { language: detectedLang }).value;
-                } catch (__) {}
-                
+                } catch (__) { }
+
                 // 如果都失败了，使用普通转义
                 return md.utils.escapeHtml(str);
             }
         });
 
         // 修改渲染规则
-        md.renderer.rules.heading_open = function(tokens, idx) {
+        md.renderer.rules.heading_open = function (tokens, idx) {
             const tag = tokens[idx].tag;
             const styles = {
                 h1: 'font-size: 2.5em; margin: 1em 0; font-weight: bold; color: #2c3e50;',
@@ -137,22 +137,22 @@ let md;
         };
 
         // 修改列表渲染规则
-        md.renderer.rules.bullet_list_open = function() {
+        md.renderer.rules.bullet_list_open = function () {
             return '<ul style="margin: 1em 0; padding-left: 2em; list-style-type: disc;">';
         };
 
-        md.renderer.rules.ordered_list_open = function(tokens, idx) {
+        md.renderer.rules.ordered_list_open = function (tokens, idx) {
             let start = tokens[idx].attrGet('start');
             start = start ? ` start="${start}"` : '';
             return `<ol style="margin: 1em 0; padding-left: 2em; list-style-type: decimal;"${start}>`;
         };
 
-        md.renderer.rules.list_item_open = function() {
+        md.renderer.rules.list_item_open = function () {
             return '<li style="margin: 0.5em 0;">';
         };
 
         // 修改行内代码渲染规则
-        md.renderer.rules.code_inline = function(tokens, idx) {
+        md.renderer.rules.code_inline = function (tokens, idx) {
             const code = tokens[idx].content;
             return `<code class="inline-code">${md.utils.escapeHtml(code)}</code>`;
         };
@@ -212,7 +212,7 @@ let md;
                 console.warn('已切换到本地存储模式');
                 window.localStorageMode = true;
             }
-            
+
             if (url.includes('/notes/')) {
                 const username = url.split('/').pop();
                 const localNotes = localStorage.getItem(`notes-${username}`);
@@ -312,7 +312,7 @@ let md;
     // 用户状态管理
     const userState = {
         currentUser: null,
-        
+
         getCurrentUser() {
             if (!this.currentUser) {
                 const stored = localStorage.getItem(STORAGE_KEYS.USER);
@@ -349,7 +349,7 @@ let md;
             this.currentUser = null;
             localStorage.removeItem(STORAGE_KEYS.USER);
             this.updateLoginButton();
-            
+
             // 修改登出逻辑，不再重新初始化编辑器
             if (notepad) {
                 // 清空当前笔记
@@ -357,7 +357,7 @@ let md;
                 titleInput.value = '';
                 markdownInput.value = '';
                 preview.innerHTML = '';
-                
+
                 // 加载匿名模式的笔记
                 noteStorage = new NoteStorage('anonymous');
                 noteStorage.loadNotes().then(notes => {
@@ -388,7 +388,7 @@ let md;
                     const menu = document.createElement('div');
                     menu.className = 'login-menu';
                     menu.innerHTML = '<div class="login-menu-item logout"><span class="mdi mdi-logout"></span>登出</div>';
-                    
+
                     // 修改菜单定位和样式
                     Object.assign(menu.style, {
                         position: 'fixed', // 改为 fixed 定位
@@ -418,7 +418,7 @@ let md;
 
                     // 将菜单添加到 body
                     document.body.appendChild(menu);
-                    
+
                     // 调整菜单位置
                     const btnRect = loginBtn.getBoundingClientRect();
                     menu.style.top = `${btnRect.bottom + 5}px`;
@@ -1762,7 +1762,7 @@ let md;
                                 <a href="https://github.com/madrays" target="_blank">Madrays</a>
                             </span>
                             <span class="divider">|</span>
-                            <a href="https://cocohe.cn" target="_blank" class="blog-link">
+                            <a href="https://madrays.de" target="_blank" class="blog-link">
                                 <span class="mdi mdi-web"></span>Blog
                             </a>
                         </div>
@@ -1888,7 +1888,7 @@ let md;
                     </div>
                 </div>
             </div>`;
-            
+
         document.body.appendChild(container);
     }
 
@@ -1897,7 +1897,7 @@ let md;
         e.stopPropagation();
         notepad.style.display = 'block';
         setTimeout(() => notepad.classList.add('show'), 0);
-        
+
         if (currentNoteId && noteStorage.notes.find(n => n.id === currentNoteId)) {
             loadNote(currentNoteId);
         } else if (noteStorage.notes.length > 0) {
@@ -2004,19 +2004,19 @@ let md;
     function bindEventListeners() {
         // 移除日志
         // console.log('绑定事件监听器...');
-        
+
         // 确保所有元素都存在
-        if (!notepad || !openButton || !closeButton || !markdownInput || !preview || 
-            !saveButton || !titleInput || !editButton || !deleteButton || 
+        if (!notepad || !openButton || !closeButton || !markdownInput || !preview ||
+            !saveButton || !titleInput || !editButton || !deleteButton ||
             !importButton || !exportButton || !newNoteButton || !fileList) {
             throw new Error('必要的 DOM 元素未找到，无法绑定事件');
         }
-        
+
         // 移除旧的事件监听器
-        const elements = [openButton, closeButton, markdownInput, titleInput, 
-                        saveButton, editButton, deleteButton, newNoteButton,
-                        importButton, exportButton];
-        
+        const elements = [openButton, closeButton, markdownInput, titleInput,
+            saveButton, editButton, deleteButton, newNoteButton,
+            importButton, exportButton];
+
         elements.forEach(element => {
             if (element && element.parentNode) {
                 const clone = element.cloneNode(true);
@@ -2060,7 +2060,7 @@ let md;
 
             // 初始化 markdown-it
             initializeMarkdownIt();
-            
+
             // 注入 HTML
             injectHTML();
 
@@ -2096,7 +2096,7 @@ let md;
 
             // 初始化工具栏
             initializeToolbar();
-            
+
             // 初始化代码对话框
             initializeCodeDialog();
         } catch (error) {
@@ -2113,7 +2113,7 @@ let md;
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
 
-        if (!loginDialog || !loginBtn || !loginButton || !cancelLogin || 
+        if (!loginDialog || !loginBtn || !loginButton || !cancelLogin ||
             !usernameInput || !passwordInput) {
             console.warn('登录相关元素未找到，跳过登录功能初始化');
             return;
@@ -2125,13 +2125,13 @@ let md;
         loginButton.addEventListener('click', async () => {
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
-            
+
             if (await userState.login(username, password)) {
                 loginDialog.classList.remove('show');
                 // 清空输入框
                 usernameInput.value = '';
                 passwordInput.value = '';
-                
+
                 // 创建新的笔记存储实例
                 noteStorage = new NoteStorage(username);
                 await noteStorage.loadNotes();
@@ -2139,7 +2139,7 @@ let md;
                 if (noteStorage.notes.length > 0) {
                     loadNote(noteStorage.notes[0].id);
                 }
-                
+
                 showNotification('登录成功');
             } else {
                 alert('用户名或密码错误');
@@ -2180,7 +2180,7 @@ let md;
         notes.forEach(note => {
             const fileItem = document.createElement('div');
             fileItem.className = `file-item ${note.id === currentNoteId ? 'active' : ''}`;
-            
+
             const date = new Date(note.updated || note.created);
             const formattedDate = date.toLocaleDateString('zh-CN', {
                 month: 'short',
@@ -2210,11 +2210,11 @@ let md;
             titleInput.value = note.title || '';
             markdownInput.value = note.content || '';
             preview.innerHTML = '';
-            
+
             requestAnimationFrame(() => {
                 updatePreview();
             });
-            
+
             renderNoteList(notes);
             toggleEditMode(false);
         }
@@ -2281,9 +2281,9 @@ let md;
         notification.className = `notification ${type}`;
         notification.textContent = message;
         document.body.appendChild(notification);
-        
+
         setTimeout(() => notification.classList.add('show'), 100);
-        
+
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
@@ -2305,13 +2305,13 @@ let md;
             </div>
         `;
         document.body.appendChild(dialog);
-        
+
         setTimeout(() => dialog.classList.add('show'), 0);
-        
+
         dialog.querySelector('.cancel-delete').onclick = () => {
             dialog.remove();
         };
-        
+
         dialog.querySelector('.confirm-delete').onclick = () => {
             deleteCurrentNote();
             dialog.remove();
@@ -2321,13 +2321,13 @@ let md;
     // 删除当前笔记
     async function deleteCurrentNote() {
         if (!currentNoteId) return;
-        
+
         try {
             // 从本地数组中删除
             const index = noteStorage.notes.findIndex(n => n.id === currentNoteId);
             if (index !== -1) {
                 noteStorage.notes.splice(index, 1);
-                
+
                 // 同步到服务器
                 try {
                     await noteStorage.saveNotes(noteStorage.notes);
@@ -2336,7 +2336,7 @@ let md;
                     console.error('服务器删除失败:', error);
                     // 继续执行本地删除
                 }
-                
+
                 // 更新UI
                 if (noteStorage.notes.length > 0) {
                     loadNote(noteStorage.notes[0].id);
@@ -2371,15 +2371,15 @@ let md;
             const expandButton = document.createElement('button');
             expandButton.className = 'expand-button';
             expandButton.innerHTML = '<span class="mdi mdi-arrow-expand"></span>展开';
-            
+
             expandButton.addEventListener('click', () => {
                 const isExpanded = pre.style.maxHeight !== 'none';
                 pre.style.maxHeight = isExpanded ? 'none' : '300px';
-                expandButton.innerHTML = isExpanded ? 
-                    '<span class="mdi mdi-arrow-collapse"></span>折叠' : 
+                expandButton.innerHTML = isExpanded ?
+                    '<span class="mdi mdi-arrow-collapse"></span>折叠' :
                     '<span class="mdi mdi-arrow-expand"></span>展开';
             });
-            
+
             wrapper.appendChild(expandButton);
 
             let language = '';
@@ -2397,7 +2397,7 @@ let md;
             const copyButton = document.createElement('button');
             copyButton.className = 'copy-button';
             copyButton.innerHTML = '<span class="mdi mdi-content-copy"></span>复制';
-            
+
             copyButton.addEventListener('click', async () => {
                 try {
                     await navigator.clipboard.writeText(code.textContent);
@@ -2429,7 +2429,7 @@ let md;
             // 创建容器
             const container = document.createElement('span');
             container.className = 'inline-code-container';
-            
+
             // 包装代码元素
             code.parentNode.insertBefore(container, code);
             container.appendChild(code);
@@ -2439,19 +2439,19 @@ let md;
             copyBtn.className = 'inline-copy-btn mdi mdi-content-copy';
             copyBtn.type = 'button';
             copyBtn.title = '复制代码';
-            
+
             // 绑定点击事件
             copyBtn.addEventListener('mousedown', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 try {
                     const text = code.textContent.trim();
                     await navigator.clipboard.writeText(text);
-                    
+
                     copyBtn.className = 'inline-copy-btn mdi mdi-check';
                     copyBtn.style.color = '#10b981';
-                    
+
                     setTimeout(() => {
                         copyBtn.className = 'inline-copy-btn mdi mdi-content-copy';
                         copyBtn.style.color = '';
@@ -2460,7 +2460,7 @@ let md;
                     console.error('复制失败:', err);
                     copyBtn.className = 'inline-copy-btn mdi mdi-alert';
                     copyBtn.style.color = '#ef4444';
-                    
+
                     setTimeout(() => {
                         copyBtn.className = 'inline-copy-btn mdi mdi-content-copy';
                         copyBtn.style.color = '';
@@ -2475,13 +2475,13 @@ let md;
 
     // 处理点击外部事件
     function handleOutsideClick(e) {
-        const shouldKeepOpen = 
-            e.target.closest('.notepad') || 
+        const shouldKeepOpen =
+            e.target.closest('.notepad') ||
             e.target.closest('.floating-button') ||
-            e.target.closest('.action-button') || 
-            e.target.closest('.code-dialog') || 
-            e.target.closest('.delete-dialog') || 
-            e.target.closest('input[type="file"]') || 
+            e.target.closest('.action-button') ||
+            e.target.closest('.code-dialog') ||
+            e.target.closest('.delete-dialog') ||
+            e.target.closest('input[type="file"]') ||
             e.target.closest('a[download]');
 
         if (!shouldKeepOpen && notepad.classList.contains('show')) {
@@ -2634,23 +2634,23 @@ let md;
             if (code) {
                 const lang = languageSelect.value;
                 const codeBlock = `\`\`\`${lang}\n${code}\n\`\`\`\n`;
-                
+
                 // 插入代码块
                 const start = markdownInput.selectionStart;
-                markdownInput.value = 
-                    markdownInput.value.slice(0, start) + 
-                    codeBlock + 
+                markdownInput.value =
+                    markdownInput.value.slice(0, start) +
+                    codeBlock +
                     markdownInput.value.slice(start);
-                
+
                 // 更新光标位置
                 const newPosition = start + codeBlock.length;
                 markdownInput.setSelectionRange(newPosition, newPosition);
-                
+
                 // 触发更新
                 updatePreview();
                 saveNote();
             }
-            
+
             // 关闭对话框
             codeDialog.style.display = 'none';
             codeInput.value = '';

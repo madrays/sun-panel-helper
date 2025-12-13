@@ -28,14 +28,14 @@ async function getDeployedEffectName(): Promise<string | null> {
             'gradient-background'
             // 添加其他可能的特效
         ];
-        
+
         for (const effect of otherEffects) {
             const effectStartMark = `/* Sun-Panel-Helper JS Start: ${effect} */`;
             if (content.includes(effectStartMark)) {
                 return effect;
             }
         }
-        
+
         // 检查自己是否已部署
         if (content.includes(startMark)) {
             return componentName;
@@ -53,8 +53,8 @@ async function getDeployedEffectName(): Promise<string | null> {
  * 生成头部注释
  */
 function generateHeaderComment(): string {
-  const now = new Date();
-  return `/* Sun-Panel-Helper JS */
+    const now = new Date();
+    return `/* Sun-Panel-Helper JS */
 /* 此文件由系统自动管理，请勿手动修改 */
 /* 警告：手动修改可能导致功能冲突或程序异常 */
 /* 上次更新：${now.toLocaleString('zh-CN')} */\n`;
@@ -64,9 +64,9 @@ function generateHeaderComment(): string {
  * 更新头部注释中的时间
  */
 function updateHeaderTime(content: string): string {
-  const now = new Date();
-  const pattern = /\/\* 上次更新：.*? \*\//;
-  return content.replace(pattern, `/* 上次更新：${now.toLocaleString('zh-CN')} */`);
+    const now = new Date();
+    const pattern = /\/\* 上次更新：.*? \*\//;
+    return content.replace(pattern, `/* 上次更新：${now.toLocaleString('zh-CN')} */`);
 }
 
 /**
@@ -170,7 +170,7 @@ export async function isDeployed(): Promise<boolean> {
         if (!existsSync(outputPath)) {
             return false;
         }
-        
+
         // 检查是否在index.js中包含了该特效的标记
         const indexContent = await readFile(outputPath, 'utf-8');
         return indexContent.includes(startMark);
@@ -183,7 +183,7 @@ export async function isDeployed(): Promise<boolean> {
 /**
  * 部署背景特效
  */
-export async function deploy(): Promise<{success: boolean, message?: string, error?: string}> {
+export async function deploy(): Promise<{ success: boolean, message?: string, error?: string }> {
     // 部署前检查互斥
     const deployedEffect = await getDeployedEffectName();
     if (deployedEffect && deployedEffect !== componentName) {
@@ -218,13 +218,21 @@ export async function deploy(): Promise<{success: boolean, message?: string, err
 
         // 直接使用完整的JS代码
         const jsCode = generateStarBackgroundScript();
-        
+
         // 查找组件标记位置
         const startIndex = existingContent.indexOf(startMark);
         const endIndex = existingContent.indexOf(endMark);
-        
+
         let finalContent = '';
-        const blockToAdd = `${startMark}\n${jsCode}\n${endMark}`;
+        const wrappedJs = `;/* Safety */
+(function() {
+    try {
+        ${jsCode}
+    } catch(e) {
+        console.error('[Sun-Panel-Helper] Error in star-background:', e);
+    }
+})();`;
+        const blockToAdd = `${startMark}\n${wrappedJs}\n${endMark}`;
 
         if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
             // 如果已存在，替换原有内容
@@ -299,8 +307,8 @@ export async function deploy(): Promise<{success: boolean, message?: string, err
         }
     } catch (error) {
         console.error('部署特效失败:', error);
-        return { 
-            success: false, 
+        return {
+            success: false,
             message: '部署特效失败',
             error: error instanceof Error ? error.message : String(error)
         };
@@ -310,7 +318,7 @@ export async function deploy(): Promise<{success: boolean, message?: string, err
 /**
  * 取消部署特效
  */
-export async function undeploy(): Promise<{success: boolean, message?: string}> {
+export async function undeploy(): Promise<{ success: boolean, message?: string }> {
     try {
         let content = '';
         try {
@@ -349,13 +357,13 @@ export async function undeploy(): Promise<{success: boolean, message?: string}> 
 
             // 写回文件
             await writeFile(outputPath, content + '\n', 'utf-8');
-            
+
             console.log(`${componentName}: 取消部署成功`);
             return { success: true };
         } else {
             console.warn(`${componentName}: 找到开始标记但未找到结束标记。`);
-            return { 
-                success: false, 
+            return {
+                success: false,
                 message: '找到开始标记但未找到结束标记，文件可能已损坏，请手动检查 custom/index.js'
             };
         }

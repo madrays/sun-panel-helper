@@ -86,6 +86,17 @@ const routes: RouteRecordRaw[] = [
       parentTitle: 'JS 功能库',
       parentPath: '/dashboard/js'
     }
+  },
+  {
+    path: 'js/weather',
+    name: 'JSWeather',
+    component: () => import('../../views/js/detail/weather/index.vue'),
+    meta: {
+      title: '智能天气助手',
+      hideInMenu: true,
+      parentTitle: 'JS 功能库',
+      parentPath: '/dashboard/js'
+    }
   }
 ]
 

@@ -26,7 +26,7 @@ function updateHeaderTime(content: string): string {
   const now = new Date();
   const timeStr = now.toLocaleString('zh-CN');
   return content.replace(
-    /\/\* 上次更新：.*?\*\//, 
+    /\/\* 上次更新：.*?\*\//,
     `/* 上次更新：${timeStr} */`
   );
 }
@@ -85,7 +85,15 @@ export async function deploy(js: string): Promise<void> {
       }
     }
 
-    const newCode = `${startMark}\n${js.trim()}\n${endMark}`;
+    const wrappedJs = `;/* Safety */
+(function() {
+    try {
+        ${js.trim()}
+    } catch(e) {
+        console.error('[Sun-Panel-Helper] Error in hide-login:', e);
+    }
+})();`;
+    const newCode = `${startMark}\n${wrappedJs}\n${endMark}`;
     content = content.slice(0, insertIndex) + (insertIndex === content.length ? '\n\n' : '') + newCode + (insertIndex === content.length ? '' : '\n\n') + content.slice(insertIndex);
 
     await writeFile(outputPath, content.trim() + '\n', 'utf-8');
@@ -99,7 +107,7 @@ export async function deploy(js: string): Promise<void> {
 export async function undeploy(): Promise<void> {
   try {
     console.log('准备取消部署，路径:', outputPath);
-    
+
     let content = '';
     try {
       content = await readFile(outputPath, 'utf-8');

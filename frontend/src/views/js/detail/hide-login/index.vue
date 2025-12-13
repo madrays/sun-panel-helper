@@ -40,7 +40,7 @@
               作者信息
             </template>
             <div class="author-info">
-              <p>作者：<a href="https://blog.ymz.icu/" target="_blank">与末</a></p>
+              <p>作者：<a href="https://ym01.cn" target="_blank">与末</a></p>
               <p>优化适配：madrays</p>
             </div>
           </el-alert>

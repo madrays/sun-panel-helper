@@ -26,7 +26,7 @@
           </template>
           <div class="provider-info">
             <p class="thanks">特别鸣谢：
-              <a href="https://blog.ymz.icu/" target="_blank" class="provider">与末</a> 
+              <a href="https://ym01.cn" target="_blank" class="provider">与末</a> 
               友情提供默认播放器
             </p>
             <p>默认播放器内容为网易云音乐热门榜单。</p>

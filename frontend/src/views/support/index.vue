@@ -21,7 +21,7 @@
             <el-icon><Platform /></el-icon>
             <span>GitHub</span>
           </a>
-          <a href="https://cocohe.cn" target="_blank" class="link-card blog">
+          <a href="https://madrays.de" target="_blank" class="link-card blog">
             <el-icon><Monitor /></el-icon>
             <span>博客</span>
           </a>

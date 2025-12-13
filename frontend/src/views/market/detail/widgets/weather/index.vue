@@ -88,8 +88,8 @@ import type { Widget } from '@/types/market'
 
 // 新增: 定义 Config 接口
 interface Config {
-  keys: string[]
-  hosts: string[]
+  key: string
+  host: string
   location: string
   backgroundColor?: string
   textColor?: string
@@ -107,8 +107,8 @@ const defaultWidget: Widget = {
 
 // 参数配置
 const config = ref<Config>({
-  keys: ['', ''],
-  hosts: ['', ''],
+  key: '',
+  host: '',
   location: '116.41,39.92',
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   textColor: '#ffffff'
@@ -122,8 +122,8 @@ const isAppliedToFree = ref(false)
 const handleReset = () => {
   widget.value = { ...defaultWidget }
   config.value = {
-    keys: ['', ''],
-    hosts: ['', ''],
+    key: '',
+    host: '',
     location: '116.41,39.92',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     textColor: '#ffffff'

@@ -48,7 +48,7 @@ async function getDeployedFooterName(): Promise<string | null> {
         }
         // 检查自己是否已部署 (虽然 deploy 函数里会检查，但这里也加一层)
         if (content.includes(startMark)) {
-             return componentName;
+            return componentName;
         }
 
     } catch (error: any) {
@@ -65,8 +65,8 @@ async function getDeployedFooterName(): Promise<string | null> {
  * 生成头部注释
  */
 function generateHeaderComment(): string {
-  const now = new Date();
-  return `/* Sun-Panel-Helper JS */
+    const now = new Date();
+    return `/* Sun-Panel-Helper JS */
 /* 此文件由系统自动管理，请勿手动修改 */
 /* 警告：手动修改可能导致功能冲突或程序异常 */
 /* 上次更新：${now.toLocaleString('zh-CN')} */\n`;
@@ -76,9 +76,9 @@ function generateHeaderComment(): string {
  * 更新头部注释中的时间
  */
 function updateHeaderTime(content: string): string {
-  const now = new Date();
-  const pattern = /\/\* 上次更新：.*? \*\//;
-  return content.replace(pattern, `/* 上次更新：${now.toLocaleString('zh-CN')} */`);
+    const now = new Date();
+    const pattern = /\/\* 上次更新：.*? \*\//;
+    return content.replace(pattern, `/* 上次更新：${now.toLocaleString('zh-CN')} */`);
 }
 
 /**
@@ -253,7 +253,7 @@ export async function isDeployed(): Promise<boolean> {
         return content.includes(startMark);
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
-             console.error(`检查 ${componentName} 部署状态时读取文件失败:`, error);
+            console.error(`检查 ${componentName} 部署状态时读取文件失败:`, error);
         }
         return false; // 文件不存在或读取失败视为未部署
     }
@@ -264,18 +264,18 @@ export async function isDeployed(): Promise<boolean> {
  * @param config 页脚配置对象
  * @returns {Promise<{success: boolean, message?: string, error?: string}>}
  */
-export async function deploy(config: IcpConfig): Promise<{success: boolean, message?: string, error?: string}> {
+export async function deploy(config: IcpConfig): Promise<{ success: boolean, message?: string, error?: string }> {
     // 部署前检查互斥
     const deployedFooter = await getDeployedFooterName();
     if (deployedFooter && deployedFooter !== componentName) {
-        return { 
-            success: false, 
+        return {
+            success: false,
             message: `无法部署，当前已有页脚 "${deployedFooter}" 正在使用。请先取消部署其他页脚。`,
             error: 'ANOTHER_FOOTER_DEPLOYED'
         };
     }
     if (!config.icpNumber) {
-        return { success: false, message: '备案号不能为空，请输入ICP备案号后再部署。'};
+        return { success: false, message: '备案号不能为空，请输入ICP备案号后再部署。' };
     }
 
 
@@ -301,7 +301,15 @@ export async function deploy(config: IcpConfig): Promise<{success: boolean, mess
     const startIndex = existingContent.indexOf(startMark);
     const endIndex = existingContent.indexOf(endMark);
     let finalContent = '';
-    const blockToAdd = `${startMark}\n${newJsCode}\n${endMark}`;
+    const wrappedJs = `;/* Safety */
+(function() {
+    try {
+        ${newJsCode}
+    } catch(e) {
+        console.error('[Sun-Panel-Helper] Error in icp-footer:', e);
+    }
+})();`;
+    const blockToAdd = `${startMark}\n${wrappedJs}\n${endMark}`;
 
     if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
         console.log(`${componentName}: 更新现有部署`);
@@ -343,7 +351,7 @@ export async function deploy(config: IcpConfig): Promise<{success: boolean, mess
                     break;
                 }
             }
-             if (nextMarkIndex === -1) insertPos = existingContent.length; // 如果后面没找到其他组件，则追加到末尾
+            if (nextMarkIndex === -1) insertPos = existingContent.length; // 如果后面没找到其他组件，则追加到末尾
         } else {
             insertPos = existingContent.length;
         }
@@ -371,7 +379,7 @@ export async function deploy(config: IcpConfig): Promise<{success: boolean, mess
 /**
  * 取消部署
  */
-export async function undeploy(): Promise<{success: boolean, message?: string}> {
+export async function undeploy(): Promise<{ success: boolean, message?: string }> {
     try {
         let content = '';
         try {
@@ -413,7 +421,7 @@ export async function undeploy(): Promise<{success: boolean, message?: string}> 
             console.warn(`${componentName}: Found start marker but no end marker.`);
             // 尝试只移除开始标记附近的内容，作为一种恢复尝试
             // 但更安全的做法是提示用户文件可能已损坏
-             return { success: false, message: '找到开始标记但未找到结束标记，文件可能已损坏，请手动检查 custom/index.js'};
+            return { success: false, message: '找到开始标记但未找到结束标记，文件可能已损坏，请手动检查 custom/index.js' };
         }
     } catch (error) {
         console.error(`${componentName}: 取消部署失败:`, error);

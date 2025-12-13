@@ -49,7 +49,7 @@
         <span class="tag">无配置</span>
       </div>
       <div class="author">
-        <span class="author-tag">作者：<a href="https://blog.ymz.icu/" target="_blank">与末</a></span>
+        <span class="author-tag">作者：<a href="https://ym01.cn" target="_blank" class="author-tag">与末</a></span>
         <span class="author-tag">优化适配：madrays</span>
       </div>
     </div>

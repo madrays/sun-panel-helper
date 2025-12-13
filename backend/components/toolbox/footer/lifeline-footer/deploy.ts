@@ -12,49 +12,49 @@ const endMark = '/* Sun-Panel-Helper JS End: lifeline-footer */'
 
 // Define interfaces (keep as is)
 interface SocialLink {
-  title: string;
-  url: string;
-  icon: string;
-  enabled: boolean;
-  isCustomIcon?: boolean;
-  customIconCode?: string;
-  name?: string;
+    title: string;
+    url: string;
+    icon: string;
+    enabled: boolean;
+    isCustomIcon?: boolean;
+    customIconCode?: string;
+    name?: string;
 }
 
 interface FooterConfig {
-  siteLaunchDate?: string;
-  enableUptime: boolean;
-  enableSocialLinks: boolean;
-  enableCustomContent: boolean;
-  enableHelperAd: boolean;
-  enableTime?: boolean;
-  uptimePrefix?: string;
-  moduleOrder?: string[];
-  customContent?: {
-    text: string;
-    enabled: boolean;
-  };
-  socialLinks?: SocialLink[];
-  textColor?: string;
-  accentColor?: string;
+    siteLaunchDate?: string;
+    enableUptime: boolean;
+    enableSocialLinks: boolean;
+    enableCustomContent: boolean;
+    enableHelperAd: boolean;
+    enableTime?: boolean;
+    uptimePrefix?: string;
+    moduleOrder?: string[];
+    customContent?: {
+        text: string;
+        enabled: boolean;
+    };
+    socialLinks?: SocialLink[];
+    textColor?: string;
+    accentColor?: string;
 }
 
 // 读取组件顺序配置
 let orderConfig: any = { js: [] }
 try {
-  orderConfig = JSON.parse(
-    readFileSync(join(__dirname, '../../../config/order.json'), 'utf-8')
-  )
+    orderConfig = JSON.parse(
+        readFileSync(join(__dirname, '../../../config/order.json'), 'utf-8')
+    )
 } catch (error) {
-  console.error('读取组件顺序配置失败:', error)
+    console.error('读取组件顺序配置失败:', error)
 }
 
 /**
  * 生成头部注释
  */
 function generateHeaderComment(): string {
-  const now = new Date()
-  return `/* Sun-Panel-Helper JS */
+    const now = new Date()
+    return `/* Sun-Panel-Helper JS */
 /* 此文件由系统自动管理，请勿手动修改 */
 /* 警告：手动修改可能导致功能冲突或程序异常 */
 /* 上次更新：${now.toLocaleString('zh-CN')} */\n`
@@ -64,9 +64,9 @@ function generateHeaderComment(): string {
  * 更新头部注释中的时间
  */
 function updateHeaderTime(content: string): string {
-  const now = new Date()
-  const pattern = /\/\* 上次更新：.*? \*\//
-  return content.replace(pattern, `/* 上次更新：${now.toLocaleString('zh-CN')} */`)
+    const now = new Date()
+    const pattern = /\/\* 上次更新：.*? \*\//
+    return content.replace(pattern, `/* 上次更新：${now.toLocaleString('zh-CN')} */`)
 }
 
 // Helper function to generate Social Links HTML
@@ -87,16 +87,16 @@ function generateSocialLinksHtml(socialLinks: SocialLink[]): string {
                 const safeIconClass = link.icon.replace(/\"/g, '\'').replace(/\'/g, '\\\'');
                 iconHtml = `<i class="${safeIconClass}"></i>`;
             } else if (link.icon) {
-                 // Escape icon if it's text/emoji
+                // Escape icon if it's text/emoji
                 const safeIconText = link.icon
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;')
                     .replace(/\"/g, '&quot;')
                     .replace(/\'/g, '&#39;');
-                 iconHtml = `<span class="custom-icon">${safeIconText}</span>`;
+                iconHtml = `<span class="custom-icon">${safeIconText}</span>`;
             } else {
-                 iconHtml = '';
+                iconHtml = '';
             }
             const linkText = link.name || link.title || 'Link';
             // Escape URL and link text for HTML attributes and content
@@ -149,7 +149,7 @@ function generateLifelineFooterScript(config: FooterConfig): string {
     const uptimePrefix = config.uptimePrefix || '本站已苟活';
     const launchDate = config.siteLaunchDate || new Date().toISOString().split('T')[0];
     const formattedLaunchDate = launchDate.includes('T') ? launchDate : `${launchDate}T00:00:00+08:00`;
-    
+
     // 处理社交链接
     let socialLinksHtml = '';
     if (config.enableSocialLinks && Array.isArray(config.socialLinks) && config.socialLinks.length > 0) {
@@ -166,7 +166,7 @@ function generateLifelineFooterScript(config: FooterConfig): string {
                 } else {
                     iconHtml = '';
                 }
-                
+
                 return `<a href="${link.url.replace(/"/g, '\\"')}" target="_blank" rel="noopener noreferrer">
                     ${iconHtml}${link.name || link.title || 'Link'}
                 </a>`;
@@ -181,7 +181,7 @@ function generateLifelineFooterScript(config: FooterConfig): string {
                                 <span class="fas fa-blog"></span>博客
                             </a>`;
     }
-    
+
     // 处理自定义内容（不添加强制的爱心图标）
     let customContentHtml = '';
     if (config.enableCustomContent && config.customContent?.enabled && config.customContent?.text) {
@@ -189,10 +189,10 @@ function generateLifelineFooterScript(config: FooterConfig): string {
     } else {
         customContentHtml = '富强· 自由· 平等· 爱国· 民主· 文明· 和谐· 公正· 法治· 敬业· 诚信· 友善';
     }
-    
+
     // 创建模块HTML对象，供后续排序使用
     const moduleHtmls: Record<string, string> = {};
-    
+
     // 运行时间模块
     moduleHtmls['uptime'] = config.enableUptime ? `
                     <!-- 顶部行：运行时间 -->
@@ -205,7 +205,7 @@ function generateLifelineFooterScript(config: FooterConfig): string {
                             <div id="day_show_container" class="time-blocks">载入中...</div>
                         </div>
                     </div>` : '';
-    
+
     // 社交链接模块
     moduleHtmls['social'] = config.enableSocialLinks ? `
                     <!-- 中间行：个人链接 -->
@@ -214,7 +214,7 @@ function generateLifelineFooterScript(config: FooterConfig): string {
                             ${socialLinksHtml}
                         </div>
                     </div>` : '';
-    
+
     // 时间模块（根据 enableTime 决定是否启用）
     // 如果 enableTime 未定义（旧配置），则默认为启用
     const isTimeEnabled = config.enableTime === undefined ? true : config.enableTime;
@@ -235,7 +235,7 @@ function generateLifelineFooterScript(config: FooterConfig): string {
                             <span id="load_show" class="time-number">载入中...</span>
                         </div>
                     </div>` : '';
-    
+
     // 自定义内容/核心价值观模块
     moduleHtmls['values'] = (config.enableCustomContent && config.customContent?.enabled) ? `
                     <!-- 核心价值观/自定义内容 -->
@@ -243,19 +243,19 @@ function generateLifelineFooterScript(config: FooterConfig): string {
                         ${customContentHtml}
                     </div>` : '';
     moduleHtmls['customContent'] = moduleHtmls['values']; // 兼容
-    
+
     // Helper广告模块
     moduleHtmls['helper'] = config.enableHelperAd ? `
                     <!-- Helper广告 -->
                     <div class="helper-ad">
-                        <a href="https://helper.cocoyoo.cn" target="_blank" rel="noopener noreferrer" class="helper-content">
+                        <a href="https://helper.madrays.de" target="_blank" rel="noopener noreferrer" class="helper-content">
                             <span class="fas fa-rocket"></span>
                             <span>本站Sun-Panel美化增强 By-</span>
                             <span class="helper-name">Sun-Panel-Helper</span>
                             <span class="helper-tagline"> - 让您的Sun-Panel锦上添花~</span>
                         </a>
                     </div>` : '';
-    
+
     // 根据moduleOrder排序生成最终的内容HTML
     let contentHTML = '';
     const moduleOrder = config.moduleOrder || ['uptime', 'social', 'time', 'customContent', 'helper'];
@@ -265,7 +265,7 @@ function generateLifelineFooterScript(config: FooterConfig): string {
             contentHTML += moduleHtmls[moduleName];
         }
     });
-    
+
     // 使用用户提供的模板，替换必要的配置项
     return `(function() {
     // 创建页脚样式
@@ -835,17 +835,17 @@ async function getDeployedFooterName(): Promise<string | null> {
             { name: 'icp-footer' },
             // 如果还有其他页脚，在这里添加
         ];
-        
+
         for (const footer of otherFooters) {
             const footerStartMark = `/* Sun-Panel-Helper JS Start: ${footer.name} */`;
             if (content.includes(footerStartMark)) {
                 return footer.name;
             }
         }
-        
+
         // 检查自己是否已部署
         if (content.includes(startMark)) {
-             return 'lifeline-footer';
+            return 'lifeline-footer';
         }
     } catch (error: any) {
         if (error.code !== 'ENOENT') {
@@ -860,190 +860,198 @@ async function getDeployedFooterName(): Promise<string | null> {
  * 检查是否已部署
  */
 export async function isDeployed(): Promise<boolean> {
-  try {
-    const content = await readFile(outputPath, 'utf-8')
-    return content.includes(startMark)
-  } catch (error) {
-    return false
-  }
+    try {
+        const content = await readFile(outputPath, 'utf-8')
+        return content.includes(startMark)
+    } catch (error) {
+        return false
+    }
 }
 
 /**
  * 部署JS
  * @param config 页脚配置对象
  */
-export async function deploy(config: FooterConfig): Promise<{success: boolean, message?: string, error?: string}> {
-  // 部署前检查互斥
-  const deployedFooter = await getDeployedFooterName();
-  if (deployedFooter && deployedFooter !== 'lifeline-footer') {
-      return { 
-          success: false, 
-          message: `无法部署，当前已有页脚 "${deployedFooter}" 正在使用。请先取消部署其他页脚。`,
-          error: 'ANOTHER_FOOTER_DEPLOYED'
-      };
-  }
+export async function deploy(config: FooterConfig): Promise<{ success: boolean, message?: string, error?: string }> {
+    // 部署前检查互斥
+    const deployedFooter = await getDeployedFooterName();
+    if (deployedFooter && deployedFooter !== 'lifeline-footer') {
+        return {
+            success: false,
+            message: `无法部署，当前已有页脚 "${deployedFooter}" 正在使用。请先取消部署其他页脚。`,
+            error: 'ANOTHER_FOOTER_DEPLOYED'
+        };
+    }
 
-  let existingContent = '';
-  try {
-    existingContent = await readFile(outputPath, 'utf-8');
-    if (!existingContent.trim().startsWith('/* Sun-Panel-Helper JS */')) {
-      existingContent = generateHeaderComment() + existingContent;
+    let existingContent = '';
+    try {
+        existingContent = await readFile(outputPath, 'utf-8');
+        if (!existingContent.trim().startsWith('/* Sun-Panel-Helper JS */')) {
+            existingContent = generateHeaderComment() + existingContent;
+        } else {
+            existingContent = updateHeaderTime(existingContent);
+        }
+    } catch (error: any) {
+        if (error.code === 'ENOENT') {
+            console.log('custom/index.js 不存在，将创建新文件。');
+            existingContent = generateHeaderComment();
+        } else {
+            console.error('读取 custom/index.js 失败:', error);
+            throw new Error('读取 custom/index.js 失败');
+        }
+    }
+
+    // Generate the new JS code for this component using the config
+    const newJsCode = generateLifelineFooterScript(config);
+
+    // Check if the block already exists and replace or insert
+    const startIndex = existingContent.indexOf(startMark);
+    const endIndex = existingContent.indexOf(endMark);
+    let finalContent = '';
+
+    const wrappedJs = `;/* Safety */
+(function() {
+    try {
+        ${newJsCode}
+    } catch(e) {
+        console.error('[Sun-Panel-Helper] Error in lifeline-footer:', e);
+    }
+})();`;
+    const blockToAdd = `${startMark}\n${wrappedJs}\n${endMark}`; // wrappedJs is already trimmed
+
+    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+        // Block exists, replace it
+        console.log('Lifeline Footer: 更新现有部署');
+        finalContent =
+            existingContent.substring(0, startIndex) +
+            blockToAdd +
+            existingContent.substring(endIndex + endMark.length);
     } else {
-      existingContent = updateHeaderTime(existingContent);
-    }
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
-      console.log('custom/index.js 不存在，将创建新文件。');
-      existingContent = generateHeaderComment();
-    } else {
-      console.error('读取 custom/index.js 失败:', error);
-      throw new Error('读取 custom/index.js 失败');
-    }
-  }
+        // Block doesn't exist, insert based on order
+        console.log('Lifeline Footer: 执行新部署');
+        const order = orderConfig.js || [];
+        const currentIndex = order.indexOf('lifeline-footer');
+        let insertPos = -1; // Sentinel value
 
-  // Generate the new JS code for this component using the config
-  const newJsCode = generateLifelineFooterScript(config);
-
-  // Check if the block already exists and replace or insert
-  const startIndex = existingContent.indexOf(startMark);
-  const endIndex = existingContent.indexOf(endMark);
-  let finalContent = '';
-
-  const blockToAdd = `${startMark}\n${newJsCode}\n${endMark}`; // newJsCode is already trimmed
-
-  if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-    // Block exists, replace it
-    console.log('Lifeline Footer: 更新现有部署');
-    finalContent =
-        existingContent.substring(0, startIndex) +
-        blockToAdd +
-        existingContent.substring(endIndex + endMark.length);
-  } else {
-    // Block doesn't exist, insert based on order
-    console.log('Lifeline Footer: 执行新部署');
-    const order = orderConfig.js || [];
-    const currentIndex = order.indexOf('lifeline-footer');
-    let insertPos = -1; // Sentinel value
-
-    // Find position AFTER the previous component in order
-    if (currentIndex > 0) {
-      for (let i = currentIndex - 1; i >= 0; i--) {
-          const prevComp = order[i];
-          const prevEndMark = `/* Sun-Panel-Helper JS End: ${prevComp} */`;
-          const prevMarkIndex = existingContent.lastIndexOf(prevEndMark);
-          if (prevMarkIndex !== -1) {
-              insertPos = prevMarkIndex + prevEndMark.length;
-              break;
-          }
-      }
-    }
-
-    // If previous component not found, or it's the first, insert after header
-    if (insertPos === -1) {
-        const headerEndMatch = existingContent.match(/\/\* 上次更新：.*? \*\/[\r\n]*/);
-        insertPos = headerEndMatch ? (headerEndMatch.index ?? 0) + headerEndMatch[0].length : 0;
-    }
-
-    // Find position BEFORE the next component (if inserting somewhere in the middle)
-    if (currentIndex !== -1 && currentIndex < order.length - 1) {
-        let nextMarkIndex = -1;
-        for (let i = currentIndex + 1; i < order.length; i++) {
-            const nextComp = order[i];
-            const nextStartMark = `/* Sun-Panel-Helper JS Start: ${nextComp} */`;
-            nextMarkIndex = existingContent.indexOf(nextStartMark, insertPos); // Search after the calculated insertPos
-            if (nextMarkIndex !== -1) {
-                 // Found the next component, insert right before it
-                 insertPos = nextMarkIndex;
-                 break;
+        // Find position AFTER the previous component in order
+        if (currentIndex > 0) {
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                const prevComp = order[i];
+                const prevEndMark = `/* Sun-Panel-Helper JS End: ${prevComp} */`;
+                const prevMarkIndex = existingContent.lastIndexOf(prevEndMark);
+                if (prevMarkIndex !== -1) {
+                    insertPos = prevMarkIndex + prevEndMark.length;
+                    break;
+                }
             }
         }
-         // If next component wasn't found, insertPos remains where it was (after previous or after header)
-         // If insertPos is still the end (meaning no previous and no next found), set to end
-         if (insertPos === -1) insertPos = existingContent.length;
-    } else {
-         // If it's the last component in order, or order is unknown, append to end
-         insertPos = existingContent.length;
+
+        // If previous component not found, or it's the first, insert after header
+        if (insertPos === -1) {
+            const headerEndMatch = existingContent.match(/\/\* 上次更新：.*? \*\/[\r\n]*/);
+            insertPos = headerEndMatch ? (headerEndMatch.index ?? 0) + headerEndMatch[0].length : 0;
+        }
+
+        // Find position BEFORE the next component (if inserting somewhere in the middle)
+        if (currentIndex !== -1 && currentIndex < order.length - 1) {
+            let nextMarkIndex = -1;
+            for (let i = currentIndex + 1; i < order.length; i++) {
+                const nextComp = order[i];
+                const nextStartMark = `/* Sun-Panel-Helper JS Start: ${nextComp} */`;
+                nextMarkIndex = existingContent.indexOf(nextStartMark, insertPos); // Search after the calculated insertPos
+                if (nextMarkIndex !== -1) {
+                    // Found the next component, insert right before it
+                    insertPos = nextMarkIndex;
+                    break;
+                }
+            }
+            // If next component wasn't found, insertPos remains where it was (after previous or after header)
+            // If insertPos is still the end (meaning no previous and no next found), set to end
+            if (insertPos === -1) insertPos = existingContent.length;
+        } else {
+            // If it's the last component in order, or order is unknown, append to end
+            insertPos = existingContent.length;
+        }
+
+        // Insert the block at the calculated position
+        const before = existingContent.substring(0, insertPos);
+        const after = existingContent.substring(insertPos);
+        // Add newlines carefully
+        finalContent = `${before.trimEnd()}\n\n${blockToAdd}\n\n${after.trimStart()}`.trim();
+
+        // Ensure header is present if it wasn't the only content
+        if (!finalContent.startsWith('/* Sun-Panel-Helper JS */')) {
+            finalContent = generateHeaderComment() + finalContent;
+        }
     }
 
-    // Insert the block at the calculated position
-    const before = existingContent.substring(0, insertPos);
-    const after = existingContent.substring(insertPos);
-    // Add newlines carefully
-    finalContent = `${before.trimEnd()}\n\n${blockToAdd}\n\n${after.trimStart()}`.trim();
-
-    // Ensure header is present if it wasn't the only content
-    if (!finalContent.startsWith('/* Sun-Panel-Helper JS */')) {
-         finalContent = generateHeaderComment() + finalContent;
+    try {
+        // Ensure directory exists
+        await mkdir(dirname(outputPath), { recursive: true });
+        // Write the final content
+        await writeFile(outputPath, finalContent + '\n', 'utf-8'); // Ensure final newline
+        console.log('Lifeline Footer: 部署成功');
+        return { success: true };
+    } catch (error) {
+        console.error('Lifeline Footer: 写入 custom/index.js 失败:', error);
+        throw new Error('写入 custom/index.js 失败');
     }
- }
-
-  try {
-      // Ensure directory exists
-      await mkdir(dirname(outputPath), { recursive: true });
-      // Write the final content
-      await writeFile(outputPath, finalContent + '\n', 'utf-8'); // Ensure final newline
-      console.log('Lifeline Footer: 部署成功');
-      return { success: true };
-  } catch (error) {
-      console.error('Lifeline Footer: 写入 custom/index.js 失败:', error);
-      throw new Error('写入 custom/index.js 失败');
-  }
 }
 
 /**
  * 取消部署
  */
 export async function undeploy(): Promise<void> {
-  try {
-    let content = '';
     try {
-      content = await readFile(outputPath, 'utf-8');
-    } catch (error: any) {
-      if (error.code === 'ENOENT') {
-        console.log('文件不存在，无需取消部署');
-        return;
-      } else {
-        throw error; // Rethrow other read errors
-      }
+        let content = '';
+        try {
+            content = await readFile(outputPath, 'utf-8');
+        } catch (error: any) {
+            if (error.code === 'ENOENT') {
+                console.log('文件不存在，无需取消部署');
+                return;
+            } else {
+                throw error; // Rethrow other read errors
+            }
+        }
+
+        const startIndex = content.indexOf(startMark);
+        if (startIndex === -1) {
+            console.log('组件未部署，无需取消部署');
+            return;
+        }
+
+        // 移除组件代码
+        const endIndex = content.indexOf(endMark, startIndex);
+        if (endIndex !== -1) {
+            const before = content.substring(0, startIndex);
+            const after = content.substring(endIndex + endMark.length);
+            content = (before.trimEnd() + after.trimStart()).trim(); // Remove block and potentially extra newlines
+
+            // If content is empty except for header, remove the file? Or just keep header?
+            // Let's keep the header if other components might exist or to indicate helper is managing the file.
+            // Check if only the header remains (potentially with whitespace)
+            const headerPattern = /^\s*\/\* Sun-Panel-Helper JS \*\/[\s\S]*?\/\* 上次更新：.*? \*\/\s*$/;
+            if (headerPattern.test(content)) {
+                console.log('Lifeline Footer: 移除后文件只剩头部注释，保留文件。');
+                // Ensure only header remains cleanly
+                content = updateHeaderTime(generateHeaderComment());
+            } else if (content.trim() === '') {
+                console.log('Lifeline Footer: 移除后文件为空，保留空文件（含头部）。');
+                content = generateHeaderComment(); // Ensure header is there
+            } else {
+                // Other content exists, just update time
+                content = updateHeaderTime(content);
+            }
+
+            // Write the potentially modified content back
+            await writeFile(outputPath, content + '\n', 'utf-8'); // Ensure final newline
+            console.log('取消部署成功');
+        } else {
+            console.warn('Lifeline Footer: Found start marker but no end marker. File might be corrupted.');
+        }
+    } catch (error) {
+        console.error('取消部署失败:', error);
+        throw error;
     }
-
-    const startIndex = content.indexOf(startMark);
-    if (startIndex === -1) {
-      console.log('组件未部署，无需取消部署');
-      return;
-    }
-
-    // 移除组件代码
-    const endIndex = content.indexOf(endMark, startIndex);
-    if (endIndex !== -1) {
-      const before = content.substring(0, startIndex);
-      const after = content.substring(endIndex + endMark.length);
-      content = (before.trimEnd() + after.trimStart()).trim(); // Remove block and potentially extra newlines
-
-      // If content is empty except for header, remove the file? Or just keep header?
-      // Let's keep the header if other components might exist or to indicate helper is managing the file.
-      // Check if only the header remains (potentially with whitespace)
-      const headerPattern = /^\s*\/\* Sun-Panel-Helper JS \*\/[\s\S]*?\/\* 上次更新：.*? \*\/\s*$/;
-      if (headerPattern.test(content)) {
-         console.log('Lifeline Footer: 移除后文件只剩头部注释，保留文件。');
-         // Ensure only header remains cleanly
-         content = updateHeaderTime(generateHeaderComment());
-      } else if (content.trim() === '') {
-         console.log('Lifeline Footer: 移除后文件为空，保留空文件（含头部）。');
-         content = generateHeaderComment(); // Ensure header is there
-      } else {
-         // Other content exists, just update time
-         content = updateHeaderTime(content);
-      }
-
-      // Write the potentially modified content back
-      await writeFile(outputPath, content + '\n', 'utf-8'); // Ensure final newline
-      console.log('取消部署成功');
-    } else {
-        console.warn('Lifeline Footer: Found start marker but no end marker. File might be corrupted.');
-    }
-  } catch (error) {
-    console.error('取消部署失败:', error);
-    throw error;
-  }
 }

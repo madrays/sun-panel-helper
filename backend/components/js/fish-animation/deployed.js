@@ -6,8 +6,8 @@ window.SunPanelFish = (function() {
             heightRate: 0.5,
             fishColor: 'hsl(0, 0%, 95%)',
             opacity: 0.37,
-            speedRate: 0.2,
-            zIndex: 999
+            speedRate: 0.9,
+            zIndex: 9999
         };
 
     // 定义构造函数

@@ -32,8 +32,8 @@ RUN echo "=== 编译后的文件 ===" && \
     echo "=== 检查 index 文件 ===" && \
     cat dist/assets/index-*.js | grep -i "localhost" || true
 
-# 生产环境
-FROM nginx:alpine
+# 生产环境 - 锁定 Alpine 版本以避免 QEMU 兼容性问题
+FROM nginx:1.26-alpine3.19
 WORKDIR /app
 
 

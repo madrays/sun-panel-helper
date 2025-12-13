@@ -27,7 +27,7 @@
         <span class="tag">全局样式</span>
       </div>
       <div class="author">
-        <span class="author-tag">作者：与末</span>
+        <a href="https://ym01.cn" target="_blank" class="author-tag">作者：与末</a>
         <span class="author-tag">优化适配：madrays</span>
       </div>
     </div>

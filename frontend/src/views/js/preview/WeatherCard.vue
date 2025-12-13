@@ -1,33 +1,39 @@
 <template>
-  <div class="widget-card" @click="$emit('click')">
+  <div class="widget-card" data-widget-id="weather" @click="$emit('click')">
+    <!-- 部署状态标签 -->
     <div class="deploy-badge" v-if="isDeployed">已部署</div>
     
+    <!-- 预览区域 -->
     <div class="preview-section">
       <div class="preview-area">
-        <div class="cursor-preview">
-          <div class="cursor-box default">
-            <span>默认指针</span>
-            <img src="https://img.hi-linux.com/staticfile/P1i7yA-2024-04-26-hZZjUZ.png" alt="默认指针" class="cursor-img" />
-          </div>
-          <div class="cursor-box hover">
-            <span>悬浮指针</span>
-            <img src="https://img.hi-linux.com/staticfile/hVX0Sf-2024-04-26-INwMSQ.png" alt="悬浮指针" class="cursor-img" />
+        <div class="weather-preview">
+          <!-- 模拟天气卡片 -->
+          <div class="weather-scene">
+            <div class="sun"></div>
+            <div class="cloud"></div>
+            <div class="temp-tag">26°C</div>
+            <div class="forecast-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- 信息区域 -->
     <div class="info-section">
-      <h3>自定义鼠标指针</h3>
-      <p>为页面添加个性化的鼠标指针样式</p>
+      <h3>智能天气助手</h3>
+      <p>多源数据融合的AI智能天气助手</p>
       <div class="tags">
-        <span class="tag">鼠标</span>
-        <span class="tag">指针</span>
-        <span class="tag">交互</span>
+        <span class="tag">天气预报</span>
+        <span class="tag">AI建议</span>
+        <span class="tag">自动定位</span>
       </div>
       <div class="author">
-        <span class="author-tag">作者：<a href="https://ym01.cn" target="_blank" class="author-tag">与末</a></span>
-        <span class="author-tag">优化适配：madrays</span>
+        <span class="author-tag">作者：დ✎﹏浮生๓</span>
+        <span class="author-tag">适配：madrays</span>
       </div>
     </div>
   </div>
@@ -44,6 +50,7 @@ defineEmits<{
 </script>
 
 <style scoped>
+/* 卡片容器 */
 .widget-card {
   background: white;
   border-radius: 12px;
@@ -62,63 +69,102 @@ defineEmits<{
   box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
+/* 预览区域 */
 .preview-section {
   padding: 1.5rem;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  height: 160px;
 }
 
 .preview-area {
   width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
-}
-
-.cursor-preview {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  width: 100%;
-}
-
-.cursor-box {
-  height: 120px;
-  border-radius: 12px;
-  background: white;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-size: 0.9rem;
-  color: #666;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 12px;
 }
 
-.cursor-box.default {
-  cursor: url('https://img.hi-linux.com/staticfile/P1i7yA-2024-04-26-hZZjUZ.png'), default;
+.weather-preview {
+  position: relative;
+  width: 140px;
+  height: 100px;
 }
 
-.cursor-box.hover {
-  cursor: url('https://img.hi-linux.com/staticfile/hVX0Sf-2024-04-26-INwMSQ.png'), pointer;
+/* 天气场景 */
+.weather-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
 
-.cursor-box:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+.sun {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 50px;
+  height: 50px;
+  background: #ffeb3b;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+  animation: sunPulse 3s infinite alternate;
 }
 
-.cursor-img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
+.cloud {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  width: 60px;
+  height: 25px;
+  background: #fff;
+  border-radius: 20px;
+  opacity: 0.9;
+  animation: cloudFloat 4s ease-in-out infinite;
 }
 
+.cloud::after {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  width: 25px;
+  height: 25px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.temp-tag {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.forecast-dots {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  gap: 4px;
+}
+
+.forecast-dots span {
+  width: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+}
+
+/* 信息区域 */
 .info-section {
   padding: 1rem;
   flex-shrink: 0;
@@ -142,6 +188,7 @@ defineEmits<{
   min-height: 40px;
 }
 
+/* 标签样式 */
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -157,7 +204,6 @@ defineEmits<{
   color: var(--primary-color, #409eff);
   border-radius: 12px;
   font-size: 0.8rem;
-  transition: all 0.3s;
 }
 
 .tag:nth-child(2) {
@@ -172,6 +218,7 @@ defineEmits<{
   color: #67c23a;
 }
 
+/* 部署状态标签 */
 .deploy-badge {
   position: absolute;
   top: 12px;
@@ -186,6 +233,7 @@ defineEmits<{
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* 作者信息 */
 .author {
   margin-top: auto;
   padding-top: 0.75rem;
@@ -227,5 +275,16 @@ defineEmits<{
   background: #67c23a;
   border-radius: 50%;
   opacity: 0.7;
+}
+
+/* 动画效果 */
+@keyframes sunPulse {
+  from { transform: scale(1); opacity: 0.9; }
+  to { transform: scale(1.1); opacity: 1; }
+}
+
+@keyframes cloudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 </style>
