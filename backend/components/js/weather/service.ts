@@ -74,6 +74,10 @@ export async function deploy(params: WeatherParams): Promise<void> {
     // 个人信息配置
     const USER_PROFILE = ${JSON.stringify(params.userProfile, null, 8)};
 
+    // 样式配置
+    const VISUAL_TRANSPARENCY = ${params.transparency ?? 0.25};
+    const VISUAL_TEXT_COLOR = "${params.textColor ?? '#ffffff'}";
+
     // 默认位置配置
     const DEFAULT_LOCATION = "${params.defaultLocation}";
     const DEFAULT_LOCATION_NAME = "${params.defaultLocationName}";

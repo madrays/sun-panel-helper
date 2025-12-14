@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气预报小组件</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: transparent;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow: hidden !important;
+            width: 100%;
+            height: 100%;
+        }
+
+        .widget-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            min-width: 280px;
+            height: 100%;
+            perspective: 1000px;
+            background: transparent;
+            display: flex;
+            align-items: stretch;
+            padding: 8px;
+            margin: 0 auto;
+            overflow: visible;
+        }
+
+        .widget-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            flex: 1;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.06),
+                0 0 10px rgba(0, 0, 0, 0.04),
+                0 0 5px rgba(0, 0, 0, 0.03);
+            border-radius: 16px;
+            overflow: visible;
+            touch-action: none;
+            margin: 2px;
+        }
+
+        .widget {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            background: transparent;
+        }
+
+        .front,
+        .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 28px;
+            padding: 12px;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+        }
+
+        .front {
+            display: grid;
+            grid-template-columns: 0.4fr 1.6fr;
+            gap: 8px;
+            padding: 12px;
+            transform: rotateY(0deg);
+            background: transparent;
+        }
+
+        .back {
+            transform: rotateY(180deg);
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: center;
+            padding: 45px 20px 12px;
+        }
+
+        .back .main-info {
+            height: 45px;
+            padding: 0 12px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            margin-bottom: 0;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .back .forecast-section {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            margin-top: 0;
+            overflow: visible;
+            position: relative;
+        }
+
+        .back .daily-forecast {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            margin-top: -5px;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        .back .daily-item {
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            transform: scale(0.9);
+        }
+
+        .menu-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent !important;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1;
+            color: white;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-btn::before {
+            content: "⋯";
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+        }
+
+        .main-info {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px;
+            gap: 2px;
+            color: white;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .current-temp {
+            font-size: 32px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .weather-icon {
+            font-size: 24px;
+            margin: -2px 0;
+        }
+
+        .weather-desc {
+            font-size: 11px;
+            margin: -2px 0;
+        }
+
+        .weather-details {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 2px;
+            font-size: 12px;
+            width: 100%;
+            gap: 4px;
+        }
+
+        .weather-details i {
+            font-size: 12px;
+            height: 12px;
+            line-height: 1;
+        }
+
+        .weather-details-value {
+            font-size: 9px;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        .hourly-section,
+        .forecast-section {
+            position: relative;
+            transform: translateZ(0);
+            will-change: transform;
+        }
+
+        .hourly-forecast {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            gap: 8px;
+            width: 100%;
+            padding: 5px 0;
+        }
+
+        .hourly-item {
+            text-align: center;
+            flex: 1;
+            padding: 0 4px;
+            min-width: 0;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: calc(100% - 24px);
+            gap: 4px;
+            font-size: 13px;
+        }
+
+        .hourly-item>div:last-child {
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hourly-item-icon {
+            font-size: 24px;
+            margin: 2px 0;
+        }
+
+        .hourly-item-desc {
+            font-size: 11px;
+            margin-top: -1px;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        .nav-btn.prev {
+            left: 0;
+        }
+
+        .nav-btn.next {
+            right: 0;
+        }
+
+        .daily-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .daily-forecast {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .daily-item {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 4px;
+            color: white;
+            font-size: 13px;
+            height: 100%;
+        }
+
+        .daily-item-icon {
+            font-size: 32px;
+            margin: 3px 0;
+        }
+
+        .temp-range {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            font-size: 15px;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .temp-range span:first-child::after {
+            content: "~";
+            margin: 0 2px;
+        }
+
+        .temperature-chart {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            padding: 0 25px;
+            pointer-events: none;
+            transform: translateX(0);
+        }
+
+        .temp-bar {
+            flex: 1;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.35);
+            transition: height 0.3s ease;
+            border-radius: 3px 3px 0 0;
+            position: relative;
+        }
+
+        .forecast-section {
+            position: relative;
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .error-toast {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .menu-btn,
+        .nav-btn {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            outline: none;
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .widget-container {
+                width: 100%;
+                min-width: auto;
+                height: 190px;
+                padding: 10px;
+                margin: 0;
+                box-sizing: border-box;
+                position: relative;
+                transform: none;
+            }
+
+            .widget-wrapper {
+                border: 1px solid rgba(128, 128, 128, 0.25);
+                box-shadow: 0 -1px 1px rgba(255, 255, 255, 0.2),
+                    0 1px 1px rgba(0, 0, 0, 0.1);
+                border-radius: 32px;
+                touch-action: pan-y;
+                pointer-events: auto;
+                background: transparent;
+                overflow: hidden;
+                height: 100%;
+                padding: 0;
+            }
+
+            .front {
+                grid-template-columns: 70px 1fr;
+                gap: 2px;
+                padding: 6px;
+            }
+
+            .hourly-section,
+            .forecast-section {
+                margin: 0;
+                padding: 0 16px;
+                height: 100%;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .nav-btn {
+                width: 16px;
+                height: 16px;
+                font-size: 8px;
+                opacity: 0.6;
+                z-index: 20;
+                background: rgba(255, 255, 255, 0.3) !important;
+            }
+
+            .nav-btn.prev {
+                left: 4px;
+            }
+
+            .nav-btn.next {
+                right: 4px;
+            }
+
+            .hourly-item {
+                transform: scale(0.95);
+                margin: 0;
+                padding: 0;
+                font-size: 13px;
+            }
+
+            .hourly-item>div:first-child {
+                font-size: 12px;
+            }
+
+            .hourly-item>div:last-child {
+                font-size: 13px;
+            }
+
+            .hourly-item-icon {
+                font-size: 24px;
+                margin: 2px 0;
+            }
+
+            .hourly-item-desc {
+                font-size: 11px;
+            }
+
+            .current-temp {
+                font-size: 30px;
+            }
+
+            .weather-icon {
+                font-size: 22px;
+            }
+
+            .weather-details {
+                gap: 4px;
+            }
+
+            .daily-item {
+                gap: 8px;
+                font-size: 13px;
+                transform: scale(0.9);
+            }
+
+            .daily-item-icon {
+                font-size: 24px;
+            }
+
+            .temp-range {
+                font-size: 13px;
+            }
+
+            .weather-details-popup {
+                position: fixed;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: calc(100% - 32px);
+                max-width: 320px;
+                margin: 0;
+                display: block !important;
+                background: rgba(255, 255, 255, 0.98);
+                box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+                z-index: 10000;
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .popup-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .popup-item {
+                display: grid;
+                grid-template-columns: 28px 1fr;
+                align-items: center;
+                gap: 12px;
+                padding: 4px 0;
+                min-width: 0;
+            }
+
+            .popup-item i {
+                font-size: 16px;
+                width: 28px;
+                text-align: center;
+                color: #666;
+            }
+
+            .popup-item span {
+                font-size: 15px;
+                color: #333;
+                line-height: 1.4;
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                word-break: break-word !important;
+                word-wrap: break-word !important;
+                min-width: 0;
+                width: 100%;
+            }
+
+            .popup-divider {
+                height: 1px;
+                background: rgba(0, 0, 0, 0.1);
+                margin: 12px -20px;
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 435px) {
+            .weather-details-popup {
+                position: absolute;
+                left: auto;
+                right: -20px;
+                top: 100%;
+                margin-top: 10px;
+            }
+        }
+
+        html {
+            overflow: hidden !important;
+            height: 100%;
+            width: 100%;
+        }
+
+        .hourly-section {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+        }
+
+        .hourly-item-icon-container,
+        .daily-item-icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .weather-details-popup {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 10px;
+            color: #333;
+            font-size: 15px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            width: 220px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            max-height: none;
+            overflow: visible;
+        }
+
+        .popup-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .weather-details-popup.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .popup-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .popup-item i {
+            width: 14px;
+            font-size: 12px;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .popup-item span {
+            font-size: 11px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .popup-divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
+            margin: 8px -16px;
+            grid-column: 1 / -1;
+        }
+
+        .front .menu-btn {
+            right: 8px;
+            top: 8px;
+        }
+
+        .back .menu-btn {
+            right: 8px;
+            top: 8px;
+        }
+
+        @media (max-width: 450px) {
+            body {
+                min-width: 320px;
+                overflow-x: auto;
+            }
+
+            .widget-container {
+                margin: 0 10px;
+            }
+        }
+
+        .widget-wrapper {
+            height: 100%;
+        }
+
+        .nav-btn {
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        @media screen and (max-width: 500px) {
+            .widget-container {
+                padding: 15px;
+            }
+
+            .front {
+                grid-template-columns: 0.4fr 1.6fr;
+                padding: 8px;
+            }
+
+            .back {
+                padding: 35px 12px 12px;
+            }
+
+            .daily-item {
+                gap: 6px;
+            }
+        }
+
+        @media screen and (max-width: 400px) {
+            .widget-container {
+                padding: 8px;
+            }
+
+            .front {
+                grid-template-columns: 0.35fr 1.65fr;
+                padding: 6px;
+            }
+
+            .back {
+                padding: 30px 10px 10px;
+            }
+
+            .daily-item {
+                gap: 4px;
+            }
+        }
+
+        @media screen and (max-width: 350px) {
+            .widget-container {
+                padding: 8px;
+                aspect-ratio: 2 / 1;
+            }
+
+            .front {
+                grid-template-columns: 0.33fr 1.67fr;
+                padding: 4px;
+            }
+
+            .current-temp {
+                font-size: 22px;
+            }
+
+            .weather-details {
+                gap: 2px;
+            }
+        }
+
+        @media screen and (max-width: 500px) {
+            .weather-details-popup {
+                position: fixed;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: calc(100% - 40px);
+                max-width: 280px;
+                margin: 0;
+            }
+        }
+
+        .daily-forecast {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .daily-item {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 8px 4px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .weather-details-popup {
+            width: 200px;
+            padding: 10px;
+            font-size: 11px;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .popup-grid {
+            gap: 6px;
+        }
+
+        .popup-item {
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .popup-item span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media screen and (min-width: 500px) {
+            .daily-item {
+                font-size: 14px;
+                gap: 10px;
+            }
+
+            .weather-details-popup {
+                width: 220px;
+                padding: 12px;
+                font-size: 12px;
+            }
+        }
+
+        .front-content,
+        .back-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 24px;
+            background: var(--widget-bg-color, rgba(0, 0, 0, 0.5));
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="widget-container">
+        <div class="widget-wrapper">
+            <div class="widget">
+                <div class="front">
+                    <div class="front-content"></div>
+                    <button class="menu-btn" onclick="flipWidget()"></button>
+
+                    <div class="main-info" onmouseenter="showWeatherDetails()" onmouseleave="hideWeatherDetails()">
+                        <div class="current-temp">23°</div>
+                        <div class="weather-icon">☀️</div>
+                        <div class="weather-desc">晴朗无云</div>
+                        <div class="weather-details">
+                            <div class="weather-details-item">
+                                <i class="fas fa-wind"></i>
+                                <div class="weather-details-value">3km/h</div>
+                            </div>
+                            <div class="weather-details-item">
+                                <i class="fas fa-tint"></i>
+                                <div class="weather-details-value">45%</div>
+                            </div>
+                            <div class="weather-details-item">
+                                <i class="fas fa-leaf"></i>
+                                <div class="weather-details-value">1013</div>
+                            </div>
+                        </div>
+                        <div class="weather-details-popup">
+                            <div class="popup-grid">
+                                <div class="popup-item">
+                                    <i class="fas fa-temperature-high"></i>
+                                    <span>体感温度: <span id="popup-feels-like">26°</span></span>
+                                </div>
+                                <div class="popup-item">
+                                    <i class="fas fa-wind"></i>
+                                    <span>风向: <span id="popup-wind-dir">东北</span></span>
+                                </div>
+                                <div class="popup-item">
+                                    <i class="fas fa-location-arrow"></i>
+                                    <span>风力等级: <span id="popup-wind-scale">3级</span></span>
+                                </div>
+                                <div class="popup-item">
+                                    <i class="fas fa-compress-alt"></i>
+                                    <span>气压: <span id="popup-pressure">1013hPa</span></span>
+                                </div>
+                                <div class="popup-divider"></div>
+                                <div class="popup-item">
+                                    <i class="fas fa-cloud"></i>
+                                    <span>云量: <span id="popup-cloud">23%</span></span>
+                                </div>
+                                <div class="popup-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>能见度: <span id="popup-visibility">10km</span></span>
+                                </div>
+                                <div class="popup-item">
+                                    <i class="fas fa-sun"></i>
+                                    <span>紫外线: <span id="popup-uv">中等</span></span>
+                                </div>
+                                <div class="popup-item">
+                                    <i class="fas fa-leaf"></i>
+                                    <span>空气质量: <span id="popup-aqi">优</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hourly-section">
+                        <button class="nav-btn prev" onclick="prevHour()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="hourly-forecast" id="hourlyForecast">
+                            <!-- 小时预报数据将通过 JavaScript 动态生成 -->
+                        </div>
+                        <div class="temperature-chart" id="tempChart"></div>
+                        <button class="nav-btn next" onclick="nextHour()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="back">
+                    <div class="back-content"></div>
+                    <div class="main-info">
+                        <button class="menu-btn" onclick="flipWidget()"></button>
+                    </div>
+
+                    <div class="forecast-section">
+                        <button class="nav-btn prev" onclick="prevDay()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="daily-forecast" id="dailyForecast"></div>
+                        <button class="nav-btn next" onclick="nextDay()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hoursData = generateHourlyData();
+        let daysData = Array.from({ length: 15 }, (_, i) => {
+            const today = new Date();
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            return {
+                date: i === 0 ? '今天' : i === 1 ? '明天' : `${date.getMonth() + 1}/${date.getDate()}`,
+                icon: ['☀️', '⛅', '🌧️', '⛅', '☀️', '☀️', '⛅'][i % 7],
+                highTemp: Math.floor(25 + Math.random() * 5),
+                lowTemp: Math.floor(15 + Math.random() * 5)
+            };
+        });
+
+        function generateHourlyData() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            return Array.from({ length: 24 }, (_, i) => {
+                const hour = (currentHour + i + 1) % 24;
+                return {
+                    time: `${hour.toString().padStart(2, '0')}:00`,
+                    icon: '☀️',
+                    temp: Math.floor(20 + Math.random() * 8)
+                };
+            });
+        }
+
+        let currentHourIndex = 0;
+        let currentDayIndex = 0;
+
+        function calculateVisibleItems() {
+            const container = document.querySelector('.widget-container');
+            const width = container.offsetWidth;
+            const isDaily = container.querySelector('.widget').getAttribute('data-flipped') === 'true';
+
+            // 确保日视图至少显示4天，最多显示7天
+            if (isDaily) {
+                const baseWidth = width - 56; // 减去padding和按钮的空间
+                const itemWidth = 85; // 每个日期项的最小宽度
+                const calculatedItems = Math.floor(baseWidth / itemWidth);
+                return Math.max(4, Math.min(7, calculatedItems));
+            }
+
+            // 小时视图根据宽度自动调整，保持合理间距
+            const baseWidth = width - 56; // 减去padding和按钮的空间
+            const itemWidth = 80; // 增加每个小时项的最小宽度
+
+            if (width <= 350) {
+                return 4;
+            } else if (width <= 450) {
+                return 5;
+            } else {
+                const calculatedItems = Math.floor(baseWidth / itemWidth);
+                return Math.min(6, calculatedItems); // 限制最大显示数量为6
+            }
+        }
+
+        function renderHourlyForecast() {
+            const container = document.getElementById('hourlyForecast');
+            container.innerHTML = '';
+            const visibleItems = calculateVisibleItems();
+
+            const prevBtn = document.querySelector('.hourly-section .nav-btn.prev');
+            const nextBtn = document.querySelector('.hourly-section .nav-btn.next');
+            if (prevBtn) prevBtn.style.display = currentHourIndex > 0 ? 'flex' : 'none';
+            if (nextBtn) nextBtn.style.display = currentHourIndex + visibleItems < 24 ? 'flex' : 'none';
+
+            // 调整每个项目的宽度以充满容器
+            const containerWidth = container.offsetWidth;
+            const totalGap = (visibleItems - 1) * 8;
+            const itemWidth = (containerWidth - totalGap) / visibleItems;
+
+            for (let i = 0; i < visibleItems; i++) {
+                const index = currentHourIndex + i;
+                if (index >= hoursData.length) break;
+                const hour = hoursData[index];
+
+                const div = document.createElement('div');
+                div.className = 'hourly-item';
+                div.style.width = `${itemWidth}px`;
+                div.innerHTML = `
+                    <div>${hour.time}</div>
+                    <div class="hourly-item-icon-container">
+                        <div class="hourly-item-icon">${hour.icon}</div>
+                        <div class="hourly-item-desc">${hour.text || '晴'}</div>
+                    </div>
+                    <div>${hour.temp}°</div>
+                `;
+                container.appendChild(div);
+            }
+
+            renderTemperatureChart();
+        }
+
+        function renderTemperatureChart() {
+            const container = document.getElementById('tempChart');
+            container.innerHTML = '';
+            const visibleItems = calculateVisibleItems();
+
+            const allTemps = hoursData.map(item => parseInt(item.temp));
+            const minTemp = Math.min(...allTemps);
+            const maxTemp = Math.max(...allTemps);
+            const range = maxTemp - minTemp;
+
+            const visibleData = hoursData.slice(currentHourIndex, currentHourIndex + visibleItems);
+            visibleData.forEach(item => {
+                const temp = parseInt(item.temp);
+                const height = range === 0 ? 50 : ((temp - minTemp) / range) * 80 + 20;
+                const bar = document.createElement('div');
+                bar.className = 'temp-bar';
+                bar.style.height = `${height}%`;
+                bar.style.backgroundColor = `rgba(255, 255, 255, ${0.2 + (height - 20) / 80 * 0.3})`;
+                container.appendChild(bar);
+            });
+        }
+
+        function renderDailyForecast() {
+            const container = document.getElementById('dailyForecast');
+            container.innerHTML = '';
+            const visibleItems = calculateVisibleItems();
+
+            const prevBtn = document.querySelector('.back .nav-btn.prev');
+            const nextBtn = document.querySelector('.back .nav-btn.next');
+            if (prevBtn) prevBtn.style.display = currentDayIndex > 0 ? 'flex' : 'none';
+            if (nextBtn) nextBtn.style.display = currentDayIndex + visibleItems < daysData.length ? 'flex' : 'none';
+
+            // 调整每个项目的宽度以充满容器
+            const containerWidth = container.offsetWidth;
+            const totalGap = (visibleItems - 1) * 12; // 使用更大的间距
+            const itemWidth = (containerWidth - totalGap) / visibleItems;
+
+            for (let i = 0; i < visibleItems; i++) {
+                const index = currentDayIndex + i;
+                if (index >= daysData.length) break;
+                const day = daysData[index];
+                const div = document.createElement('div');
+                div.className = 'daily-item';
+                div.style.width = `${itemWidth}px`;
+                div.innerHTML = `
+                    <div>${day.date}</div>
+                    <div class="daily-item-icon-container">
+                        <div class="daily-item-icon">${day.icon}</div>
+                        <div class="daily-item-desc">${day.text || '晴'}</div>
+                    </div>
+                    <div class="temp-range">
+                        <span>${day.lowTemp}°</span>
+                        <span>${day.highTemp}°</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function prevHour() {
+            if (currentHourIndex > 0) {
+                currentHourIndex--;
+                renderHourlyForecast();
+            }
+        }
+
+        function nextHour() {
+            if (currentHourIndex + calculateVisibleItems() < 24) {
+                currentHourIndex++;
+                renderHourlyForecast();
+            }
+        }
+
+        function prevDay() {
+            if (currentDayIndex > 0) {
+                currentDayIndex--;
+                renderDailyForecast();
+            }
+        }
+
+        function nextDay() {
+            const visibleItems = calculateVisibleItems();
+            if (currentDayIndex + visibleItems < daysData.length) {
+                currentDayIndex++;
+                renderDailyForecast();
+            }
+        }
+
+        function flipWidget() {
+            const widget = document.querySelector('.widget');
+            const isFlipped = widget.getAttribute('data-flipped') === 'true';
+            const popup = document.querySelector('.weather-details-popup');
+            const frontContent = document.querySelector('.front-content');
+            const backContent = document.querySelector('.back-content');
+
+            popup.classList.remove('show');
+
+            // 先改变显示状态，再执行翻转动画
+            if (frontContent && backContent) {
+                if (isFlipped) {
+                    frontContent.style.display = 'block';
+                    setTimeout(() => {
+                        backContent.style.display = 'none';
+                    }, 300); // 等待翻转完成后再隐藏背面
+                } else {
+                    backContent.style.display = 'block';
+                    setTimeout(() => {
+                        frontContent.style.display = 'none';
+                    }, 300); // 等待翻转完成后再隐藏正面
+                }
+            }
+
+            widget.setAttribute('data-flipped', (!isFlipped).toString());
+            widget.style.transform = isFlipped ? 'rotateY(0deg)' : 'rotateY(180deg)';
+        }
+
+        function adjustLayout() {
+            const container = document.querySelector('.widget-container');
+            const width = container.offsetWidth;
+
+            renderHourlyForecast();
+            renderDailyForecast();
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        window.addEventListener('resize', debounce(adjustLayout, 250));
+
+        adjustLayout();
+        renderHourlyForecast();
+        renderDailyForecast();
+
+        // 添加 API 配置
+
+        <!-- 天气组件配置 -->
+        
+    <!-- 天气组件配置 -->
+    const WEATHER_API = {
+      key: '',
+      host: '',
+      location: '116.41,39.92',
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+      textColor: '#ffffff',
+      maxWidth: '600px',
+      retryDelay: 60000,
+      lastFailTime: {}
+    };
+  
+
+
+        // 缓存对象
+        const weatherCache = {
+            data: null,
+            lastUpdate: null,
+            cacheTime: 15 * 60 * 1000 // 15分钟缓存
+        };
+
+        // 统一的 fetch 函数，包含 host 和 header 处理
+        async function fetchApiData(endpoint) {
+            const key = WEATHER_API.key;
+            let host = WEATHER_API.host;
+
+            if (!key || !host) {
+                throw new Error('API Key or Host not configured');
+            }
+
+            // 清理 host (移除 http://, https:// 和尾部斜杠)
+            host = host.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+            const url = `https://${host}/v7${endpoint}?location=${WEATHER_API.location}&key=${key}`;
+            console.log(`Fetching ${endpoint} from ${host}`);
+
+            try {
+                const response = await fetch(url, {
+                    signal: AbortSignal.timeout(10000) // 10s timeout
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const json = await response.json();
+
+                if (json.code !== '200') {
+                    throw new Error(`API Error: ${json.code}`);
+                }
+
+                return json;
+
+            } catch (error) {
+                console.error(`Fetch failed:`, error.message);
+                throw error;
+            }
+        }
+
+        // 获取所有天气数据
+        async function fetchAllWeatherData(forceUpdate = false) {
+            const now = Date.now();
+            if (!forceUpdate &&
+                weatherCache.data &&
+                weatherCache.lastUpdate &&
+                (now - weatherCache.lastUpdate < weatherCache.cacheTime)) {
+                console.log('Using cached weather data');
+                return weatherCache.data;
+            }
+
+            // 定义需要获取的端点
+            const endpoints = [
+                { name: 'now', path: '/weather/now' },
+                { name: 'air', path: '/air/now' },
+                { name: 'hourly', path: '/weather/24h' },
+                { name: 'daily', path: '/weather/7d' }
+            ];
+
+            const results = {};
+            let success = true;
+
+            try {
+                // 并行获取所有数据
+                const promises = endpoints.map(async (ep) => {
+                    const data = await fetchApiData(ep.path);
+                    return { name: ep.name, data };
+                });
+
+                const responses = await Promise.all(promises);
+                responses.forEach(res => {
+                    results[res.name] = res.data;
+                });
+
+                weatherCache.data = results;
+                weatherCache.lastUpdate = now;
+                console.log('Successfully fetched all data');
+                return results;
+
+            } catch (error) {
+                console.error('Failed to fetch all weather data:', error.message);
+                success = false;
+            }
+
+            if (!success) {
+                if (weatherCache.data) {
+                    console.warn('Fetching failed, using stale cache data.');
+                    return weatherCache.data;
+                }
+                throw new Error('Failed to fetch weather data and no cache available.');
+            }
+        }
+
+        // 更新UI的函数
+        async function updateWeatherUI(forceUpdate = false) {
+            try {
+                const weatherData = await fetchAllWeatherData(forceUpdate);
+
+                if (!weatherData) {
+                    throw new Error('fetchAllWeatherData returned null');
+                }
+
+                // 更新实时天气
+                if (weatherData.now && weatherData.now.now) {
+                    const now = weatherData.now.now;
+                    document.querySelector('.current-temp').textContent = `${now.temp}°`;
+                    document.querySelector('.weather-icon').textContent = getWeatherIcon(now.icon);
+                    document.querySelector('.weather-desc').textContent = now.text;
+
+                    const detailsItems = document.querySelectorAll('.weather-details-item .weather-details-value');
+                    detailsItems[0].textContent = `${now.windSpeed}km/h`;
+                    detailsItems[1].textContent = `${now.humidity}%`;
+
+                    // 更新 popup
+                    document.getElementById('popup-feels-like').textContent = `${now.feelsLike}°`;
+                    document.getElementById('popup-wind-dir').textContent = now.windDir;
+                    document.getElementById('popup-wind-scale').textContent = `${now.windScale}级`;
+                    document.getElementById('popup-pressure').textContent = `${now.pressure}hPa`;
+                    document.getElementById('popup-cloud').textContent = `${now.cloud || 0}%`;
+                    document.getElementById('popup-visibility').textContent = `${now.vis}km`;
+                    document.getElementById('popup-uv').textContent = now.uvIndex !== undefined ? now.uvIndex : '暂无';
+                }
+
+                // 更新空气质量
+                if (weatherData.air && weatherData.air.now) {
+                    const air = weatherData.air.now;
+                    document.querySelectorAll('.weather-details-item .weather-details-value')[2].textContent = `${air.category} ${air.aqi}`;
+                    document.getElementById('popup-aqi').textContent = `${air.category} (${air.aqi})`;
+                } else {
+                    // 即使没有空气质量数据，也不要报错停止渲染
+                    console.warn('Missing air data in response');
+                }
+
+                // 更新小时预报
+                if (weatherData.hourly && weatherData.hourly.hourly) {
+                    hoursData = weatherData.hourly.hourly.map(hour => {
+                        const hour24 = hour.fxTime.split('T')[1].substring(0, 2);
+                        return {
+                            time: `${hour24}:00`,
+                            icon: getWeatherIcon(hour.icon),
+                            temp: hour.temp,
+                            text: hour.text
+                        };
+                    });
+                    currentHourIndex = 0;
+                    renderHourlyForecast();
+                }
+
+                // 更新每日预报
+                if (weatherData.daily && weatherData.daily.daily) {
+                    daysData = weatherData.daily.daily.map((day, index) => {
+                        const [, month, date] = day.fxDate.split('-');
+                        return {
+                            date: index === 0 ? '今天' :
+                                index === 1 ? '明天' :
+                                    `${parseInt(month)}/${parseInt(date)}`,
+                            icon: getWeatherIcon(day.iconDay),
+                            highTemp: day.tempMax,
+                            lowTemp: day.tempMin,
+                            text: day.textDay
+                        };
+                    });
+                    currentDayIndex = 0;
+                    renderDailyForecast();
+                }
+
+                console.log('Weather UI updated successfully.');
+                const existingError = document.querySelector('.error-toast');
+                if (existingError) existingError.remove();
+
+            } catch (error) {
+                console.error('Failed to update weather UI:', error);
+                showError('获取天气数据失败');
+            }
+        }
+
+        function getWeatherIcon(code) {
+            const iconMap = {
+                '100': '☀️',
+                '101': '🌤️',
+                '102': '⛅',
+                '103': '🌥️',
+                '104': '☁️',
+                '150': '🌑',
+                '151': '🌒',
+                '152': '🌓',
+                '153': '🌔',
+                '300': '🌧️',
+                '301': '🌧️',
+                '302': '⛈️',
+                '303': '⛈️',
+                '304': '⛈️',
+                '305': '🌧️',
+                '306': '🌧️',
+                '307': '🌧️',
+                '308': '🌧️',
+                '309': '🌧️',
+                '310': '🌧️',
+                '311': '🌧️',
+                '312': '🌧️',
+                '313': '🌧️',
+                '314': '🌧️',
+                '315': '🌧️',
+                '316': '🌧️',
+                '317': '🌧️',
+                '318': '🌧️',
+                '399': '🌧️',
+                '400': '🌨️',
+                '401': '🌨️',
+                '402': '🌨️',
+                '403': '🌨️',
+                '404': '🌨️',
+                '405': '🌨️',
+                '406': '🌨️',
+                '407': '🌨️',
+                '408': '🌨️',
+                '409': '🌨️',
+                '410': '🌨️',
+                '499': '🌨️',
+                '500': '🌫️',
+                '501': '🌫️',
+                '502': '🌫️',
+                '503': '🌫️',
+                '504': '🌫️',
+                '507': '🌫️',
+                '508': '🌫️',
+                '509': '🌫️',
+                '510': '🌫️',
+                '511': '🌫️',
+                '512': '🌫️',
+                '513': '🌫️',
+                '514': '🌫️',
+                '515': '🌫️',
+                '900': '🌡️',
+                '901': '🌡️',
+                '999': '❓'
+            };
+            return iconMap[code] || '❓';
+        }
+
+        function showError(message) {
+            const existingError = document.querySelector('.error-toast');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-toast';
+            errorDiv.textContent = message;
+            document.querySelector('.widget-container').appendChild(errorDiv);
+
+            const timeout = message.includes('API') ? 5000 : 3000;
+            setTimeout(() => errorDiv.remove(), timeout);
+        }
+
+        let updateInterval;
+        function startAutoUpdate() {
+            updateWeatherUI();
+            updateInterval = setInterval(async () => {
+                try {
+                    await updateWeatherUI(true);
+                } catch (error) {
+                    console.error('自动更新失败:', error);
+                }
+            }, weatherCache.cacheTime);
+        }
+
+        function stopAutoUpdate() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const widget = document.querySelector('.widget');
+
+            widget.setAttribute('data-flipped', 'false');
+            widget.style.transform = 'rotateY(0deg)';
+
+            // 应用配置
+            if (WEATHER_API.key && WEATHER_API.host) {
+                startAutoUpdate();
+
+                // 应用样式配置
+                const container = document.querySelector('.widget-container');
+                if (container) {
+                    container.style.maxWidth = WEATHER_API.maxWidth;
+                }
+
+                document.documentElement.style.setProperty('--widget-bg-color', WEATHER_API.backgroundColor);
+                document.documentElement.style.setProperty('--widget-text-color', WEATHER_API.textColor);
+                document.body.style.color = WEATHER_API.textColor;
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoUpdate();
+            } else {
+                startAutoUpdate();
+            }
+        });
+
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'updateWeather') {
+                startAutoUpdate();
+            }
+        });
+
+        function getAirQuality(airData) {
+            if (!airData) return '未知';
+            return airData.category || '未知';
+        }
+
+        function showWeatherDetails() {
+            const popup = document.querySelector('.weather-details-popup');
+            const mainInfo = document.querySelector('.main-info');
+            const container = document.querySelector('.widget-container');
+
+            const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+            if (isMobile) {
+                popup.classList.add('show');
+                const closeOnOutsideClick = (e) => {
+                    if (!popup.contains(e.target) && !mainInfo.contains(e.target)) {
+                        popup.classList.remove('show');
+                        document.removeEventListener('click', closeOnOutsideClick);
+                    }
+                };
+                setTimeout(() => {
+                    document.addEventListener('click', closeOnOutsideClick);
+                }, 100);
+                return;
+            }
+
+            const containerRect = container.getBoundingClientRect();
+            const mainInfoRect = mainInfo.getBoundingClientRect();
+
+            const popupWidth = 200;
+            const popupHeight = 180;
+            const padding = 8;
+
+            let left, top;
+
+            if (containerRect.right - mainInfoRect.right >= popupWidth + padding) {
+                left = mainInfoRect.right + padding;
+                top = mainInfoRect.top;
+            }
+            else if (mainInfoRect.left - containerRect.left >= popupWidth + padding) {
+                left = mainInfoRect.left - popupWidth - padding;
+                top = mainInfoRect.top;
+            }
+            else {
+                left = Math.max(
+                    containerRect.left + padding,
+                    Math.min(
+                        mainInfoRect.left,
+                        containerRect.right - popupWidth - padding
+                    )
+                );
+                top = mainInfoRect.bottom + padding;
+            }
+
+            top = Math.max(
+                containerRect.top + padding,
+                Math.min(
+                    top,
+                    containerRect.bottom - popupHeight - padding
+                )
+            );
+
+            popup.style.left = `${left - containerRect.left}px`;
+            popup.style.top = `${top - containerRect.top}px`;
+            popup.classList.add('show');
+        }
+
+        function hideWeatherDetails() {
+            const popup = document.querySelector('.weather-details-popup');
+            const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+            if (!isMobile) {
+                popup.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+
+</html>

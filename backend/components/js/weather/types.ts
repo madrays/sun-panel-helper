@@ -21,4 +21,8 @@ export interface WeatherParams {
     // Location Config
     defaultLocation: string;
     defaultLocationName: string;
+
+    // Style Config
+    transparency?: number;
+    textColor?: string;
 }

@@ -28,6 +28,10 @@
     const DEFAULT_LOCATION = "116.41,39.92"; // 默认经纬度坐标
     const DEFAULT_LOCATION_NAME = "北京";     // 默认位置名称
 
+    // 样式配置
+    const VISUAL_TRANSPARENCY = 0.25; // 背景透明度 (0-1)
+    const VISUAL_TEXT_COLOR = "#ffffff"; // 字体颜色
+
     // =========== 插件配置 - 以下配置一般无需修改 ===========
     const weatherConfig = {
         apiKey: QWEATHER_API_KEY,
@@ -44,7 +48,9 @@
         openaiApiKey: OPENAI_API_KEY,
         openaiModel: OPENAI_MODEL,
         openaiBaseUrl: OPENAI_BASE_URL,
-        userProfile: USER_PROFILE // 新增用户配置
+        userProfile: USER_PROFILE, // 新增用户配置
+        transparency: VISUAL_TRANSPARENCY,
+        textColor: VISUAL_TEXT_COLOR
     };
     // =========== 配置结束 ===========
 
@@ -911,152 +917,154 @@ ${weatherInfo}
                 
                 <!-- 天气面板 -->
                 <div class="weather-panel ${utils.isMobile() ? 'weather-panel-mobile' : 'weather-panel-pc'} hidden">
-                    <div class="weather-header">
-                        <div class="location" title="点击切换城市">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span class="city-name">加载中...</span>
-                        </div>
-                        <div class="weather-actions">
-                            <button class="weather-auto-locate-btn" title="自动定位">
-                                <i class="fas fa-crosshairs"></i>
-                            </button>
-                            <button class="weather-refresh-btn" title="刷新天气">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                            <button class="weather-close-btn" title="关闭面板">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="weather-main">
-                        <div class="temperature-container">
-                            <div class="temperature">--°</div>
-                            <div class="temp-range">
-                                <span class="high-temp">--°</span>
-                                <span class="low-temp">--°</span>
+                    <div class="weather-panel-content-wrapper">
+                        <div class="weather-header">
+                            <div class="location" title="点击切换城市">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="city-name">加载中...</span>
+                            </div>
+                            <div class="weather-actions">
+                                <button class="weather-auto-locate-btn" title="自动定位">
+                                    <i class="fas fa-crosshairs"></i>
+                                </button>
+                                <button class="weather-refresh-btn" title="刷新天气">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="weather-close-btn" title="关闭面板">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="weather-icon">
-                            <i class="fas fa-sun"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="weather-description">加载中...</div>
-                    
-                    <!-- 简化的小信息栏 -->
-                    <div class="weather-mini-info">
-                        <div class="mini-item">
-                            <i class="fas fa-wind"></i>
-                            <span class="mini-value" id="wind-speed">--</span>
-                            <span class="mini-label">风速</span>
-                        </div>
-                        <div class="mini-item">
-                            <i class="fas fa-tint"></i>
-                            <span class="mini-value" id="humidity">--</span>
-                            <span class="mini-label">湿度</span>
-                        </div>
-                        <div class="mini-item">
-                            <i class="fas fa-temperature-low"></i>
-                            <span class="mini-value" id="feels-like">--</span>
-                            <span class="mini-label">体感</span>
-                        </div>
-                    </div>
-                    
-                    <!-- 24小时天气预报 - 带折线图 -->
-                    <div class="hourly-forecast">
-                        <div class="hourly-header">
-                            <div class="section-title">24小时预报</div>
-                            <div class="sun-times">
-                                <span class="sunrise">
-                                    <i class="fas fa-sun"></i>
-                                    <span class="sun-time-text">日出 --:--</span>
-                                </span>
-                                <span class="sunset">
-                                    <i class="fas fa-moon"></i>
-                                    <span class="sun-time-text">日落 --:--</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="hourly-scroll-container">
-                            <div class="hourly-chart-container">
-                                <svg class="temperature-line-chart" width="1200" height="120">
-                                    <!-- 折线图路径将由JS动态生成 -->
-                                </svg>
-                                <div class="hourly-list">
-                                    <!-- 小时数据将由JS动态生成 -->
+                        
+                        <div class="weather-main">
+                            <div class="temperature-container">
+                                <div class="temperature">--°</div>
+                                <div class="temp-range">
+                                    <span class="high-temp">--°</span>
+                                    <span class="low-temp">--°</span>
                                 </div>
                             </div>
+                            <div class="weather-icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- 7天天气预报 -->
-                    <div class="daily-forecast">
-                        <div class="section-title">7天预报</div>
-                        <div class="daily-list">
-                            <!-- 每日数据将由JS动态生成 -->
+                        
+                        <div class="weather-description">加载中...</div>
+                        
+                        <!-- 简化的小信息栏 -->
+                        <div class="weather-mini-info">
+                            <div class="mini-item">
+                                <i class="fas fa-wind"></i>
+                                <span class="mini-value" id="wind-speed">--</span>
+                                <span class="mini-label">风速</span>
+                            </div>
+                            <div class="mini-item">
+                                <i class="fas fa-tint"></i>
+                                <span class="mini-value" id="humidity">--</span>
+                                <span class="mini-label">湿度</span>
+                            </div>
+                            <div class="mini-item">
+                                <i class="fas fa-temperature-low"></i>
+                                <span class="mini-value" id="feels-like">--</span>
+                                <span class="mini-label">体感</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- 新增：AI建议面板 -->
-                    <div class="ai-advice-panel">
-                        <div class="section-title">
-                            <i class="fas fa-robot"></i>
-                            AI生活建议
-                            <span class="ai-loading hidden">分析中...</span>
-                        </div>
-                        <div class="advice-grid">
-                            <div class="advice-item">
-                                <div class="advice-icon">
-                                    <i class="fas fa-walking"></i>
-                                </div>
-                                <div class="advice-content">
-                                    <div class="advice-title">出行准备</div>
-                                    <div class="advice-text">分析中...</div>
+                        
+                        <!-- 24小时天气预报 - 带折线图 -->
+                        <div class="hourly-forecast">
+                            <div class="hourly-header">
+                                <div class="section-title">24小时预报</div>
+                                <div class="sun-times">
+                                    <span class="sunrise">
+                                        <i class="fas fa-sun"></i>
+                                        <span class="sun-time-text">日出 --:--</span>
+                                    </span>
+                                    <span class="sunset">
+                                        <i class="fas fa-moon"></i>
+                                        <span class="sun-time-text">日落 --:--</span>
+                                    </span>
                                 </div>
                             </div>
-                            <div class="advice-item">
-                                <div class="advice-icon">
-                                    <i class="fas fa-tshirt"></i>
-                                </div>
-                                <div class="advice-content">
-                                    <div class="advice-title">着装建议</div>
-                                    <div class="advice-text">分析中...</div>
-                                </div>
-                            </div>
-                            <div class="advice-item">
-                                <div class="advice-icon">
-                                    <i class="fas fa-heartbeat"></i>
-                                </div>
-                                <div class="advice-content">
-                                    <div class="advice-title">健康防护</div>
-                                    <div class="advice-text">分析中...</div>
-                                </div>
-                            </div>
-                            <div class="advice-item">
-                                <div class="advice-icon">
-                                    <i class="fas fa-running"></i>
-                                </div>
-                                <div class="advice-content">
-                                    <div class="advice-title">户外活动</div>
-                                    <div class="advice-text">分析中...</div>
-                                </div>
-                            </div>
-                            <div class="advice-item">
-                                <div class="advice-icon">
-                                    <i class="fas fa-subway"></i>
-                                </div>
-                                <div class="advice-content">
-                                    <div class="advice-title">通勤提醒</div>
-                                    <div class="advice-text">分析中...</div>
+                            <div class="hourly-scroll-container">
+                                <div class="hourly-chart-container">
+                                    <svg class="temperature-line-chart" width="1200" height="120">
+                                        <!-- 折线图路径将由JS动态生成 -->
+                                    </svg>
+                                    <div class="hourly-list">
+                                        <!-- 小时数据将由JS动态生成 -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="weather-footer">
-                        <span class="update-time">更新于: 刚刚</span>
-                        <span class="mock-indicator hidden">演示数据</span>
+                        
+                        <!-- 7天天气预报 -->
+                        <div class="daily-forecast">
+                            <div class="section-title">7天预报</div>
+                            <div class="daily-list">
+                                <!-- 每日数据将由JS动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 新增：AI建议面板 -->
+                        <div class="ai-advice-panel">
+                            <div class="section-title">
+                                <i class="fas fa-robot"></i>
+                                AI生活建议
+                                <span class="ai-loading hidden">分析中...</span>
+                            </div>
+                            <div class="advice-grid">
+                                <div class="advice-item">
+                                    <div class="advice-icon">
+                                        <i class="fas fa-walking"></i>
+                                    </div>
+                                    <div class="advice-content">
+                                        <div class="advice-title">出行准备</div>
+                                        <div class="advice-text">分析中...</div>
+                                    </div>
+                                </div>
+                                <div class="advice-item">
+                                    <div class="advice-icon">
+                                        <i class="fas fa-tshirt"></i>
+                                    </div>
+                                    <div class="advice-content">
+                                        <div class="advice-title">着装建议</div>
+                                        <div class="advice-text">分析中...</div>
+                                    </div>
+                                </div>
+                                <div class="advice-item">
+                                    <div class="advice-icon">
+                                        <i class="fas fa-heartbeat"></i>
+                                    </div>
+                                    <div class="advice-content">
+                                        <div class="advice-title">健康防护</div>
+                                        <div class="advice-text">分析中...</div>
+                                    </div>
+                                </div>
+                                <div class="advice-item">
+                                    <div class="advice-icon">
+                                        <i class="fas fa-running"></i>
+                                    </div>
+                                    <div class="advice-content">
+                                        <div class="advice-title">户外活动</div>
+                                        <div class="advice-text">分析中...</div>
+                                    </div>
+                                </div>
+                                <div class="advice-item">
+                                    <div class="advice-icon">
+                                        <i class="fas fa-subway"></i>
+                                    </div>
+                                    <div class="advice-content">
+                                        <div class="advice-title">通勤提醒</div>
+                                        <div class="advice-text">分析中...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="weather-footer">
+                            <span class="update-time">更新于: 刚刚</span>
+                            <span class="mock-indicator hidden">演示数据</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -1127,7 +1135,8 @@ ${weatherInfo}
                 
                 .weather-toggle-btn i {
                     font-size: 1.4rem;
-                    color: rgba(255, 255, 255, 0.9);
+                    color: ${weatherConfig.textColor};
+                    opacity: 0.9;
                 }
                 
                 /* 天气面板 - PC端 */
@@ -1135,22 +1144,53 @@ ${weatherInfo}
                     position: fixed;
                     top: 20px;
                     left: 20px;
-                    width: 350px; /* 保持原有宽度 */
-                    background: rgba(255, 255, 255, 0.15);
+                    width: 350px;
+                    background: rgba(255, 255, 255, ${weatherConfig.transparency});
                     backdrop-filter: blur(15px);
                     border-radius: 16px;
-                    padding: 20px;
+                    padding: 20px 6px 20px 20px; /* 右侧减少padding给滚动条腾位置 */
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
                     border: 1px solid rgba(255, 255, 255, 0.2);
-                    color: white;
+                    color: ${weatherConfig.textColor};
                     max-height: 80vh;
-                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
                     z-index: 10002;
+                    overflow: hidden; /* 确保圆角裁剪生效 */
                     transform-origin: 56px 0;
                     transform: scale(0);
                     opacity: 0;
                     transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
                     pointer-events: none;
+                }
+
+                .weather-panel-content-wrapper {
+                    flex: 1; /* 占据剩余空间 */
+                    min-height: 0; /* 允许flex子项小于内容高度 */
+                    overflow-y: auto;
+                    padding-right: 14px; /* 补回右侧padding */
+                    /* 自定义滚动条样式 */
+                    scrollbar-width: thin;
+                    scrollbar-color: ${weatherConfig.textColor} transparent;
+                }
+
+                .weather-panel-content-wrapper::-webkit-scrollbar {
+                    width: 4px;
+                }
+
+                .weather-panel-content-wrapper::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+
+                .weather-panel-content-wrapper::-webkit-scrollbar-thumb {
+                    background: ${weatherConfig.textColor};
+                    border-radius: 2px;
+                    opacity: 0.3;
+                }
+
+                .weather-panel-content-wrapper::-webkit-scrollbar-thumb:hover {
+                    background: ${weatherConfig.textColor};
+                    opacity: 0.5;
                 }
                 
                 /* PC端面板激活状态 - 展开 */
@@ -1167,16 +1207,18 @@ ${weatherInfo}
                     left: 50%;
                     transform: translate(-50%, -50%);
                     width: 90%;
-                    max-width: 350px; /* 保持原有宽度 */
+                    max-width: 350px;
                     max-height: 80vh;
-                    background: rgba(255, 255, 255, 0.15);
+                    background: rgba(255, 255, 255, ${weatherConfig.transparency});
                     backdrop-filter: blur(15px);
                     border-radius: 16px;
-                    padding: 20px;
+                    padding: 20px 6px 20px 20px; /* 保持与PC端一致的内边距逻辑 */
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
                     border: 1px solid rgba(255, 255, 255, 0.2);
-                    color: white;
-                    overflow-y: auto;
+                    color: ${weatherConfig.textColor};
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden; /* 确保圆角裁剪 */
                     z-index: 10003;
                     display: none;
                 }
@@ -1261,15 +1303,18 @@ ${weatherInfo}
                 
                 .temperature-line {
                     fill: none;
-                    stroke: rgba(255, 255, 255, 0.8);
+                    stroke: ${weatherConfig.textColor};
+                    stroke-opacity: 0.8;
                     stroke-width: 2;
                     stroke-linecap: round;
                     stroke-linejoin: round;
                 }
                 
                 .temperature-point {
-                    fill: rgba(255, 255, 255, 0.9);
-                    stroke: rgba(255, 255, 255, 0.3);
+                    fill: ${weatherConfig.textColor};
+                    fill-opacity: 0.9;
+                    stroke: ${weatherConfig.textColor};
+                    stroke-opacity: 0.3;
                     stroke-width: 1;
                     r: 4;
                     transition: all 0.3s ease;
@@ -1277,7 +1322,7 @@ ${weatherInfo}
                 
                 .temperature-point:hover {
                     r: 6;
-                    fill: #fff;
+                    fill: ${weatherConfig.textColor};
                 }
                 
                 .hourly-list {
@@ -1331,8 +1376,20 @@ ${weatherInfo}
                     justify-content: space-between;
                     align-items: center;
                     padding: 6px 0;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    position: relative;
                 }
+
+                .daily-item::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 1px;
+                    background: ${weatherConfig.textColor};
+                    opacity: 0.1;
+                }
+
                 
                 .daily-weekday {
                     min-width: 35px;
@@ -1389,7 +1446,7 @@ ${weatherInfo}
                 }
                 
                 .ai-advice-panel .section-title i {
-                    color: #4fc3f7;
+                    color: ${weatherConfig.textColor};
                 }
                 
                 .ai-loading {
@@ -1445,7 +1502,8 @@ ${weatherInfo}
                     font-size: 0.8rem;
                     font-weight: 600;
                     margin-bottom: 4px;
-                    color: rgba(255, 255, 255, 0.9);
+                    color: ${weatherConfig.textColor};
+                    opacity: 0.9;
                 }
                 
                 .advice-text {
@@ -1497,7 +1555,8 @@ ${weatherInfo}
                     padding: 6px;
                     border-radius: 6px;
                     cursor: pointer;
-                    color: rgba(255, 255, 255, 0.8);
+                    color: ${weatherConfig.textColor};
+                    opacity: 0.8;
                     transition: all 0.3s ease;
                     display: flex;
                     align-items: center;
@@ -1511,12 +1570,14 @@ ${weatherInfo}
                 
                 .weather-refresh-btn:hover {
                     background: rgba(255, 255, 255, 0.15);
-                    color: white;
+                    color: ${weatherConfig.textColor};
+                    opacity: 1;
                 }
                 
                 .weather-close-btn:hover {
                     background: rgba(255, 255, 255, 0.15);
-                    color: white;
+                    color: ${weatherConfig.textColor};
+                    opacity: 1;
                 }
                 
                 .weather-main {
@@ -1691,6 +1752,126 @@ ${weatherInfo}
                   align-self: auto;
                      }
                  }
+                /* 城市选择弹窗 */
+                .city-select-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 20000;
+                    backdrop-filter: blur(5px);
+                }
+
+                .modal-content {
+                    background: white;
+                    padding: 25px;
+                    border-radius: 12px;
+                    width: 90%;
+                    max-width: 400px;
+                    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+                    color: #333;
+                }
+
+                .modal-content h3 {
+                    margin-top: 0;
+                    margin-bottom: 20px;
+                    font-size: 1.2rem;
+                    color: #333;
+                    text-align: center;
+                }
+
+                .input-group {
+                    margin-bottom: 15px;
+                }
+
+                .input-group label {
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 500;
+                    font-size: 0.9rem;
+                    color: #666;
+                }
+
+                .input-group input {
+                    width: 100%;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    font-size: 1rem;
+                    transition: border-color 0.3s;
+                    box-sizing: border-box;
+                    color: #333;
+                    background: white;
+                }
+
+                .input-group input:focus {
+                    border-color: #4fc3f7;
+                    outline: none;
+                    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+                }
+
+                .modal-tips {
+                    background: #f8f9fa;
+                    padding: 10px;
+                    border-radius: 6px;
+                    margin-bottom: 20px;
+                    font-size: 0.85rem;
+                    color: #666;
+                    line-height: 1.5;
+                }
+
+                .modal-tips p {
+                    margin: 4px 0;
+                }
+
+                .modal-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 10px;
+                    margin-top: 20px;
+                }
+
+                .modal-actions button {
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                    transition: all 0.2s;
+                }
+
+                .modal-auto-locate {
+                    margin-right: auto;
+                    background: #e3f2fd;
+                    color: #1976d2;
+                }
+
+                .modal-auto-locate:hover {
+                    background: #bbdefb;
+                }
+
+                .modal-cancel {
+                    background: #f5f5f5;
+                    color: #666;
+                }
+
+                .modal-cancel:hover {
+                    background: #e0e0e0;
+                }
+
+                .modal-confirm {
+                    background: #4fc3f7;
+                    color: white;
+                }
+
+                .modal-confirm:hover {
+                    background: #29b6f6;
+                }
                 </style>
             `;
 

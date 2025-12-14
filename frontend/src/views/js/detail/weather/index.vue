@@ -95,6 +95,33 @@
             <el-input v-model="params.userProfile.coreNeeds" type="textarea" :rows="2" placeholder="例如: 舒适生活、高效出行、健康防护" />
           </el-form-item>
 
+          <el-form-item label="核心需求" prop="userProfile.coreNeeds">
+            <el-input v-model="params.userProfile.coreNeeds" type="textarea" :rows="2" placeholder="例如: 舒适生活、高效出行、健康防护" />
+          </el-form-item>
+
+          <el-divider content-position="left">外观配置</el-divider>
+
+          <el-form-item label="背景不透明度 (0-1)" prop="transparency">
+            <el-slider 
+                v-model="params.transparency" 
+                :min="0" 
+                :max="1" 
+                :step="0.05" 
+                show-input
+            />
+            <div class="param-tip">值越小越透明，0为完全透明，1为完全不透明。推荐 0.25</div>
+            <div class="param-tip">值越小越透明，0为完全透明，1为完全不透明。推荐 0.25</div>
+          </el-form-item>
+
+          <el-form-item label="字体/图标颜色" prop="textColor">
+            <el-color-picker 
+                v-model="params.textColor" 
+                show-alpha
+                :predefine="['#ffffff', '#000000', '#333333', '#f5f5f5']"
+            />
+            <div class="param-tip">设置全局字体和图标颜色，建议根据背景透明度调整以保证可读性</div>
+          </el-form-item>
+
           <el-divider content-position="left">默认位置</el-divider>
 
           <el-row :gutter="20">
@@ -153,8 +180,11 @@ const defaultParams = {
     commuteMethod: '地铁',
     coreNeeds: '舒适生活、便利出行'
   },
+
   defaultLocation: '116.41,39.92',
-  defaultLocationName: '北京'
+  defaultLocationName: '北京',
+  transparency: 0.25,
+  textColor: '#ffffff'
 }
 
 const params = reactive({ ...defaultParams })
