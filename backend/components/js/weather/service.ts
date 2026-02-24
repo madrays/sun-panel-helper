@@ -7,7 +7,7 @@ import type { WeatherParams } from './types';
 const PROJECT_ROOT = process.cwd();
 const DEPLOY_PATH = join(PROJECT_ROOT, 'custom/index.js');
 const TEMPLATE_PATH = join(PROJECT_ROOT, 'components/js/weather/template.js');
-const CONFIG_PATH = join(PROJECT_ROOT, 'components/js/weather/config.json');
+const CONFIG_PATH = join(PROJECT_ROOT, 'data/weather.json');
 
 // Generate JS content (used for deployment logic)
 export function generateJS(params: WeatherParams): string {
