@@ -96,9 +96,17 @@ const params = ref<MarkdownEditorParams>({
 // 错误信息
 const error = ref('');
 
+// 防止循环更新的标志
+let isUpdatingFromProps = false;
+
 // 监听props变化
 watch(() => props.modelValue, (newValue) => {
+  isUpdatingFromProps = true;
   params.value = JSON.parse(JSON.stringify(newValue));
+  // 使用 nextTick 确保更新完成后再重置标志
+  setTimeout(() => {
+    isUpdatingFromProps = false;
+  }, 0);
 }, { deep: true, immediate: true });
 
 // 添加用户
@@ -119,6 +127,8 @@ function removeUser(index: number) {
 
 // 监听参数变化，自动同步到父组件（不再需要手动保存）
 watch(() => params.value, (newValue) => {
+  // 如果是从 props 更新来的，不要再 emit 回去，避免循环
+  if (isUpdatingFromProps) return;
   emit('update:modelValue', newValue);
 }, { deep: true });
 </script>

@@ -1,5 +1,4 @@
 import express from 'express'
-import cors from 'cors'
 import { config } from 'dotenv'
 import { join } from 'path'
 import userRoutes from './routes/user'
@@ -53,12 +52,7 @@ global.multer = patchedMulter
 
 const app = express()
 
-// 添加全局 CORS 中间件
-app.use(cors({
-  origin: '*',  // 允许所有来源
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}))
+// CORS 由 nginx 统一处理，后端不再添加 CORS 头，避免重复
 
 // 解析 JSON
 app.use(express.json())

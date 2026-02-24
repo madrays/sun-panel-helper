@@ -9,6 +9,10 @@ import markdownEditorUserModel from '../../models/markdown-editor-user';
 import { markdownEditorAuth } from '../../middleware/markdown-editor-auth';
 
 const router = Router();
+
+// CORS 由 nginx 统一处理，/api/ 路径已在 nginx 配置中添加 CORS 头
+// /custom/helper/md/ 路径也在 nginx 中单独配置了 CORS
+
 const CONFIG_PATH = join(process.cwd(), 'data/markdown-editor.json');
 
 // 修改存储路径到 custom/helper/md
