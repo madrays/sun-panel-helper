@@ -1,6 +1,6 @@
 <template>
   <div class="params-form">
-    <el-button 
+    <el-button
       plain
       type="info"
       class="guide-btn"
@@ -11,16 +11,25 @@
     </el-button>
 
     <el-form label-position="top">
-      <el-form-item label="API密钥">
-        <el-input 
+      <el-form-item label="API 前缀">
+        <el-input
+          v-model="config.apiPrefix"
+          placeholder="请输入 API 前缀，如：http://localhost:3001"
+          @input="updatePreview"
+        />
+        <div class="form-tip">Helper 访问地址，用于代理天气 API 请求（Docker 部署请填写容器外部可访问的地址）</div>
+      </el-form-item>
+
+      <el-form-item label="API 密钥">
+        <el-input
           v-model="config.key"
-          placeholder="请输入和风天气API密钥"
+          placeholder="请输入和风天气 API 密钥"
           @input="updatePreview"
         />
       </el-form-item>
 
       <el-form-item label="API Host">
-        <el-input 
+        <el-input
           v-model="config.host"
           placeholder="请输入对应的 API Host (控制台查看)"
           @input="updatePreview"
@@ -28,9 +37,9 @@
       </el-form-item>
 
       <el-form-item label="位置坐标">
-        <el-input 
+        <el-input
           v-model="config.location"
-          placeholder="经度,纬度 (如: 116.41,39.92)"
+          placeholder="经度，纬度 (如：116.41,39.92)"
           @input="updatePreview"
         />
       </el-form-item>
@@ -38,18 +47,18 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="背景颜色">
-            <el-color-picker 
-              v-model="config.backgroundColor" 
+            <el-color-picker
+              v-model="config.backgroundColor"
               show-alpha
               @change="updatePreview"
-              style="width: 100%;" 
+              style="width: 100%;"
             />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="文字颜色">
-            <el-color-picker 
-              v-model="config.textColor" 
+            <el-color-picker
+              v-model="config.textColor"
               @change="updatePreview"
               style="width: 100%;"
             />
@@ -58,17 +67,17 @@
       </el-row>
 
       <el-form-item label="最大宽度">
-        <el-input 
+        <el-input
           v-model="config.maxWidth"
-          placeholder="例如: 600px, 80%, auto"
+          placeholder="例如：600px, 80%, auto"
           @input="updatePreview"
         />
       </el-form-item>
     </el-form>
 
     <div class="save-actions">
-      <el-button 
-        type="primary" 
+      <el-button
+        type="primary"
         @click="handleSave"
         :loading="saving"
       >
@@ -85,6 +94,7 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
 interface Config {
+  apiPrefix: string
   key: string
   host: string
   location: string
@@ -106,7 +116,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Config): void
-  (e: 'update:url', url: string): void  // 添加 url 更新事件
+  (e: 'update:url', url: string): void
   (e: 'guide'): void
 }>()
 
@@ -117,53 +127,32 @@ const config = computed({
 
 const saving = ref(false)
 
-// 从 HTML 文件读取配置
+// 从后端加载配置
 onMounted(async () => {
   try {
-    // 读取目录下最新的配置文件
+    // 从后端加载保存的配置
+    const configRes = await fetch('/api/preview/weather-widget/config')
+    const configData = await configRes.json()
+
+    // 读取目录下最新的配置文件（获取样式配置）
     const response = await fetch('/api/preview/weather-widget/latest')
     const html = await response.text()
-    
-    // 提取配置
-    // 提取配置 - 使用更严格的正则
-    const keyMatch = html.match(/key:\s*'([^']*)'/)
-    const hostMatch = html.match(/host:\s*'([^']*)'/)
-    const locationMatch = html.match(/location:\s*'([^']*)'/)
+
+    // 提取样式配置
     const backgroundColorMatch = html.match(/backgroundColor:\s*'([^']*)'/)
     const textColorMatch = html.match(/textColor:\s*'([^']*)'/)
     const maxWidthMatch = html.match(/maxWidth:\s*'([^']*)'/)
-    
-    // 初始化变量
-    let key = '';
-    let host = '';
+    const locationMatch = html.match(/location:\s*'([^']*)'/)
 
-    // 优先匹配新版配置
-    if (keyMatch) {
-       key = keyMatch[1];
-    } else {
-       // 兼容旧版：尝试匹配 keys 数组
-       const keysMatch = html.match(/keys:\s*\[\s*'([^']*)'/);
-       if (keysMatch) key = keysMatch[1];
-    }
-
-    if (hostMatch) {
-        host = hostMatch[1];
-    } else {
-        // 兼容旧版：尝试匹配 hosts 数组
-        const hostsMatch = html.match(/hosts:\s*\[\s*'([^']*)'/);
-        if (hostsMatch) host = hostsMatch[1];
-    }
-
-    if (locationMatch) {
-      emit('update:modelValue', {
-        key: key,
-        host: host,
-        location: locationMatch[1],
-        backgroundColor: backgroundColorMatch ? backgroundColorMatch[1] : 'rgba(0, 0, 0, 0.5)',
-        textColor: textColorMatch ? textColorMatch[1] : '#ffffff',
-        maxWidth: maxWidthMatch ? maxWidthMatch[1] : '600px'
-      })
-    }
+    emit('update:modelValue', {
+      apiPrefix: configData.apiPrefix || '',
+      key: configData.key || '',
+      host: configData.host || '',
+      location: configData.location || locationMatch?.[1] || '116.41,39.92',
+      backgroundColor: backgroundColorMatch ? backgroundColorMatch[1] : 'rgba(0, 0, 0, 0.5)',
+      textColor: textColorMatch ? textColorMatch[1] : '#ffffff',
+      maxWidth: maxWidthMatch ? maxWidthMatch[1] : '600px'
+    })
   } catch (error) {
     console.error('读取配置失败:', error)
   }
@@ -190,9 +179,19 @@ const showGuide = () => {
 const handleSave = async () => {
   try {
     saving.value = true
+
+    // 先保存配置到后端（加密存储）
+    await axios.post('/api/preview/weather-widget/config', {
+      apiPrefix: config.value.apiPrefix,
+      key: config.value.key,
+      host: config.value.host,
+      location: config.value.location
+    })
+
+    // 生成不包含 API Key 的配置文件
     const timestamp = Date.now()
     const filename = `weather-${timestamp}.html`
-    
+
     const { data } = await axios.post<SaveResponse>('/api/preview/weather-widget', {
       html: generateHtml(config.value),
       filename
@@ -212,13 +211,14 @@ const handleSave = async () => {
   }
 }
 
-// 生成 HTML 内容
+// 生成 HTML 内容（不再包含 API Key）
 const generateHtml = (config: Config) => {
   return `
-    <!-- 天气组件配置 -->
+    // 天气组件配置
     const WEATHER_API = {
-      key: '${config.key}',
-      host: '${config.host}',
+      apiPrefix: '${config.apiPrefix || ''}',
+      key: '',
+      host: '',
       location: '${config.location}',
       backgroundColor: '${config.backgroundColor || 'rgba(0, 0, 0, 0.5)'}',
       textColor: '${config.textColor || '#ffffff'}',
@@ -257,8 +257,14 @@ const generateHtml = (config: Config) => {
   color: var(--el-text-color-primary);
 }
 
+.form-tip {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  margin-top: 4px;
+}
+
 .save-actions {
   margin-top: 20px;
   text-align: right;
 }
-</style> 
+</style>

@@ -36,7 +36,8 @@ RUN echo "=== 编译后的文件 ===" && \
 FROM nginx:1.26-alpine3.19
 WORKDIR /app
 
-
+# 更换 Alpine 镜像源为国内源（解决网络问题）
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # 复制前端构建产物
 COPY --from=frontend-builder /app/frontend/dist/ /usr/share/nginx/html/

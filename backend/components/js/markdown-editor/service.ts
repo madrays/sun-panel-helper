@@ -58,14 +58,17 @@ export function validateParams(params: MarkdownEditorParams): string[] {
 // 生成JS代码
 export function generateJS(params: MarkdownEditorParams): string {
   const template = readFileSync(join(__dirname, 'template.js'), 'utf-8');
-  
-  // 读取最新配置，而不是使用传入的参数
-  const config = readConfig();
-  
-  // 使用最新配置替换模板
+
+  // 提取用户名列表（不含密码）
+  const allowedUsers = params.users.map(u => u.username);
+
+  // 使用传入的参数生成 JS，而不是重新读取配置文件
+  // 这样可以确保部署时使用的是前端传递的最新配置
+  // 注意：为了安全，只生成用户名列表，不包含密码
+  // 密码验证在后端进行，通过 JWT Token 认证
   return template
-    .replace('{USERS_CONFIG}', JSON.stringify(config.users))
-    .replace('{API_PREFIX}', config.apiPrefix || 'http://localhost:3000');
+    .replace('{ ALLOWED_USERS }', JSON.stringify(allowedUsers))
+    .replace('{API_PREFIX}', params.apiPrefix || 'http://localhost:3000');
 }
 
 export { deploy, undeploy, isDeployed }; 

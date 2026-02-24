@@ -56,22 +56,22 @@ export async function deploy(params: WeatherParams): Promise<void> {
         // Let's read the template.
         let template = await fs.readFile(TEMPLATE_PATH, 'utf8');
 
-        // Construct the new config block
+        // Construct the new config block - 只注入非敏感配置，API Key 存储在后端
         const newConfigBlock = `    // =========== 用户配置区域 - 由 Sun-Panel-Helper 自动生成 ===========
 
-    // 和风天气配置
-    const QWEATHER_API_KEY = "${params.qweatherApiKey}";
-    const QWEATHER_API_HOST = "${params.qweatherApiHost}";
+    // API 前缀配置（Docker 部署时填写 Helper 访问地址）
+    const API_PREFIX = "${params.apiPrefix || ''}";
 
-    // 高德地图配置
-    const AMAP_API_KEY = "${params.amapApiKey}";
+    // 注意：API 密钥已安全存储在后端，前端通过代理 API 请求数据
+    // 以下变量保留用于兼容性，实际值为空
+    const QWEATHER_API_KEY = "";
+    const QWEATHER_API_HOST = "";
+    const AMAP_API_KEY = "";
+    const OPENAI_API_KEY = "";
+    const OPENAI_MODEL = "";
+    const OPENAI_BASE_URL = "";
 
-    // AI助手配置
-    const OPENAI_API_KEY = "${params.openaiApiKey}";
-    const OPENAI_MODEL = "${params.openaiModel}";
-    const OPENAI_BASE_URL = "${params.openaiBaseUrl}";
-
-    // 个人信息配置
+    // 个人信息配置（非敏感，用于 AI 建议个性化）
     const USER_PROFILE = ${JSON.stringify(params.userProfile, null, 8)};
 
     // 样式配置

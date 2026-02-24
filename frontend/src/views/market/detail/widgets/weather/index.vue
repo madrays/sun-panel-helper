@@ -88,11 +88,13 @@ import type { Widget } from '@/types/market'
 
 // 新增: 定义 Config 接口
 interface Config {
+  apiPrefix: string
   key: string
   host: string
   location: string
   backgroundColor?: string
   textColor?: string
+  maxWidth?: string
 }
 
 // 默认配置
@@ -107,6 +109,7 @@ const defaultWidget: Widget = {
 
 // 参数配置
 const config = ref<Config>({
+  apiPrefix: '',
   key: '',
   host: '',
   location: '116.41,39.92',
@@ -122,6 +125,7 @@ const isAppliedToFree = ref(false)
 const handleReset = () => {
   widget.value = { ...defaultWidget }
   config.value = {
+    apiPrefix: '',
     key: '',
     host: '',
     location: '116.41,39.92',

@@ -1,4 +1,7 @@
 export interface WeatherParams {
+    // API Prefix
+    apiPrefix?: string;
+
     // Weather API Config
     qweatherApiKey: string;
     qweatherApiHost: string;

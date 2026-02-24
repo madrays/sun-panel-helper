@@ -104,15 +104,52 @@ onMounted(async () => {
 async function handleDeploy() {
   try {
     deploying.value = true;
-    const res = await fetch('/api/js/markdown-editor/deploy', {
-      method: 'POST'
+
+    // 过滤空用户（用户名或密码为空的）
+    const validUsers = params.value.users.filter(u => u.username && u.password);
+
+    // 构建部署参数
+    const deployParams = {
+      ...params.value,
+      users: validUsers
+    };
+
+    // 先保存配置
+    const saveRes = await fetch('/api/js/markdown-editor/config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(deployParams)
     });
-    
-    if (!res.ok) throw new Error('部署失败');
-    
+
+    if (!saveRes.ok) {
+      throw new Error('保存配置失败');
+    }
+
+    // 然后部署
+    const deployRes = await fetch('/api/js/markdown-editor/deploy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(deployParams)
+    });
+
+    const data = await deployRes.json();
+    if (!deployRes.ok) {
+      if (data.errors) {
+        ElMessage.error(data.errors.join('\n'));
+      } else {
+        ElMessage.error(data.error || '部署失败');
+      }
+      return;
+    }
+
     isDeployed.value = true;
-    ElMessage.success('部署成功');
+    ElMessage.success(`部署成功（已过滤 ${params.value.users.length - validUsers.length} 个空用户）`);
   } catch (error) {
+    console.error('部署失败:', error);
     ElMessage.error('部署失败');
   } finally {
     deploying.value = false;

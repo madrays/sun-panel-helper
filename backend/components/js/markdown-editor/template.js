@@ -76,9 +76,13 @@ let md;
         });
     }
 
-    // 用户配置
-    const users = { USERS_CONFIG };
-    const API_PREFIX = '{API_PREFIX}';  // 从配置中读取
+    // ========== 安全认证配置 ==========
+    // 允许的用户名列表（不含密码，密码在后端验证）
+    const ALLOWED_USERS = { ALLOWED_USERS };
+    // API 前缀
+    const API_PREFIX = '{API_PREFIX}';
+    // 是否启用认证（默认启用）
+    const ENABLE_AUTH = true;
 
     // 本地存储键名
     const STORAGE_KEYS = {
@@ -179,6 +183,9 @@ let md;
     }
 
     // API 请求封装
+    /**
+     * API 请求封装 - 支持 JWT Token 认证
+     */
     async function fetchApi(url, options = {}) {
         try {
             let apiUrl;
@@ -193,16 +200,36 @@ let md;
                 apiUrl = `${baseUrl}/${cleanUrl}`;
             }
 
+            // 获取当前用户 token
+            const currentUser = userState.getCurrentUser();
+            const token = currentUser?.token;
+
+            // 构建请求头，添加 token 认证
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            };
+
+            // 如果有 token，添加到请求头
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const response = await fetch(apiUrl, {
                 ...options,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(options.headers || {})
-                }
+                headers
             });
 
+            // 处理 401 未授权情况
+            if (response.status === 401) {
+                // Token 过期或无效，清除用户信息
+                userState.logout();
+                throw new Error('认证已过期，请重新登录');
+            }
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
 
             return await response.json();
@@ -223,7 +250,7 @@ let md;
                 localStorage.setItem(`notes-${username}`, JSON.stringify(options.body));
                 return { success: true };
             }
-            return null;
+            throw error;
         }
     }
 
@@ -318,11 +345,14 @@ let md;
                 const stored = localStorage.getItem(STORAGE_KEYS.USER);
                 if (stored) {
                     try {
-                        this.currentUser = JSON.parse(stored);
-                        const isValid = users.some(u => u.username === this.currentUser.username);
+                        const userData = JSON.parse(stored);
+                        // 检查用户名是否在允许列表中
+                        const isValid = ALLOWED_USERS.includes(userData.username);
                         if (!isValid) {
                             this.currentUser = null;
                             localStorage.removeItem(STORAGE_KEYS.USER);
+                        } else {
+                            this.currentUser = userData;
                         }
                     } catch (error) {
                         console.error('解析用户数据失败:', error);
@@ -334,15 +364,46 @@ let md;
             return this.currentUser;
         },
 
+        /**
+         * 用户登录 - 通过后端 API 验证
+         */
         async login(username, password) {
-            const user = users.find(u => u.username === username && u.password === password);
-            if (user) {
-                this.currentUser = { username };
-                localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(this.currentUser));
-                this.updateLoginButton();
-                return true;
+            try {
+                // 首先检查用户名是否在允许列表中
+                if (!ALLOWED_USERS.includes(username)) {
+                    console.warn('用户名不在允许列表中');
+                    return false;
+                }
+
+                // 调用后端 API 进行认证
+                const loginUrl = API_PREFIX.replace(/\/+$/, '') + '/api/js/markdown-editor/login';
+                const response = await fetch(loginUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // 保存 token 和用户信息
+                    this.currentUser = {
+                        username: result.data.username,
+                        token: result.data.token
+                    };
+                    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(this.currentUser));
+                    this.updateLoginButton();
+                    return true;
+                } else {
+                    console.warn('登录失败:', result.message);
+                    return false;
+                }
+            } catch (error) {
+                console.error('登录请求失败:', error);
+                return false;
             }
-            return false;
         },
 
         logout() {
@@ -1867,18 +1928,18 @@ let md;
                 <div class="login-dialog-content">
                     <h3>用户登录</h3>
                     <div class="login-form">
-                        <input 
-                            type="text" 
-                            id="username" 
-                            placeholder="用户名" 
-                            autocomplete="new-password" 
+                        <input
+                            type="text"
+                            id="username"
+                            placeholder="用户名"
+                            autocomplete="new-password"
                             data-form-type="other"
                             name="sunpanel_username">
-                        <input 
-                            type="text" 
-                            id="password" 
-                            placeholder="密码" 
-                            autocomplete="new-password" 
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="密码"
+                            autocomplete="new-password"
                             data-form-type="other"
                             name="sunpanel_password">
                         <div class="login-buttons">

@@ -1182,11 +1182,11 @@
 
         // 添加 API 配置
 
-        <!-- 天气组件配置 -->
+        // 天气组件配置
         const WEATHER_API = {
-            key: 'API_KEY',
-            host: 'API_HOST',
-            location: 'DEFAULT_LOCATION',
+            key: '',
+            host: '',
+            location: '',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             textColor: '#ffffff',
             maxWidth: 'DEFAULT_MAX_WIDTH',
@@ -1202,23 +1202,33 @@
             cacheTime: 15 * 60 * 1000 // 15分钟缓存
         };
 
-        // 统一的 fetch 函数，包含 host 和 header 处理
+        // 统一的 fetch 函数，使用后端代理
         async function fetchApiData(endpoint) {
-            const key = WEATHER_API.key;
-            let host = WEATHER_API.host;
-
-            if (!key || !host) {
-                throw new Error('API Key or Host not configured');
+            // 使用后端代理 API，隐藏 API Key
+            // 从配置的 endpoint 转换为代理 API 路径
+            let apiPath;
+            if (endpoint.includes('/weather/now')) {
+                apiPath = '/api/preview/weather-widget/api/weather?type=now';
+            } else if (endpoint.includes('/weather/24h')) {
+                apiPath = '/api/preview/weather-widget/api/hourly';
+            } else if (endpoint.includes('/weather/7d')) {
+                apiPath = '/api/preview/weather-widget/api/daily';
+            } else if (endpoint.includes('/air/now')) {
+                apiPath = '/api/preview/weather-widget/api/air';
+            } else {
+                throw new Error('Unknown endpoint: ' + endpoint);
             }
 
-            // 清理 host (移除 http://, https:// 和尾部斜杠)
-            host = host.replace(/^https?:\/\//, '').replace(/\/$/, '');
-
-            const url = `https://${host}/v7${endpoint}?location=${WEATHER_API.location}&key=${key}`;
-            console.log(`Fetching ${endpoint} from ${host}`);
+            // 使用 apiPrefix 构建完整的 URL
+            // 判断 apiPath 是否已包含查询参数，决定用 ? 还是 &
+            const separator = apiPath.includes('?') ? '&' : '?';
+            const apiUrl = WEATHER_API.apiPrefix
+                ? `${WEATHER_API.apiPrefix.replace(/\/$/, '')}${apiPath}${separator}location=${WEATHER_API.location}`
+                : `${apiPath}${separator}location=${WEATHER_API.location}`;
+            console.log(`Fetching ${endpoint} from proxy: ${apiUrl}`);
 
             try {
-                const response = await fetch(url, {
+                const response = await fetch(apiUrl, {
                     signal: AbortSignal.timeout(10000) // 10s timeout
                 });
 
@@ -1479,8 +1489,8 @@
             widget.setAttribute('data-flipped', 'false');
             widget.style.transform = 'rotateY(0deg)';
 
-            // 应用配置
-            if (WEATHER_API.key && WEATHER_API.host) {
+            // 应用配置 - 检查 apiPrefix（API 密钥存储在后端，前端只需要代理地址）
+            if (WEATHER_API.apiPrefix) {
                 startAutoUpdate();
 
                 // 应用样式配置

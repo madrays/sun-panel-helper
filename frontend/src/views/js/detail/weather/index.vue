@@ -30,9 +30,26 @@
       <div class="params-section">
         <h3>参数配置</h3>
         <el-form label-position="top" :model="params" :rules="rules" ref="formRef">
-          
-          <el-divider content-position="left">基础API配置</el-divider>
-          
+
+          <el-alert
+            title="部署说明"
+            type="info"
+            :closable="false"
+            style="margin-bottom: 16px;"
+          >
+            <p>1. API 前缀：填写 Helper 访问地址（Docker 部署请填写容器外部可访问的地址）</p>
+            <p>2. 部署后，JS 组件会嵌入到 Sun-Panel 的 custom/index.js 中</p>
+            <p>3. API 请求会通过后端代理，隐藏 API Key</p>
+          </el-alert>
+
+          <el-divider content-position="left">基础配置</el-divider>
+
+          <el-form-item label="API 前缀" prop="apiPrefix">
+            <el-input v-model="params.apiPrefix" placeholder="如：http://localhost:3001" />
+            <div class="param-tip">Helper 后端地址，用于代理天气 API 请求（Docker 部署请填写容器外部可访问的地址）</div>
+          </el-form-item>
+
+          <el-divider content-position="left">基础 API 配置</el-divider>
           <el-form-item label="和风天气 API Key" prop="qweatherApiKey">
             <el-input v-model="params.qweatherApiKey" placeholder="请输入和风天气API Key" show-password />
             <div class="param-tip">前往 <a href="https://id.qweather.com/" target="_blank">和风天气控制台</a> 获取 (每月限额免费)</div>
@@ -110,7 +127,6 @@
                 show-input
             />
             <div class="param-tip">值越小越透明，0为完全透明，1为完全不透明。推荐 0.25</div>
-            <div class="param-tip">值越小越透明，0为完全透明，1为完全不透明。推荐 0.25</div>
           </el-form-item>
 
           <el-form-item label="字体/图标颜色" prop="textColor">
@@ -167,6 +183,7 @@ const formRef = ref()
 
 // 默认参数
 const defaultParams = {
+  apiPrefix: '',
   qweatherApiKey: '',
   qweatherApiHost: 'devapi.qweather.com',
   amapApiKey: '',

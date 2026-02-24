@@ -60,27 +60,16 @@
     <!-- 底部工具栏 -->
     <div class="toolbar">
       <el-button type="primary" @click="addUser">添加用户</el-button>
-      <el-button type="success" @click="saveConfig">保存配置</el-button>
-    </div>
-
-    <!-- 错误信息 -->
-    <div v-if="error" class="error-message">
-      <el-alert
-        :title="error"
-        type="error"
-        :closable="false"
-        show-icon
-      />
     </div>
 
     <!-- 配置说明 -->
     <div class="config-tips">
       <h4>配置说明</h4>
       <ul>
-        <li>填写正确的 API 前缀</li>
-        <li>添加用户后点击"保存"按钮</li>
-        <li>点击"部署"使配置生效</li>
-        <li>修改配置后需重新部署</li>
+        <li>填写正确的 API 前缀（开发环境填后端地址，生产环境填前端地址）</li>
+        <li>添加用户后直接点击"部署"按钮即可，无需手动保存</li>
+        <li>部署会自动保存配置并生成 JS 文件</li>
+        <li>空的用户会被自动过滤，不会导致部署失败</li>
       </ul>
     </div>
   </div>
@@ -128,46 +117,10 @@ function removeUser(index: number) {
   emit('update:modelValue', params.value);
 }
 
-// 保存配置
-async function saveConfig() {
-  try {
-    error.value = '';
-    
-    // 验证用户数据
-    const errors: string[] = [];
-    params.value.users.forEach((user, index) => {
-      if (!user.username) {
-        errors.push(`第${index + 1}个用户的用户名不能为空`);
-      }
-      if (!user.password) {
-        errors.push(`第${index + 1}个用户的密码不能为空`);
-      }
-    });
-
-    if (errors.length > 0) {
-      error.value = errors.join('\n');
-      return;
-    }
-
-    // 保存配置
-    const res = await fetch('/api/js/markdown-editor/config', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params.value)
-    });
-
-    if (!res.ok) {
-      throw new Error('保存失败');
-    }
-
-    ElMessage.success('保存成功');
-  } catch (err) {
-    console.error('保存失败:', err);
-    error.value = err instanceof Error ? err.message : '保存失败';
-  }
-}
+// 监听参数变化，自动同步到父组件（不再需要手动保存）
+watch(() => params.value, (newValue) => {
+  emit('update:modelValue', newValue);
+}, { deep: true });
 </script>
 
 <style scoped>

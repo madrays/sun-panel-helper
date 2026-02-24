@@ -211,7 +211,10 @@
             try {
                 console.log('开始IP定位...');
                 // 使用高德地图IP定位API
-                const response = await fetch(`https://restapi.amap.com/v3/ip?key=${weatherConfig.amapKey}`);
+                const apiUrl = API_PREFIX
+                    ? `${API_PREFIX.replace(/\/$/, "")}/api/js/weather/api/geo?source=ip`
+                    : `/api/js/weather/api/geo?source=ip`;
+                const response = await fetch(apiUrl);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -374,7 +377,10 @@
         async reverseGeocodeAMap(longitude, latitude) {
             try {
                 console.log('开始高德逆地理编码:', longitude, latitude);
-                const response = await fetch(`https://restapi.amap.com/v3/geocode/regeo?key=${weatherConfig.amapKey}&location=${longitude},${latitude}&extensions=base`);
+                const apiUrl = API_PREFIX
+                    ? `${API_PREFIX.replace(/\/$/, "")}/api/js/weather/api/geo?location=${longitude},${latitude}`
+                    : `/api/js/weather/api/geo?location=${longitude},${latitude}`;
+                const response = await fetch(apiUrl);
 
                 if (!response.ok) {
                     throw new Error(`高德逆地理编码请求失败: HTTP ${response.status}`);
@@ -460,46 +466,60 @@
         // 新增：AI建议API调用
         async getAIAdvice(weatherData) {
             try {
-                console.log('开始获取AI建议...');
+                console.log('[AI建议] 开始请求AI建议...');
+                console.log('[AI建议] 请求地址:', API_PREFIX
+                    ? `${API_PREFIX.replace(/\/$/, "")}/api/js/weather/api/ai-advice`
+                    : `/api/js/weather/api/ai-advice`);
 
                 // 构建用户信息和天气数据的提示词
                 const prompt = this.buildAIPrompt(weatherData);
 
-                const response = await fetch(`${weatherConfig.openaiBaseUrl}/chat/completions`, {
+                // 使用后端 AI 代理，隐藏 API Key
+                const apiUrl = API_PREFIX
+                    ? `${API_PREFIX.replace(/\/$/, "")}/api/js/weather/api/ai-advice`
+                    : `/api/js/weather/api/ai-advice`;
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${weatherConfig.openaiApiKey}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: weatherConfig.openaiModel,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: prompt
-                            }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 1000
+                        weather: JSON.stringify(weatherData),
+                        location: weatherData.location
                     })
                 });
+
+                console.log('[AI建议] 响应状态:', response.status);
 
                 if (!response.ok) {
                     throw new Error(`AI API请求失败: HTTP ${response.status}`);
                 }
 
                 const data = await response.json();
+                console.log('[AI建议] 响应数据:', data);
 
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    const adviceText = data.choices[0].message.content;
-                    return this.parseAIResponse(adviceText);
+                // 检查后端返回的 source 字段
+                if (data.success && data.advice && data.source === 'ai') {
+                    // 后端确认是 AI 生成的内容
+                    console.log('[AI建议] ✅ AI生成成功，原始响应:', data.advice);
+                    const parsed = this.parseAIResponse(data.advice);
+                    parsed._source = 'ai';
+                    console.log('[AI建议] ✅ 解析后的建议:', parsed);
+                    return parsed;
+                } else if (data.success) {
+                    // 后端返回成功但不是 AI 生成（可能是空内容）
+                    console.log('[AI建议] ⚠️ 后端返回非AI内容，source:', data.source);
+                    throw new Error('AI 返回空内容');
                 } else {
-                    throw new Error('AI API返回数据格式错误');
+                    throw new Error(data.message || 'AI API返回数据格式错误');
                 }
             } catch (error) {
-                console.error('获取AI建议失败:', error);
+                console.error('[AI建议] ❌ 获取AI建议失败:', error);
+                console.log('[AI建议] ⚠️ 使用预设建议作为降级方案');
                 // 返回默认建议作为降级方案
-                return this.getDefaultAdvice(weatherData);
+                const defaultAdvice = this.getDefaultAdvice(weatherData);
+                defaultAdvice._source = 'preset'; // 标记来源为预设
+                return defaultAdvice;
             }
         },
 
@@ -708,11 +728,13 @@ ${weatherInfo}
         },
 
         async fetchApiData(endpoint, location) {
-            const url = `https://${weatherConfig.apiHost}/v7${endpoint}?location=${location}`;
+            const apiUrl = API_PREFIX
+                ? `${API_PREFIX.replace(/\/$/, "")}/api/js/weather/api/weather?type=${endpoint.replace('/weather/', '')}&location=${location}`
+                : `/api/js/weather/api/weather?type=${endpoint.replace('/weather/', '')}&location=${location}`;
 
-            const response = await fetch(url, {
+            const response = await fetch(apiUrl, {
                 headers: {
-                    'X-QW-Api-Key': weatherConfig.apiKey
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -1010,6 +1032,7 @@ ${weatherInfo}
                             <div class="section-title">
                                 <i class="fas fa-robot"></i>
                                 AI生活建议
+                                <span class="ai-source-indicator hidden"></span>
                                 <span class="ai-loading hidden">分析中...</span>
                             </div>
                             <div class="advice-grid">
@@ -1454,7 +1477,15 @@ ${weatherInfo}
                     opacity: 0.7;
                     margin-left: auto;
                 }
-                
+
+                .ai-source-indicator {
+                    font-size: 0.7rem;
+                    margin-left: auto;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    background: rgba(255, 255, 255, 0.1);
+                }
+
                 .advice-grid {
                     display: grid;
                     grid-template-columns: 1fr;
@@ -2370,14 +2401,34 @@ ${weatherInfo}
             try {
                 const adviceData = await utils.getAIAdvice(weatherData);
                 this.updateAIAdvice(adviceData);
-                console.log('AI建议更新完成:', adviceData);
+                // 更新来源标识
+                this.updateAISourceIndicator(adviceData._source || 'unknown');
             } catch (error) {
-                console.error('获取AI建议失败:', error);
+                console.error('[AI建议] ❌ UI层获取失败:', error);
                 // 使用默认建议作为降级
                 const defaultAdvice = utils.getDefaultAdvice(weatherData);
+                defaultAdvice._source = 'preset';
                 this.updateAIAdvice(defaultAdvice);
+                this.updateAISourceIndicator('preset');
             } finally {
                 this.setAIAdviceLoading(false);
+            }
+        },
+
+        // 新增：更新AI来源标识
+        updateAISourceIndicator(source) {
+            const indicator = document.querySelector('.ai-source-indicator');
+            if (indicator) {
+                if (source === 'ai') {
+                    indicator.textContent = '✨ AI生成';
+                    indicator.style.color = '#4fc3f7';
+                    console.log('[AI建议] 界面显示: AI生成');
+                } else {
+                    indicator.textContent = '📋 预设建议';
+                    indicator.style.color = '#ffb74d';
+                    console.log('[AI建议] 界面显示: 预设建议');
+                }
+                indicator.classList.remove('hidden');
             }
         },
 

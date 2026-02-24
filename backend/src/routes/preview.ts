@@ -1,8 +1,10 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs'
 import { resolve, dirname, join } from 'path'
+import axios from 'axios'
 
 const router = Router()
+const WEATHER_WIDGET_CONFIG_PATH = join(process.cwd(), 'data/weather-widget-config.json')
 
 // 确保 weather-widget.html 存在
 function ensureWeatherWidget() {
@@ -40,6 +42,74 @@ function ensureWeatherWidget() {
 
 // 初始化时确保文件存在
 ensureWeatherWidget()
+
+// ==================== 天气 Widget 配置管理 ====================
+
+// 读取天气 widget 配置
+function readWeatherWidgetConfig(): { apiPrefix: string; key: string; host: string; location: string } | null {
+  try {
+    if (existsSync(WEATHER_WIDGET_CONFIG_PATH)) {
+      const content = readFileSync(WEATHER_WIDGET_CONFIG_PATH, 'utf-8')
+      return JSON.parse(content)
+    }
+  } catch (error) {
+    console.error('读取天气 widget 配置失败:', error)
+  }
+  return null
+}
+
+// 保存天气 widget 配置
+function saveWeatherWidgetConfig(config: { apiPrefix: string; key: string; host: string; location: string }): boolean {
+  try {
+    const configDir = dirname(WEATHER_WIDGET_CONFIG_PATH)
+    if (!existsSync(configDir)) {
+      mkdirSync(configDir, { recursive: true })
+    }
+    writeFileSync(WEATHER_WIDGET_CONFIG_PATH, JSON.stringify(config, null, 2))
+    return true
+  } catch (error) {
+    console.error('保存天气 widget 配置失败:', error)
+    return false
+  }
+}
+
+// 保存配置路由
+router.post('/weather-widget/config', (req, res) => {
+  try {
+    const { apiPrefix, key, host, location } = req.body
+    if (!key || !host) {
+      return res.status(400).json({
+        success: false,
+        message: 'API Key 和 Host 不能为空'
+      })
+    }
+    const success = saveWeatherWidgetConfig({
+      apiPrefix: apiPrefix || '',
+      key,
+      host,
+      location: location || '116.41,39.92'
+    })
+    res.json({ success })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : '保存配置失败'
+    })
+  }
+})
+
+// 获取配置路由
+router.get('/weather-widget/config', (_req, res) => {
+  try {
+    const config = readWeatherWidgetConfig()
+    res.json(config || { apiPrefix: '', key: '', host: '', location: '' })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : '获取配置失败'
+    })
+  }
+})
 
 router.get('/weather-widget', (req, res) => {
   const { key, host, location } = req.query
@@ -145,6 +215,133 @@ router.post('/weather-widget/preview', (req, res) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
+    })
+  }
+})
+
+// ==================== 天气 API 代理（隐藏 API Key） ====================
+
+// 代理天气查询 API
+router.get('/weather-widget/api/weather', async (req: Request, res: Response) => {
+  try {
+    const config = readWeatherWidgetConfig()
+    if (!config?.key || !config?.host) {
+      return res.status(400).json({
+        success: false,
+        message: '天气 API 配置不完整'
+      })
+    }
+
+    const { type = 'now', location = config.location } = req.query
+
+    // 清理 host
+    const cleanHost = config.host.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    const url = `https://${cleanHost}/v7/weather/${type}?location=${location}&key=${config.key}`
+
+    const response = await axios.get(url, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10000
+    })
+
+    res.json(response.data)
+  } catch (error: any) {
+    console.error('Weather API proxy error:', error)
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || '天气数据获取失败'
+    })
+  }
+})
+
+// 代理小时预报 API
+router.get('/weather-widget/api/hourly', async (req: Request, res: Response) => {
+  try {
+    const config = readWeatherWidgetConfig()
+    if (!config?.key || !config?.host) {
+      return res.status(400).json({
+        success: false,
+        message: '天气 API 配置不完整'
+      })
+    }
+
+    const location = req.query.location as string || config.location
+
+    const cleanHost = config.host.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    const url = `https://${cleanHost}/v7/weather/24h?location=${location}&key=${config.key}`
+
+    const response = await axios.get(url, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10000
+    })
+
+    res.json(response.data)
+  } catch (error: any) {
+    console.error('Hourly weather API proxy error:', error)
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || '小时天气预报获取失败'
+    })
+  }
+})
+
+// 代理每日预报 API
+router.get('/weather-widget/api/daily', async (req: Request, res: Response) => {
+  try {
+    const config = readWeatherWidgetConfig()
+    if (!config?.key || !config?.host) {
+      return res.status(400).json({
+        success: false,
+        message: '天气 API 配置不完整'
+      })
+    }
+
+    const location = req.query.location as string || config.location
+
+    const cleanHost = config.host.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    const url = `https://${cleanHost}/v7/weather/7d?location=${location}&key=${config.key}`
+
+    const response = await axios.get(url, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10000
+    })
+
+    res.json(response.data)
+  } catch (error: any) {
+    console.error('Daily weather API proxy error:', error)
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || '每日天气预报获取失败'
+    })
+  }
+})
+
+// 代理空气质量 API
+router.get('/weather-widget/api/air', async (req: Request, res: Response) => {
+  try {
+    const config = readWeatherWidgetConfig()
+    if (!config?.key || !config?.host) {
+      return res.status(400).json({
+        success: false,
+        message: '天气 API 配置不完整'
+      })
+    }
+
+    const location = req.query.location as string || config.location
+
+    const cleanHost = config.host.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    const url = `https://${cleanHost}/v7/air/now?location=${location}&key=${config.key}`
+
+    const response = await axios.get(url, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10000
+    })
+
+    res.json(response.data)
+  } catch (error: any) {
+    console.error('Air quality API proxy error:', error)
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || '空气质量数据获取失败'
     })
   }
 })
