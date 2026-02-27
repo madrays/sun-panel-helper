@@ -42,13 +42,23 @@ custom/*
 !custom/helper/maxkb/logo.gif
 !custom/helper/md
 !custom/helper/md/.gitkeep
+custom/helper/md/*/
 !custom/helper/mouse
 !custom/helper/mouse/.gitkeep
 !custom/helper/weather-widget
 !custom/helper/weather-widget/.gitkeep
+custom/helper/weather-widget/*.html
 !custom/helper/freewidgets
 !custom/helper/freewidgets/setting
 !custom/helper/freewidgets/setting/.gitkeep
+custom/index.css
+custom/index.js
+
+# Backend custom 动态生成文件
+backend/custom/helper/md/*/
+backend/custom/helper/weather-widget/*.html
+backend/custom/index.css
+backend/custom/index.js
 
 # 临时文件
 *.swp
