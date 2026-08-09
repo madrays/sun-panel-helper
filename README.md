@@ -744,4 +744,4 @@ Sun Panel Helper 是一个专注于增强 Sun-Panel 功能的辅助工具。我�
 
 ## 📈 项目统计
 
-[![Star History Chart](https://api.star-history.com/svg?repos=madrays/sun-panel-helper&type=Date)](https://star-history.com/#madrays/sun-panel-helper&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=madrays/sun-panel-helper&type=Date)](https://star-history.dera.page/#madrays/sun-panel-helper&Date)
